@@ -5,8 +5,150 @@ import { cls } from '@/lib/helpers';
 import { CardHead, Pill } from '@/components/ui/primitives';
 import Icon from '@/components/ui/Icon';
 
+const GROCERY_CATEGORIES = ['Produce', 'Protein', 'Dairy', 'Pantry', 'Snacks', 'Other'];
+
+function GroceryView({ state, setState }) {
+  const groceryList = state.groceryList || [];
+  const [newItem, setNewItem] = useState('');
+  const [newCat, setNewCat] = useState('Produce');
+  const [filterCat, setFilterCat] = useState('all');
+
+  const addItem = () => {
+    if (!newItem.trim()) return;
+    setState(s => ({
+      ...s,
+      groceryList: [...(s.groceryList || []), { id: `g-${Date.now()}`, item: newItem.trim(), category: newCat, checked: false }],
+    }));
+    setNewItem('');
+  };
+
+  const toggleItem = (id) => setState(s => ({
+    ...s, groceryList: (s.groceryList || []).map(g => g.id === id ? { ...g, checked: !g.checked } : g),
+  }));
+
+  const removeItem = (id) => setState(s => ({
+    ...s, groceryList: (s.groceryList || []).filter(g => g.id !== id),
+  }));
+
+  const clearChecked = () => setState(s => ({
+    ...s, groceryList: (s.groceryList || []).filter(g => !g.checked),
+  }));
+
+  const checkedCount = groceryList.filter(g => g.checked).length;
+  const uncheckedCount = groceryList.length - checkedCount;
+
+  const grouped = GROCERY_CATEGORIES.reduce((acc, cat) => {
+    const items = groceryList.filter(g => g.category === cat && (filterCat === 'all' || filterCat === cat));
+    if (items.length > 0) acc[cat] = items;
+    return acc;
+  }, {});
+
+  return (
+    <div style={{ maxWidth: 680 }}>
+      {/* Add item */}
+      <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+        <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 12 }}>Add item</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+          <input
+            value={newItem}
+            onChange={e => setNewItem(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addItem()}
+            placeholder="What do you need?"
+            style={{ flex: 1, padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'inherit', fontSize: 14 }}
+          />
+          <button onClick={addItem} className="btn btn--pink" style={{ padding: '9px 18px' }}>Add</button>
+        </div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {GROCERY_CATEGORIES.map(cat => (
+            <button key={cat} onClick={() => setNewCat(cat)} style={{
+              padding: '5px 12px', borderRadius: 20, fontSize: 11, cursor: 'pointer', fontWeight: 500,
+              border: `1px solid ${newCat === cat ? 'var(--ink)' : 'var(--line)'}`,
+              background: newCat === cat ? 'var(--ink)' : 'var(--card)',
+              color: newCat === cat ? 'var(--bg)' : 'var(--ink-soft)',
+            }}>{cat}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Filter + stats */}
+      {groceryList.length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <button onClick={() => setFilterCat('all')} style={{
+              padding: '5px 12px', borderRadius: 20, fontSize: 11, cursor: 'pointer', fontWeight: 500,
+              border: `1px solid ${filterCat === 'all' ? 'var(--primary)' : 'var(--line)'}`,
+              background: filterCat === 'all' ? 'var(--primary)' : 'var(--card)',
+              color: filterCat === 'all' ? 'white' : 'var(--ink-soft)',
+            }}>All ({groceryList.length})</button>
+            {Object.keys(grouped).map(cat => (
+              <button key={cat} onClick={() => setFilterCat(cat)} style={{
+                padding: '5px 12px', borderRadius: 20, fontSize: 11, cursor: 'pointer', fontWeight: 500,
+                border: `1px solid ${filterCat === cat ? 'var(--primary)' : 'var(--line)'}`,
+                background: filterCat === cat ? 'var(--primary)' : 'var(--card)',
+                color: filterCat === cat ? 'white' : 'var(--ink-soft)',
+              }}>{cat}</button>
+            ))}
+          </div>
+          {checkedCount > 0 && (
+            <button onClick={clearChecked} className="btn btn--ghost" style={{ fontSize: 11, color: 'var(--primary)' }}>
+              Clear {checkedCount} done
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* List grouped by category */}
+      {groceryList.length === 0 ? (
+        <div className="card">
+          <div className="empty" style={{ padding: 60 }}>Your grocery list is empty — add items above</div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {Object.entries(grouped).map(([cat, items]) => (
+            <div key={cat}>
+              <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 8 }}>
+                {cat} · {items.filter(g => !g.checked).length} left
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {items.map(g => (
+                  <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 12, opacity: g.checked ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+                    <button onClick={() => toggleItem(g.id)} style={{
+                      flexShrink: 0, width: 22, height: 22, borderRadius: '50%',
+                      background: g.checked ? 'var(--accent-2)' : 'transparent',
+                      border: `1.5px solid ${g.checked ? 'var(--accent-2)' : 'var(--muted)'}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 11,
+                    }}>
+                      {g.checked && '✓'}
+                    </button>
+                    <span style={{ flex: 1, fontSize: 14, color: 'var(--ink)', textDecoration: g.checked ? 'line-through' : 'none' }}>{g.item}</span>
+                    <button onClick={() => removeItem(g.id)} style={{ color: 'var(--muted)', fontSize: 16, background: 'none', border: 'none', cursor: 'pointer', padding: 4, lineHeight: 1 }}>×</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Progress bar */}
+      {groceryList.length > 0 && (
+        <div style={{ marginTop: 24, padding: 16, background: 'var(--card)', borderRadius: 14, border: '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--ink-soft)', marginBottom: 8 }}>
+            <span>{checkedCount} of {groceryList.length} items checked off</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{Math.round(checkedCount / groceryList.length * 100)}%</span>
+          </div>
+          <div style={{ height: 5, background: 'var(--line)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ width: `${checkedCount / groceryList.length * 100}%`, height: '100%', background: 'var(--accent-2)', borderRadius: 4, transition: 'width 0.4s' }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function RecipesView({ state, setState }) {
   const { recipes } = state;
+  const [view, setView] = useState('recipes');
   const [filter, setFilter] = useState('all');
   const [open, setOpen] = useState(null);
   const [addOpen, setAddOpen] = useState(false);
@@ -15,6 +157,7 @@ export default function RecipesView({ state, setState }) {
   const types = ['all', 'Breakfast', 'Lunch', 'Dinner', 'Side', 'Snack', 'Dessert'];
   const filtered = filter === 'all' ? recipes : recipes.filter((r) => r.type === filter);
   const favs = recipes.filter((r) => r.fav).length;
+  const groceryCount = (state.groceryList || []).filter(g => !g.checked).length;
 
   const toggleFav = (id) => {
     setState((s) => ({ ...s, recipes: s.recipes.map((r) => r.id === id ? { ...r, fav: !r.fav } : r) }));
@@ -43,68 +186,82 @@ export default function RecipesView({ state, setState }) {
       <div className="page-head">
         <div>
           <div className="page-head__greeting">Kitchen · {recipes.length} recipes</div>
-          <h1 className="page-head__title">Recipe library</h1>
-          <div className="page-head__date mt-sm">{favs} favorites</div>
+          <h1 className="page-head__title">{view === 'recipes' ? 'Recipe library' : 'Grocery list'}</h1>
+          <div className="page-head__date mt-sm">{view === 'recipes' ? `${favs} favorites` : `${groceryCount} items needed`}</div>
         </div>
         <div className="row gap-md">
-          <button className="btn btn--ghost"><Icon name="search" size={14} /> Search</button>
-          <button className="btn btn--pink" onClick={() => setAddOpen(true)}>
-            <Icon name="plus" size={14} /> Add recipe
-          </button>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="row gap-sm" style={{ flexWrap: 'wrap', marginBottom: 18 }}>
-        {types.map((t) => (
-          <button
-            key={t}
-            className="pill pill--mono"
-            style={{
-              cursor: 'pointer',
-              background: filter === t ? 'var(--primary)' : 'var(--card)',
-              color: filter === t ? 'white' : 'var(--ink-soft)',
-              border: filter === t ? '1px solid var(--primary)' : '1px solid var(--line)',
-            }}
-            onClick={() => setFilter(t)}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="card">
-          <div className="empty" style={{ padding: 60 }}>
-            No recipes yet — add your first one with the button above
+          {/* View toggle */}
+          <div style={{ display: 'flex', gap: 4, background: 'var(--line)', borderRadius: 10, padding: 3 }}>
+            <button onClick={() => setView('recipes')} style={{ padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', background: view === 'recipes' ? 'var(--card)' : 'transparent', color: view === 'recipes' ? 'var(--ink)' : 'var(--muted)', fontWeight: view === 'recipes' ? 600 : 500, fontSize: 13, boxShadow: view === 'recipes' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none', transition: 'all 0.15s' }}>Recipes</button>
+            <button onClick={() => setView('grocery')} style={{ padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', background: view === 'grocery' ? 'var(--card)' : 'transparent', color: view === 'grocery' ? 'var(--ink)' : 'var(--muted)', fontWeight: view === 'grocery' ? 600 : 500, fontSize: 13, boxShadow: view === 'grocery' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none', transition: 'all 0.15s', position: 'relative' }}>
+              Grocery
+              {groceryCount > 0 && <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--primary)', color: 'white', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>{groceryCount}</span>}
+            </button>
           </div>
+          {view === 'recipes' && (
+            <button className="btn btn--pink" onClick={() => setAddOpen(true)}>
+              <Icon name="plus" size={14} /> Add recipe
+            </button>
+          )}
         </div>
-      )}
+      </div>
 
-      <div className="recipe-grid">
-        {filtered.map((r) => (
-          <div key={r.id} className="recipe-card" onClick={() => setOpen(r)}>
-            <div className="recipe-card__img" style={{ background: r.bg }}>
-              {r.icon}
+      {view === 'grocery' ? (
+        <GroceryView state={state} setState={setState} />
+      ) : (
+        <>
+          <div className="row gap-sm" style={{ flexWrap: 'wrap', marginBottom: 18 }}>
+            {types.map((t) => (
               <button
-                className="recipe-fav"
-                onClick={(e) => { e.stopPropagation(); toggleFav(r.id); }}
-                title="Favorite"
+                key={t}
+                className="pill pill--mono"
+                style={{
+                  cursor: 'pointer',
+                  background: filter === t ? 'var(--primary)' : 'var(--card)',
+                  color: filter === t ? 'white' : 'var(--ink-soft)',
+                  border: filter === t ? '1px solid var(--primary)' : '1px solid var(--line)',
+                }}
+                onClick={() => setFilter(t)}
               >
-                {r.fav ? '♥' : '♡'}
+                {t}
               </button>
-            </div>
-            <div className="recipe-card__body">
-              <h4 className="recipe-card__title">{r.name}</h4>
-              <div className="recipe-card__meta">
-                <span>{r.time}</span>
-                <span>·</span>
-                <span>{r.type}</span>
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="card">
+              <div className="empty" style={{ padding: 60 }}>
+                No recipes yet — add your first one with the button above
               </div>
             </div>
+          )}
+
+          <div className="recipe-grid">
+            {filtered.map((r) => (
+              <div key={r.id} className="recipe-card" onClick={() => setOpen(r)}>
+                <div className="recipe-card__img" style={{ background: r.bg }}>
+                  {r.icon}
+                  <button
+                    className="recipe-fav"
+                    onClick={(e) => { e.stopPropagation(); toggleFav(r.id); }}
+                    title="Favorite"
+                  >
+                    {r.fav ? '♥' : '♡'}
+                  </button>
+                </div>
+                <div className="recipe-card__body">
+                  <h4 className="recipe-card__title">{r.name}</h4>
+                  <div className="recipe-card__meta">
+                    <span>{r.time}</span>
+                    <span>·</span>
+                    <span>{r.type}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
       {/* Recipe detail modal */}
       {open && (

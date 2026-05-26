@@ -123,6 +123,24 @@ const TARGETS = { cal: 1525, p: 130, f: 50, c: 135 };
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
 
+const compressImage = (file) => new Promise((resolve) => {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 900;
+      const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+      canvas.width = img.width * ratio;
+      canvas.height = img.height * ratio;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.72));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
 function MacroBar({ label, value, target, unit, color }) {
   const pct = Math.min(100, Math.round((value / target) * 100));
   const over = value > target;
@@ -162,6 +180,160 @@ function WeightSparkline({ log }) {
   );
 }
 
+// ── Tab: Sleep ────────────────────────────────────────────────────────────────
+
+const SLEEP_QUALITY = ['', '😫', '😕', '😐', '😊', '✨'];
+const SLEEP_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+function SleepTab({ fitness, setState }) {
+  const today = todayKey();
+  const sleepLog = fitness.sleepLog || [];
+  const [draft, setDraft] = useState({ date: today, hours: '', quality: 3, notes: '' });
+  const [adding, setAdding] = useState(false);
+
+  const weekDays = (() => {
+    const now = new Date();
+    const mon = (now.getDay() + 6) % 7;
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now);
+      d.setDate(now.getDate() - mon + i);
+      return d.toISOString().slice(0, 10);
+    });
+  })();
+
+  const byDate = sleepLog.reduce((acc, e) => { acc[e.date] = e; return acc; }, {});
+  const weekEntries = weekDays.map(d => byDate[d]).filter(Boolean);
+  const avg = weekEntries.length > 0
+    ? (weekEntries.reduce((s, e) => s + e.hours, 0) / weekEntries.length).toFixed(1)
+    : null;
+
+  const addSleep = () => {
+    if (!draft.hours) return;
+    setState(s => ({
+      ...s, fitness: {
+        ...s.fitness,
+        sleepLog: [
+          ...(s.fitness.sleepLog || []).filter(e => e.date !== draft.date),
+          { id: `sl-${Date.now()}`, ...draft, hours: +draft.hours },
+        ],
+      },
+    }));
+    setDraft({ date: today, hours: '', quality: 3, notes: '' });
+    setAdding(false);
+  };
+
+  const removeSleep = (id) => setState(s => ({
+    ...s, fitness: { ...s.fitness, sleepLog: (s.fitness.sleepLog || []).filter(e => e.id !== id) },
+  }));
+
+  return (
+    <div>
+      {/* Week card */}
+      <div style={{ background: 'var(--ink)', color: 'var(--bg)', borderRadius: 18, padding: 20, marginBottom: 16 }}>
+        <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.6, marginBottom: 6 }}>This week · Target 8h</div>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 42, fontWeight: 400, lineHeight: 1, marginBottom: 4 }}>
+          {avg ?? '—'}<span style={{ fontSize: 20, opacity: 0.45, fontStyle: 'italic' }}> hr avg</span>
+        </div>
+        {avg && (
+          <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 16 }}>
+            {+avg >= 7.5 ? 'Excellent rest — keep it up' : +avg >= 6.5 ? 'Decent — try 30 min earlier' : 'Sleep debt building — prioritize rest'}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', marginTop: avg ? 0 : 16 }}>
+          {weekDays.map((d, i) => {
+            const entry = byDate[d];
+            const hrs = entry?.hours || 0;
+            const pct = Math.min(100, (hrs / 10) * 100);
+            const isToday = d === today;
+            return (
+              <div key={d} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div style={{ height: 64, width: '100%', display: 'flex', alignItems: 'flex-end' }}>
+                  <div style={{
+                    width: '100%', height: hrs > 0 ? `${pct}%` : '3px',
+                    background: hrs >= 7.5 ? 'rgba(255,255,255,0.85)' : hrs > 0 ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.12)',
+                    borderRadius: 4, transition: 'height 0.3s',
+                  }} />
+                </div>
+                <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', opacity: isToday ? 1 : 0.5, fontWeight: isToday ? 700 : 400, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  {SLEEP_LABELS[i]}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {!adding ? (
+        <button onClick={() => setAdding(true)} style={{ width: '100%', padding: 16, borderRadius: 14, border: '1px dashed var(--line)', background: 'transparent', color: 'var(--muted)', fontStyle: 'italic', fontSize: 13, cursor: 'pointer', marginBottom: 16 }}>
+          + Log last night's sleep
+        </button>
+      ) : (
+        <div className="card" style={{ padding: 18, marginBottom: 16 }}>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, marginBottom: 14 }}>Log sleep</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+            <div>
+              <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Date</div>
+              <input type="date" value={draft.date} onChange={e => setDraft({ ...draft, date: e.target.value })}
+                style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'inherit', fontSize: 13, boxSizing: 'border-box' }} />
+            </div>
+            <div>
+              <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Hours slept</div>
+              <input type="number" min="1" max="12" step="0.5" placeholder="7.5" value={draft.hours} onChange={e => setDraft({ ...draft, hours: e.target.value })}
+                style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--font-serif)', fontSize: 16, boxSizing: 'border-box' }} />
+            </div>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Quality</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[1, 2, 3, 4, 5].map(q => (
+                <button key={q} onClick={() => setDraft({ ...draft, quality: q })} style={{
+                  fontSize: 22, padding: '6px 10px', borderRadius: 10,
+                  border: `1.5px solid ${draft.quality === q ? 'var(--primary)' : 'var(--line)'}`,
+                  background: draft.quality === q ? 'var(--bg)' : 'transparent', cursor: 'pointer',
+                }}>
+                  {SLEEP_QUALITY[q]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <input placeholder="Notes (woke up twice, vivid dreams...)" value={draft.notes} onChange={e => setDraft({ ...draft, notes: e.target.value })}
+            style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'inherit', fontSize: 13, boxSizing: 'border-box', marginBottom: 12 }} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setAdding(false)} className="btn btn--ghost" style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
+            <button onClick={addSleep} className="btn btn--pink" style={{ flex: 1, justifyContent: 'center' }}>Save</button>
+          </div>
+        </div>
+      )}
+
+      <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 10 }}>Recent nights</div>
+      {sleepLog.length === 0 ? (
+        <div style={{ padding: '24px 0', textAlign: 'center', fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>No sleep logged yet — start wearing your watch at night</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[...sleepLog].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 14).map((e) => (
+            <div key={e.id || e.date} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 12 }}>
+              <div style={{
+                width: 46, height: 46, borderRadius: '50%', flexShrink: 0,
+                background: e.hours >= 7.5 ? 'var(--accent-2)' : e.hours >= 6 ? 'var(--accent-1)' : 'var(--line)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-serif)', fontSize: 14, fontWeight: 600,
+              }}>
+                {e.hours}h
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
+                  {new Date(e.date + 'T12:00:00').toLocaleDateString('en', { weekday: 'long', month: 'short', day: 'numeric' })}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--muted)' }}>{SLEEP_QUALITY[e.quality || 3]} {e.notes || ''}</div>
+              </div>
+              <button onClick={() => removeSleep(e.id || e.date)} style={{ color: 'var(--muted)', fontSize: 18, background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Tab: Train ────────────────────────────────────────────────────────────────
 
 function TrainTab({ fitness, setState }) {
@@ -188,9 +360,8 @@ function TrainTab({ fitness, setState }) {
 
   return (
     <div>
-      {/* Day selector */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, overflowX: 'auto', paddingBottom: 4 }}>
-        {[1,2,3,4,5].map(n => (
+        {[1, 2, 3, 4, 5].map(n => (
           <button key={n} onClick={() => setDay(n)} style={{
             flexShrink: 0, padding: '10px 18px', borderRadius: 14, border: `1px solid ${n === currentDay ? 'var(--ink)' : 'var(--line)'}`,
             background: n === currentDay ? 'var(--ink)' : 'var(--card)', color: n === currentDay ? 'var(--bg)' : 'var(--ink)',
@@ -202,7 +373,6 @@ function TrainTab({ fitness, setState }) {
         ))}
       </div>
 
-      {/* Day header */}
       <div className="card" style={{ marginBottom: 16, padding: 20 }}>
         <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 6 }}>
           Day {currentDay} · {w.duration}
@@ -217,13 +387,11 @@ function TrainTab({ fitness, setState }) {
         </div>
       </div>
 
-      {/* Warm-up */}
       <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 8 }}>Warm-up</div>
       <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 14, padding: 16, marginBottom: 16, fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.6 }}>
         {w.warmup}
       </div>
 
-      {/* Exercises */}
       <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 8 }}>Lifts</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         {w.exercises.map((ex, i) => {
@@ -241,7 +409,7 @@ function TrainTab({ fitness, setState }) {
                 </button>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-                    <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', letterSpacing: '0.12em' }}>0{i+1}</span>
+                    <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', letterSpacing: '0.12em' }}>0{i + 1}</span>
                     <span style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 500, textDecoration: done ? 'line-through' : 'none', color: 'var(--ink)' }}>{ex.name}</span>
                   </div>
                   <div style={{ display: 'flex', gap: 16, fontSize: 12, marginBottom: 6 }}>
@@ -257,14 +425,13 @@ function TrainTab({ fitness, setState }) {
         })}
       </div>
 
-      {/* Finisher */}
       <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 8 }}>Finisher</div>
       <div style={{ background: 'var(--ink)', color: 'var(--bg)', borderRadius: 14, padding: 16, marginBottom: 16, fontSize: 13, lineHeight: 1.6 }}>
         {w.finisher}
       </div>
 
       <div style={{ background: 'var(--card)', border: '1px dashed var(--line)', borderRadius: 14, padding: 16, fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.7, fontStyle: 'italic' }}>
-        When your last set hits the top of the rep range with 2 reps in reserve, go up. For glutes that means more weight. For upper body — leave the 10 lb shelf. Your back, chest, and shoulders can handle more.
+        When your last set hits the top of the rep range with 2 reps in reserve, go up. For glutes that means more weight. For upper body — leave the 10 lb shelf.
       </div>
     </div>
   );
@@ -319,7 +486,6 @@ function NutritionTab({ fitness, setState }) {
 
   return (
     <div>
-      {/* Macro summary */}
       <div style={{ background: 'var(--ink)', color: 'var(--bg)', borderRadius: 18, padding: 20, marginBottom: 16 }}>
         <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.6, marginBottom: 6 }}>Today's target · 5′7″ · 160 lb · Recomp</div>
         <div style={{ fontFamily: 'var(--font-serif)', fontSize: 42, fontWeight: 400, lineHeight: 1, marginBottom: 4 }}>
@@ -346,7 +512,6 @@ function NutritionTab({ fitness, setState }) {
         </div>
       </div>
 
-      {/* Log today's workout */}
       {!logWorkout && !workoutToday.session ? (
         <button onClick={() => { setLogWorkout(true); setWDraft(workoutToday); }} style={{ width: '100%', padding: 16, borderRadius: 14, border: '1px dashed var(--line)', background: 'transparent', color: 'var(--muted)', fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 14, cursor: 'pointer', marginBottom: 16 }}>
           + Log today's workout
@@ -387,7 +552,6 @@ function NutritionTab({ fitness, setState }) {
         </div>
       )}
 
-      {/* Today's food log */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700 }}>Logged Today</div>
         {log.length > 0 && <button className="btn btn--ghost" style={{ fontSize: 11 }} onClick={() => setState(s => ({ ...s, fitness: { ...s.fitness, nutritionByDate: { ...(s.fitness.nutritionByDate || {}), [today]: [] } } }))}>Reset</button>}
@@ -408,7 +572,6 @@ function NutritionTab({ fitness, setState }) {
         </div>
       )}
 
-      {/* Meal library */}
       <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 10 }}>Meal Library</div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 14, overflowX: 'auto', paddingBottom: 4 }}>
         {Object.keys(MEALS).map(cat => (
@@ -438,12 +601,12 @@ function NutritionTab({ fitness, setState }) {
       ) : (
         <div className="card" style={{ padding: 16 }}>
           <div style={{ fontFamily: 'var(--font-serif)', fontSize: 15, marginBottom: 12 }}>Custom entry</div>
-          {inp("What did you eat?", custom.name, v => setCustom({ ...custom, name: v }))}
+          {inp('What did you eat?', custom.name, v => setCustom({ ...custom, name: v }))}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
-            {inp("Calories", custom.cal, v => setCustom({ ...custom, cal: v }), true)}
-            {inp("Protein (g)", custom.p, v => setCustom({ ...custom, p: v }), true)}
-            {inp("Carbs (g)", custom.c, v => setCustom({ ...custom, c: v }), true)}
-            {inp("Fat (g)", custom.f, v => setCustom({ ...custom, f: v }), true)}
+            {inp('Calories', custom.cal, v => setCustom({ ...custom, cal: v }), true)}
+            {inp('Protein (g)', custom.p, v => setCustom({ ...custom, p: v }), true)}
+            {inp('Carbs (g)', custom.c, v => setCustom({ ...custom, c: v }), true)}
+            {inp('Fat (g)', custom.f, v => setCustom({ ...custom, f: v }), true)}
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
             <button onClick={() => setCustomOpen(false)} className="btn btn--ghost" style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
@@ -468,6 +631,7 @@ function OverviewTab({ fitness, setState }) {
   const today = todayKey();
   const latestWeight = fitness.weightLog?.slice(-1)[0]?.weight || 160;
   const [newWeight, setNewWeight] = useState('');
+  const [photoView, setPhotoView] = useState(null);
 
   const logWeight = () => {
     if (!newWeight) return;
@@ -480,7 +644,22 @@ function OverviewTab({ fitness, setState }) {
     setNewWeight('');
   };
 
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const dataUrl = await compressImage(file);
+    const photo = { id: `ph-${Date.now()}`, date: today, dataUrl, note: '' };
+    setState(s => ({ ...s, fitness: { ...s.fitness, progressPhotos: [...(s.fitness.progressPhotos || []), photo] } }));
+    e.target.value = '';
+  };
+
+  const deletePhoto = (id) => {
+    setState(s => ({ ...s, fitness: { ...s.fitness, progressPhotos: (s.fitness.progressPhotos || []).filter(p => p.id !== id) } }));
+    setPhotoView(null);
+  };
+
   const watchWorkouts = (fitness.watchWorkouts || []).slice(-5).reverse();
+  const photos = [...(fitness.progressPhotos || [])].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <div className="bento">
@@ -540,6 +719,29 @@ function OverviewTab({ fitness, setState }) {
         </div>
       </div>
 
+      {/* Progress Photos */}
+      <div className="card col-12" style={{ padding: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+          <CardHead title="Progress photos" sub="Document your transformation" />
+          <label style={{ cursor: 'pointer' }}>
+            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
+            <span className="btn btn--ghost" style={{ fontSize: 12 }}>+ Add photo</span>
+          </label>
+        </div>
+        {photos.length === 0 ? (
+          <div className="empty">Upload progress photos to track your transformation over time</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 10 }}>
+            {photos.map(photo => (
+              <div key={photo.id} style={{ cursor: 'pointer' }} onClick={() => setPhotoView(photo)}>
+                <img src={photo.dataUrl} alt={photo.date} style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', borderRadius: 10, display: 'block', border: '1px solid var(--line)' }} />
+                <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textAlign: 'center', marginTop: 4 }}>{photo.date}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Apple Watch */}
       <div className="card col-12" style={{ padding: 20 }}>
         <CardHead title="Apple Watch log" sub="Auto-logged via Health Auto Export" right={<Pill tone="mint" mono>Auto</Pill>} />
@@ -560,6 +762,23 @@ function OverviewTab({ fitness, setState }) {
           </div>
         )}
       </div>
+
+      {/* Photo lightbox */}
+      {photoView && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+          onClick={() => setPhotoView(null)}>
+          <div style={{ maxWidth: 380, width: '100%', position: 'relative' }} onClick={e => e.stopPropagation()}>
+            <img src={photoView.dataUrl} alt={photoView.date} style={{ width: '100%', borderRadius: 14, display: 'block' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>
+                {new Date(photoView.date + 'T12:00:00').toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+              </span>
+              <button onClick={() => deletePhoto(photoView.id)} style={{ color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}>Delete</button>
+            </div>
+            <button onClick={() => setPhotoView(null)} style={{ position: 'absolute', top: -14, right: -14, width: 30, height: 30, borderRadius: '50%', background: 'white', border: 'none', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>×</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -574,10 +793,14 @@ export default function FitnessView({ state, setState }) {
   const totals = log.reduce((a, m) => ({ cal: a.cal + m.cal, p: a.p + m.p }), { cal: 0, p: 0 });
   const weekWorkouts = Object.values(fitness.workoutByDate || {}).filter(w => w.session).length;
 
+  const sleepLog = fitness.sleepLog || [];
+  const lastSleep = sleepLog.length > 0 ? [...sleepLog].sort((a, b) => b.date.localeCompare(a.date))[0] : null;
+
   const TABS = [
     { id: 'overview', label: 'Overview' },
     { id: 'train', label: 'Train' },
     { id: 'nutrition', label: 'Nutrition' },
+    { id: 'sleep', label: 'Sleep' },
   ];
 
   return (
@@ -594,10 +817,10 @@ export default function FitnessView({ state, setState }) {
           <Pill tone="pink" mono>{weekWorkouts} workouts logged</Pill>
           <Pill tone="mint" mono>{fitness.weightLog?.slice(-1)[0]?.weight || 160} lb</Pill>
           <Pill tone="sun" mono>{Math.round(totals.cal)}/{TARGETS.cal} kcal</Pill>
+          {lastSleep && <Pill tone="lilac" mono>{lastSleep.hours}h sleep</Pill>}
         </div>
       </div>
 
-      {/* Tab bar */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 24, background: 'var(--line)', borderRadius: 12, padding: 4, width: 'fit-content' }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
@@ -612,8 +835,9 @@ export default function FitnessView({ state, setState }) {
       </div>
 
       {tab === 'overview' && <OverviewTab fitness={fitness} setState={setState} />}
-      {tab === 'train' && <div className="bento"><div className="card col-8" style={{ padding: 20 }}><TrainTab fitness={fitness} setState={setState} /></div><div className="card col-4" style={{ padding: 20 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 12 }}>Your Program</div>{[1,2,3,4,5].map(n => (<div key={n} style={{ padding: '10px 0', borderBottom: '1px dashed var(--line)', fontSize: 13 }}><span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', marginRight: 8 }}>Day {n}</span><span style={{ color: 'var(--ink)', fontWeight: 500 }}>{WORKOUTS[n].title}</span></div>))}<div style={{ marginTop: 16, padding: 14, background: 'var(--bg)', borderRadius: 12, fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.7, fontStyle: 'italic' }}>Consistency over intensity. Always.</div></div></div>}
-      {tab === 'nutrition' && <div className="bento"><div className="card col-8" style={{ padding: 20 }}><NutritionTab fitness={fitness} setState={setState} /></div><div className="card col-4" style={{ padding: 20 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 12 }}>Daily Targets</div>{[{ label: 'Calories', value: TARGETS.cal, unit: 'kcal', color: 'var(--accent-1)' }, { label: 'Protein', value: TARGETS.p, unit: 'g', color: 'var(--primary)' }, { label: 'Carbs', value: TARGETS.c, unit: 'g', color: 'var(--accent-2)' }, { label: 'Fat', value: TARGETS.f, unit: 'g', color: 'var(--accent-3)' }].map(t => (<MacroBar key={t.label} label={t.label} value={totals[t.label.toLowerCase().slice(0,1)] || 0} target={t.value} unit={t.unit} color={t.color} />))}<div style={{ marginTop: 20, padding: 14, background: 'var(--bg)', borderRadius: 12 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Goal</div><div style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.7 }}>Recomp — build muscle, lose fat simultaneously. High protein keeps you full and preserves muscle in a slight deficit.</div></div></div></div>}
+      {tab === 'sleep' && <div className="bento"><div className="card col-8" style={{ padding: 20 }}><SleepTab fitness={fitness} setState={setState} /></div><div className="card col-4" style={{ padding: 20 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 12 }}>Sleep tips</div><div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>{['Aim for 7.5–9h per night','Consistent wake time matters more than bedtime','Avoid screens 30 min before bed','Cool room = deeper sleep (65–68°F)','Magnesium glycinate before bed can help'].map((tip, i) => (<div key={i} style={{ padding: '10px 12px', background: 'var(--bg)', borderRadius: 10, fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.5, borderLeft: '3px solid var(--primary)' }}>{tip}</div>))}</div><div style={{ marginTop: 20, padding: 14, background: 'var(--bg)', borderRadius: 12, fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.7, fontStyle: 'italic' }}>Sleep is when your muscles actually grow. Non-negotiable for the glute goals.</div></div></div>}
+      {tab === 'train' && <div className="bento"><div className="card col-8" style={{ padding: 20 }}><TrainTab fitness={fitness} setState={setState} /></div><div className="card col-4" style={{ padding: 20 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 12 }}>Your Program</div>{[1, 2, 3, 4, 5].map(n => (<div key={n} style={{ padding: '10px 0', borderBottom: '1px dashed var(--line)', fontSize: 13 }}><span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', marginRight: 8 }}>Day {n}</span><span style={{ color: 'var(--ink)', fontWeight: 500 }}>{WORKOUTS[n].title}</span></div>))}<div style={{ marginTop: 16, padding: 14, background: 'var(--bg)', borderRadius: 12, fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.7, fontStyle: 'italic' }}>Consistency over intensity. Always.</div></div></div>}
+      {tab === 'nutrition' && <div className="bento"><div className="card col-8" style={{ padding: 20 }}><NutritionTab fitness={fitness} setState={setState} /></div><div className="card col-4" style={{ padding: 20 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 12 }}>Daily Targets</div>{[{ label: 'Calories', value: TARGETS.cal, unit: 'kcal', color: 'var(--accent-1)' }, { label: 'Protein', value: TARGETS.p, unit: 'g', color: 'var(--primary)' }, { label: 'Carbs', value: TARGETS.c, unit: 'g', color: 'var(--accent-2)' }, { label: 'Fat', value: TARGETS.f, unit: 'g', color: 'var(--accent-3)' }].map(t => (<MacroBar key={t.label} label={t.label} value={totals[t.label.toLowerCase().slice(0, 1)] || 0} target={t.value} unit={t.unit} color={t.color} />))}<div style={{ marginTop: 20, padding: 14, background: 'var(--bg)', borderRadius: 12 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Goal</div><div style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.7 }}>Recomp — build muscle, lose fat simultaneously. High protein keeps you full and preserves muscle in a slight deficit.</div></div></div></div>}
     </>
   );
 }

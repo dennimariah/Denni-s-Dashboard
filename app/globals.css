@@ -109,16 +109,15 @@ input, textarea { font-family: inherit; color: inherit; }
 .btn--ghost:hover { background: var(--card-2); }
 .btn--icon { width: 30px; height: 30px; padding: 0; display: grid; place-items: center; background: var(--card-2); color: var(--ink-soft); }
 .btn--icon:hover { background: var(--primary-soft); color: var(--primary-deep); }
-.habit-grid { display: grid; gap: 6px; }
-.habit-row { display: grid; grid-template-columns: 180px repeat(7, minmax(0, 1fr)) 60px; gap: 8px; align-items: center; }
-.habit-row__head { display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 500; }
-.habit-row__icon { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; font-size: 15px; flex-shrink: 0; }
-.habit-cell { aspect-ratio: 1; border-radius: 8px; border: 1.5px dashed var(--line); background: var(--card); display: grid; place-items: center; transition: all 0.12s; font-size: 12px; color: var(--muted); cursor: pointer; }
-.habit-cell:hover { border-color: var(--primary); border-style: solid; }
-.habit-cell--done { border-style: solid; border-color: transparent; color: white; font-weight: 700; }
-.habit-cell--today { outline: 2px solid var(--primary); outline-offset: 2px; }
-.habit-row__score { text-align: right; font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); }
-.habit-day-head { text-align: center; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+.habit-grid { display: flex; flex-direction: column; gap: 2px; }
+.habit-row { display: grid; grid-template-columns: 168px repeat(7, 34px) 40px; gap: 4px; align-items: center; min-height: 44px; padding: 3px 0; }
+.habit-row__head { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.habit-row__icon { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; font-size: 12px; flex-shrink: 0; }
+.habit-cell { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(0,0,0,0.055); display: grid; place-items: center; transition: background 0.12s, transform 0.08s; font-size: 11px; color: transparent; cursor: pointer; flex-shrink: 0; }
+.habit-cell:hover { background: rgba(0,0,0,0.1); transform: scale(1.08); }
+.habit-cell--done { color: white; }
+.habit-row__score { text-align: right; font-family: var(--font-mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+.habit-day-head { text-align: center; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase; width: 34px; }
 .phone { background: linear-gradient(180deg, #1a1014 0%, #2a181f 100%); border-radius: 28px; padding: 14px 12px 16px; box-shadow: var(--shadow-lg); width: 100%; max-width: 280px; margin: 0 auto; }
 .phone__notch { width: 80px; height: 18px; background: #000; border-radius: 999px; margin: -4px auto 12px; }
 .phone__bubble { background: var(--primary-soft); border-radius: 18px 18px 18px 4px; padding: 12px 14px; font-size: 12.5px; color: var(--ink); white-space: pre-line; line-height: 1.55; }

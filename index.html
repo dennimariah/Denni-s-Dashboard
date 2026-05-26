@@ -4824,8 +4824,170 @@ const DashboardTweaks = ({ tweak, setTweak }) => {
 
 };
 
+// ── PIN gate ────────────────────────────────────────────────────────
+const PIN_KEY   = "dennika-pin";
+const AUTH_KEY  = "dennika-authed";
+
+const PinGate = ({ children }) => {
+  const storedPin = localStorage.getItem(PIN_KEY);
+  const [mode, setMode]     = React.useState(storedPin ? "enter" : "create");
+  const [pin, setPin]       = React.useState("");
+  const [confirm, setConfirm] = React.useState("");
+  const [authed, setAuthed] = React.useState(() => sessionStorage.getItem(AUTH_KEY) === "1");
+  const [error, setError]   = React.useState("");
+  const [shake, setShake]   = React.useState(false);
+
+  const doShake = () => {
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+  };
+
+  const submit = () => {
+    if (mode === "create") {
+      if (pin.length < 4) { setError("PIN must be at least 4 digits"); doShake(); return; }
+      if (pin !== confirm) { setError("PINs don't match"); doShake(); setConfirm(""); return; }
+      localStorage.setItem(PIN_KEY, pin);
+      sessionStorage.setItem(AUTH_KEY, "1");
+      setAuthed(true);
+    } else {
+      if (pin === localStorage.getItem(PIN_KEY)) {
+        sessionStorage.setItem(AUTH_KEY, "1");
+        setAuthed(true);
+      } else {
+        setError("Wrong PIN");
+        doShake();
+        setPin("");
+      }
+    }
+  };
+
+  const handleKey = (e) => { if (e.key === "Enter") submit(); };
+
+  if (authed) return children;
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "radial-gradient(900px 600px at 20% 10%, var(--primary-soft) 0%, transparent 60%), radial-gradient(700px 500px at 90% 80%, var(--accent-3-soft) 0%, transparent 60%), var(--bg)",
+      display: "grid",
+      placeItems: "center",
+      fontFamily: "var(--font-sans)",
+    }}>
+      <div style={{
+        background: "var(--card)",
+        borderRadius: "var(--radius-xl)",
+        padding: "40px 36px 36px",
+        width: "100%",
+        maxWidth: 360,
+        boxShadow: "var(--shadow-lg)",
+        border: "1px solid var(--line)",
+        animation: shake ? "pin-shake 0.45s ease" : "none",
+      }}>
+        <style>{`
+          @keyframes pin-shake {
+            0%,100%{transform:translateX(0)}
+            20%{transform:translateX(-8px)}
+            40%{transform:translateX(8px)}
+            60%{transform:translateX(-6px)}
+            80%{transform:translateX(6px)}
+          }
+        `}</style>
+
+        {/* Brand */}
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: 16, margin: "0 auto 12px",
+            background: "linear-gradient(135deg, var(--primary), var(--accent-1))",
+            display: "grid", placeItems: "center",
+            color: "white", fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 30,
+            boxShadow: "var(--shadow)",
+          }}>D</div>
+          <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 26, color: "var(--ink)" }}>Dennika</div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--muted)", marginTop: 4 }}>
+            {mode === "create" ? "Set a PIN to protect your dashboard" : "Enter your PIN to continue"}
+          </div>
+        </div>
+
+        {/* PIN input */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 6 }}>
+            {mode === "create" ? "Choose a PIN" : "PIN"}
+          </div>
+          <input
+            type="password"
+            inputMode="numeric"
+            value={pin}
+            onChange={e => { setPin(e.target.value); setError(""); }}
+            onKeyDown={handleKey}
+            placeholder="••••"
+            autoFocus
+            style={{
+              width: "100%", border: "1.5px solid var(--line)", borderRadius: 12,
+              padding: "12px 14px", fontSize: 22, letterSpacing: "0.3em",
+              background: "var(--card-2)", outline: "none", textAlign: "center",
+              fontFamily: "var(--font-mono)", color: "var(--ink)",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
+
+        {mode === "create" && (
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 6 }}>Confirm PIN</div>
+            <input
+              type="password"
+              inputMode="numeric"
+              value={confirm}
+              onChange={e => { setConfirm(e.target.value); setError(""); }}
+              onKeyDown={handleKey}
+              placeholder="••••"
+              style={{
+                width: "100%", border: "1.5px solid var(--line)", borderRadius: 12,
+                padding: "12px 14px", fontSize: 22, letterSpacing: "0.3em",
+                background: "var(--card-2)", outline: "none", textAlign: "center",
+                fontFamily: "var(--font-mono)", color: "var(--ink)",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+        )}
+
+        {error && (
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--primary)", textAlign: "center", marginBottom: 10, letterSpacing: "0.05em" }}>
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={submit}
+          style={{
+            width: "100%", padding: "13px", borderRadius: 12, border: 0,
+            background: "linear-gradient(135deg, var(--primary), var(--accent-1))",
+            color: "white", fontWeight: 700, fontSize: 15,
+            cursor: "pointer", fontFamily: "var(--font-sans)",
+            marginTop: 4, boxShadow: "var(--shadow)",
+          }}
+        >
+          {mode === "create" ? "Set PIN & Enter" : "Unlock →"}
+        </button>
+
+        {mode === "enter" && (
+          <div style={{ textAlign: "center", marginTop: 14 }}>
+            <button
+              onClick={() => { setMode("create"); setPin(""); setConfirm(""); setError(""); localStorage.removeItem(PIN_KEY); }}
+              style={{ background: "none", border: 0, fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--muted)", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}
+            >
+              Reset PIN
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+root.render(<PinGate><App /></PinGate>);
 </script>
 </body>
 </html>

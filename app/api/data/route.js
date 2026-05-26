@@ -23,6 +23,9 @@ export async function GET() {
     const merged = { ...defaults, ...saved };
     if (!saved.quarterGoals?.length) merged.quarterGoals = defaults.quarterGoals;
     if (!saved.habits?.length) merged.habits = defaults.habits;
+    if (!saved.travelTrips?.length) merged.travelTrips = defaults.travelTrips;
+    if (!saved.travelPackingTemplates?.length) merged.travelPackingTemplates = defaults.travelPackingTemplates;
+    if (!saved.devotionAffirmations?.length) merged.devotionAffirmations = defaults.devotionAffirmations;
     return Response.json(merged);
   } catch (err) {
     console.error('GET /api/data error:', err);

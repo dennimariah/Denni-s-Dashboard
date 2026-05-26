@@ -22,8 +22,8 @@ export async function GET(request) {
 
   try {
     const data = await getUserData();
-    const msg = await sendMorningBriefing(data);
-    return Response.json({ ok: true, sid: msg.sid });
+    await sendMorningBriefing(data);
+    return Response.json({ ok: true });
   } catch (err) {
     console.error('Briefing send error:', err);
     return Response.json({ ok: false, error: err.message }, { status: 500 });
@@ -34,8 +34,8 @@ export async function GET(request) {
 export async function POST() {
   try {
     const data = await getUserData();
-    const msg = await sendMorningBriefing(data);
-    return Response.json({ ok: true, sid: msg.sid });
+    await sendMorningBriefing(data);
+    return Response.json({ ok: true });
   } catch (err) {
     console.error('Briefing send error:', err);
     return Response.json({ ok: false, error: err.message }, { status: 500 });

@@ -513,7 +513,7 @@ input, textarea { font-family: inherit; color: inherit; }
 /* ----- Mood ----- */
 .mood-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
 }
 .mood-pick {
@@ -531,6 +531,7 @@ input, textarea { font-family: inherit; color: inherit; }
   font-size: 22px;
   background: var(--card-2);
   border: 1.5px solid transparent;
+  overflow: hidden;
   transition: transform 0.1s, border-color 0.15s, background 0.15s;
 }
 .mood-emoji:hover { transform: scale(1.08); }

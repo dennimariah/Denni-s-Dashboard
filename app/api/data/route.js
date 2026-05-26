@@ -17,7 +17,13 @@ export async function GET() {
     if (rows.length === 0) {
       return Response.json(getDefaultState());
     }
-    return Response.json({ ...getDefaultState(), ...rows[0].data });
+    const defaults = getDefaultState();
+    const saved = rows[0].data;
+    // For array fields seeded with defaults, don't overwrite with empty arrays from old saves
+    const merged = { ...defaults, ...saved };
+    if (!saved.quarterGoals?.length) merged.quarterGoals = defaults.quarterGoals;
+    if (!saved.habits?.length) merged.habits = defaults.habits;
+    return Response.json(merged);
   } catch (err) {
     console.error('GET /api/data error:', err);
     return Response.json(getDefaultState());

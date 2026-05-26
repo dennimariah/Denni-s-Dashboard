@@ -125,14 +125,12 @@ export default function TodayView({ state, setState }) {
               calendar.connected === true
                 ? <Pill tone="mint" mono>Live</Pill>
                 : calendar.connected === false
-                ? <a href="/api/auth/google" style={{ fontSize: 11, color: 'var(--primary)', fontFamily: 'var(--font-mono)', textDecoration: 'none', letterSpacing: '0.08em' }}>Connect →</a>
+                ? <Pill tone="lilac" mono>Not connected</Pill>
                 : <Pill tone="lilac" mono>Loading…</Pill>
             }
           />
           {calendar.connected === false && (
-            <div className="empty" style={{ textAlign: 'center' }}>
-              <a href="/api/auth/google" style={{ color: 'var(--primary)' }}>Connect Google Calendar →</a>
-            </div>
+            <div className="empty">Add a calendar URL in Themes &amp; settings →</div>
           )}
           {calendar.connected === true && calendar.events.length === 0 && (
             <div className="empty">No events today</div>

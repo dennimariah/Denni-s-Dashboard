@@ -37,6 +37,8 @@ export default function Dashboard({ initialData }) {
   const [shortcut, setShortcut] = useState(null);
   const [briefingSending, setBriefingSending] = useState(false);
   const [briefingStatus, setBriefingStatus] = useState(null);
+  const [calLabel, setCalLabel] = useState('');
+  const [calUrl, setCalUrl] = useState('');
   const saveTimer = useRef(null);
 
   useEffect(() => {
@@ -126,6 +128,40 @@ export default function Dashboard({ initialData }) {
             ))}
           </div>
 
+          <div className="text-mono fs-xs text-muted" style={{ letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>Calendars</div>
+          {(state.calendarUrls || []).map((cal, i) => (
+            <div key={i} className="row row--between" style={{ marginBottom: 6, fontSize: 12 }}>
+              <span style={{ color: 'var(--ink-soft)' }}>{cal.label}</span>
+              <button className="btn btn--icon" style={{ width: 20, height: 20 }} onClick={() => setStateAndPersist(s => ({ ...s, calendarUrls: s.calendarUrls.filter((_, j) => j !== i) }))}>
+                <Icon name="x" size={11}/>
+              </button>
+            </div>
+          ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18 }}>
+            <input
+              placeholder="Name (e.g. iCloud)"
+              value={calLabel}
+              onChange={e => setCalLabel(e.target.value)}
+              style={{ fontSize: 12, padding: '6px 8px', border: '1px solid var(--line)', borderRadius: 8, fontFamily: 'inherit', background: 'var(--bg)' }}
+            />
+            <input
+              placeholder="webcal:// or https:// URL"
+              value={calUrl}
+              onChange={e => setCalUrl(e.target.value)}
+              style={{ fontSize: 12, padding: '6px 8px', border: '1px solid var(--line)', borderRadius: 8, fontFamily: 'inherit', background: 'var(--bg)' }}
+            />
+            <button
+              className="btn btn--ghost"
+              style={{ fontSize: 11, justifyContent: 'center' }}
+              onClick={() => {
+                if (!calLabel.trim() || !calUrl.trim()) return;
+                setStateAndPersist(s => ({ ...s, calendarUrls: [...(s.calendarUrls || []), { label: calLabel.trim(), url: calUrl.trim() }] }));
+                setCalLabel(''); setCalUrl('');
+              }}
+            >
+              + Add calendar
+            </button>
+          </div>
           <div className="text-mono fs-xs text-muted" style={{ letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>Morning briefing</div>
           <button
             className="btn btn--pink"

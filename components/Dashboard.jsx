@@ -16,8 +16,9 @@ import RecipesView from '@/components/views/RecipesView';
 import ContentView from '@/components/views/ContentView';
 import HairView from '@/components/views/HairView';
 import FitnessView from '@/components/views/FitnessView';
+import SilkCollectiveView from '@/components/views/SilkCollectiveView';
 
-const VIEWS = { today: TodayView, week: WeekView, habits: HabitsView, quarter: QuarterView, finance: FinanceView, journal: JournalView, recipes: RecipesView, content: ContentView, hair: HairView, fitness: FitnessView };
+const VIEWS = { today: TodayView, week: WeekView, habits: HabitsView, quarter: QuarterView, finance: FinanceView, journal: JournalView, recipes: RecipesView, content: ContentView, hair: HairView, fitness: FitnessView, silk: SilkCollectiveView };
 
 const NAV = [
   { id: 'today', label: 'Today', icon: 'spark' },
@@ -30,6 +31,7 @@ const NAV = [
   { id: 'content', label: 'Content', icon: 'sparkle' },
   { id: 'hair', label: 'Hair', icon: 'leaf' },
   { id: 'fitness', label: 'Fitness', icon: 'habit' },
+  { id: 'silk', label: 'The Silk Collective', icon: 'star' },
 ];
 
 export default function Dashboard({ initialData }) {

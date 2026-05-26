@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { cls, DAYS_OF_WEEK } from '@/lib/helpers';
 import { CardHead, Pill, burstConfetti, Editable } from '@/components/ui/primitives';
 import Icon from '@/components/ui/Icon';
+import { getRegimenWeek } from '@/lib/hairRegimen';
 
 // ── Wash Day Data (8 full weeks) ──────────────────────────────────────────────
 
@@ -345,7 +346,7 @@ function OverviewTab({ hair, setState }) {
     setState(s => ({ ...s, hair: { ...s.hair, scalpDays: { ...scalpDone, [day]: isChecking } } }));
   };
 
-  const activeWeek = hair.activeWeek || 5;
+  const activeWeek = hair.activeWeek || getRegimenWeek();
   const week = HAIR_WEEKS[activeWeek];
 
   return (
@@ -457,7 +458,7 @@ function OverviewTab({ hair, setState }) {
 
 function WashDayTab({ hair, setState }) {
   const today = todayKey();
-  const activeWeek = hair.activeWeek || 5;
+  const activeWeek = hair.activeWeek || getRegimenWeek();
   const week = HAIR_WEEKS[activeWeek];
   const [expanded, setExpanded] = useState(null);
   const [logging, setLogging] = useState(false);
@@ -840,7 +841,7 @@ function ProductsTab() {
 // ── Tab: Reference ────────────────────────────────────────────────────────────
 
 function ReferenceTab({ hair, setState }) {
-  const activeWeek = hair.activeWeek || 5;
+  const activeWeek = hair.activeWeek || getRegimenWeek();
   return (
     <div className="bento">
       <div className="card col-12" style={{ padding: 20 }}>
@@ -923,7 +924,7 @@ export default function HairView({ state, setState }) {
   const nightlyCount = Object.values(nightlyDone).filter(Boolean).length;
   const washDayCount = (hair.washDayLog || []).length;
   const latestLength = (hair.lengthLog || []).slice(-1)[0]?.length || 15;
-  const activeWeek = hair.activeWeek || 5;
+  const activeWeek = hair.activeWeek || getRegimenWeek();
 
   const TABS = [
     { id: 'overview', label: 'Overview' },

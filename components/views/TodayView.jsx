@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Icon from '@/components/ui/Icon';
 import { DEVOTIONALS } from '@/lib/devotionals';
+import { getRegimenWeek } from '@/lib/hairRegimen';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -555,9 +556,8 @@ function FitnessThisWeek({ state }) {
 }
 
 function HairRegimenStatus({ state }) {
-  const regimenStart = new Date('2026-05-14T00:00:00');
+  const weekNum = getRegimenWeek();
   const now = new Date(todayStr() + 'T00:00:00');
-  const weekNum = Math.max(1, Math.min(8, Math.floor((now - regimenStart) / (7 * 86400000)) + 1));
   const nextTrim = new Date('2026-07-23T00:00:00');
   const daysToTrim = Math.max(0, Math.ceil((nextTrim - now) / 86400000));
 
@@ -784,9 +784,21 @@ function BrainDump({ state, setState }) {
     </div>
   );
 
+  const clearAll = () => {
+    if (items.length === 0) return;
+    if (window.confirm(`Clear all ${items.length} brain dump items?`)) {
+      setState(s => ({ ...s, todayBrainDump: [] }));
+    }
+  };
+
   return (
     <div>
-      <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 22, color: 'var(--ink)', marginBottom: 10 }}>Brain Dump</div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 10 }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 22, color: 'var(--ink)' }}>Brain Dump{items.length > 0 && <span style={{ fontFamily: 'inherit', fontStyle: 'normal', fontSize: 14, color: 'var(--muted)', marginLeft: 6 }}>({items.length})</span>}</div>
+        {items.length > 0 && (
+          <button onClick={clearAll} style={{ fontSize: 11, color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0, marginLeft: 'auto' }}>Clear all</button>
+        )}
+      </div>
       <div className="card" style={{ padding: '14px 16px' }}>
         <div style={{ display: 'flex', gap: 8, marginBottom: items.length ? 4 : 0 }}>
           <input value={text} onChange={e => setText(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()}

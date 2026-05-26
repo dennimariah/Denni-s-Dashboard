@@ -161,8 +161,8 @@ export default function ContentView({ state, setState }) {
 
               <div className="col gap-sm">
                 {items.length === 0 && (
-                  <div className="empty" style={{ padding: '20px 0', border: '1.5px dashed var(--line)', borderRadius: 12 }}>
-                    empty · capture one
+                  <div style={{ padding: '20px 12px', border: '1.5px dashed var(--line)', borderRadius: 12, textAlign: 'center', fontSize: 12, color: 'var(--ink-soft)', opacity: 0.65, lineHeight: 1.5 }}>
+                    {st === 'Idea' ? 'No ideas yet — use Capture idea ↑ to add one' : 'Nothing here yet'}
                   </div>
                 )}
                 {items.map((c) => {

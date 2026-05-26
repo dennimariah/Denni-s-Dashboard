@@ -109,6 +109,7 @@ export default function WeekView({ state, setState }) {
             <Editable
               value={state.focus}
               onChange={(v) => setState(s => ({ ...s, focus: v }))}
+              placeholder="What is the one thing that, if accomplished this week, would make everything else easier?"
               style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 26, lineHeight: 1.2 }}
               multiline
             />

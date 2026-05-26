@@ -110,7 +110,7 @@ input, textarea { font-family: inherit; color: inherit; }
 .btn--icon { width: 30px; height: 30px; padding: 0; display: grid; place-items: center; background: var(--card-2); color: var(--ink-soft); }
 .btn--icon:hover { background: var(--primary-soft); color: var(--primary-deep); }
 .habit-grid { display: flex; flex-direction: column; gap: 2px; }
-.habit-row { display: grid; grid-template-columns: 168px repeat(7, 34px) 40px; gap: 4px; align-items: center; min-height: 44px; padding: 3px 0; }
+.habit-row { display: grid; grid-template-columns: 205px repeat(7, 34px) 40px; gap: 4px; align-items: center; min-height: 44px; padding: 3px 0; }
 .habit-row__head { display: flex; align-items: center; gap: 7px; min-width: 0; }
 .habit-row__icon { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; font-size: 12px; flex-shrink: 0; }
 .habit-cell { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(0,0,0,0.055); display: grid; place-items: center; transition: background 0.12s, transform 0.08s; font-size: 11px; color: transparent; cursor: pointer; flex-shrink: 0; }

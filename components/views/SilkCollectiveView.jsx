@@ -147,7 +147,7 @@ function OverviewTab({ state, setState, onOpsOpen }) {
           { label:'Active clients', value:activeClients, sub:'seen in 60 days' },
           { label:'Revenue this month', value:`$${monthRev.toFixed(0)}`, sub:`of $${goal} goal` },
           { label:'Monthly goal', value:`${goalPct}%`, sub: goalPct >= 100 ? '🎉 Hit it!' : `$${(goal-monthRev).toFixed(0)} to go` },
-          { label:'Bookings this week', value:null, sub:'tap to edit' },
+          { label:'Bookings this week', value:null, sub:'click to edit' },
         ].map((s, i) => (
           <div key={i} className="card" style={{ padding:16, textAlign:'center' }}>
             <div className="text-mono fs-xs text-muted" style={{ letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:6 }}>{s.label}</div>

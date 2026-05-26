@@ -60,7 +60,7 @@ function DailyRow({ habit, log, todayIdx, onToggle }) {
       <div className="habit-row__head">
         <span className="habit-row__icon" style={{ background: habit.color + '22' }}>{habit.icon}</span>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{habit.label}</div>
+          <div title={habit.label} style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{habit.label}</div>
           <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>{habit.goal}/wk</div>
         </div>
       </div>
@@ -95,7 +95,7 @@ function WeeklyRow({ habit, weeklyHabitLogs, onToggleWeekly }) {
       <div className="habit-row__head">
         <span className="habit-row__icon" style={{ background: habit.color + '22' }}>{habit.icon}</span>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{habit.label}</div>
+          <div title={habit.label} style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{habit.label}</div>
           <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>weekly</div>
         </div>
       </div>
@@ -127,7 +127,7 @@ function ChurchRow({ habit, churchLog, onChurchSelect }) {
       <div className="habit-row__head">
         <span className="habit-row__icon" style={{ background: habit.color + '22' }}>{habit.icon}</span>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{habit.label}</div>
+          <div title={habit.label} style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{habit.label}</div>
           <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>weekly · pick one</div>
         </div>
       </div>

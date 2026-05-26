@@ -201,6 +201,7 @@ export default function FinanceView({ state, setState }) {
   const { cards, budget, savings, transactions } = state;
   const [txOpen, setTxOpen] = useState(false);
   const [editingTx, setEditingTx] = useState(null);
+  const monthlyIncome = state.monthlyIncome || 0;
 
   const liveBudget = budget.map((b) => {
     const txSpent = transactions
@@ -215,6 +216,7 @@ export default function FinanceView({ state, setState }) {
   const totalBudget = liveBudget.reduce((s, b) => s + b.budget, 0);
   const totalSaved = savings.reduce((s, x) => s + x.saved, 0);
   const totalSavingsGoal = savings.reduce((s, x) => s + x.goal, 0);
+  const monthlyBalance = monthlyIncome - totalSpent;
 
   const now = new Date();
   const monthLabel = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -236,11 +238,34 @@ export default function FinanceView({ state, setState }) {
       </div>
 
       <div className="bento">
+        {/* Income input */}
+        <div className="card col-12" style={{ padding: '14px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <div className="text-mono fs-xs text-muted" style={{ letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Income this month</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 18, color: 'var(--muted)' }}>$</span>
+              <input
+                type="number"
+                min={0}
+                value={monthlyIncome || ''}
+                onChange={e => setState(s => ({ ...s, monthlyIncome: parseFloat(e.target.value) || 0 }))}
+                placeholder="0"
+                style={{ fontSize: 22, fontFamily: 'var(--font-serif)', width: 140, border: 0, borderBottom: '2px solid var(--line)', background: 'transparent', outline: 'none', color: 'var(--ink)', padding: '2px 4px' }}
+              />
+            </div>
+            {monthlyIncome > 0 && (
+              <div style={{ fontSize: 13, color: monthlyBalance >= 0 ? 'var(--accent-2)' : 'var(--primary)', fontWeight: 600, marginLeft: 8 }}>
+                {monthlyBalance >= 0 ? `+${currency(monthlyBalance)} remaining this month` : `${currency(Math.abs(monthlyBalance))} over budget`}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Top stats */}
         <div className="card col-12 card--tinted">
           <div className="bento" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
             {[
-              { label: 'Net worth',          value: currency(totalSaved - totalDebt), sub: 'saved minus owed',      tone: 'var(--primary)' },
+              { label: 'Net worth',          value: currency(monthlyBalance + totalSaved - totalDebt), sub: 'income − spent + saved − owed', tone: 'var(--primary)' },
               { label: 'Spent this month',   value: currency(totalSpent),             sub: `of ${currency(totalBudget)}`, tone: 'var(--accent-1)' },
               { label: 'Total saved',        value: currency(totalSaved),             sub: `of ${currency(totalSavingsGoal)} goal`, tone: 'var(--accent-2)' },
               { label: 'Credit utilization', value: (totalLimit > 0 ? Math.round(totalDebt / totalLimit * 100) : 0) + '%', sub: `${currency(totalDebt)} / ${currency(totalLimit)}`, tone: 'var(--accent-3)' },
@@ -339,6 +364,16 @@ export default function FinanceView({ state, setState }) {
                 </div>
               );
             })}
+            <div style={{ borderTop: '2px solid var(--line)', paddingTop: 10, marginTop: 4 }}>
+              <div className="budget-row">
+                <span className="budget-label" style={{ fontWeight: 700, color: 'var(--ink)' }}>TOTAL</span>
+                <span className="budget-amounts">
+                  <span style={{ color: totalSpent > totalBudget ? 'var(--primary)' : 'var(--ink)', fontWeight: 700 }}>{currency(totalSpent)}</span>
+                  <span style={{ margin: '0 4px', color: 'var(--muted)' }}>/</span>
+                  <span style={{ fontWeight: 600 }}>{currency(totalBudget)} budgeted</span>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

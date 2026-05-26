@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { MOOD_OPTIONS, DAYS_OF_WEEK, cls } from '@/lib/helpers';
 import { CardHead, Pill, burstConfetti } from '@/components/ui/primitives';
 import Icon from '@/components/ui/Icon';
+import { DEVOTIONALS } from '@/lib/devotionals';
 
 export default function TodayView({ state, setState }) {
   const { tasks, gymWeek, habits, habitLogs, moodWeek, journal, parking } = state;
@@ -77,6 +78,37 @@ export default function TodayView({ state, setState }) {
       </div>
 
       <div className="bento">
+        {(() => {
+          const todayVerse = DEVOTIONALS[now.getDay()];
+          const start = new Date(now.getFullYear(), 0, 0);
+          const dayOfYear = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+          const affirmations = state.devotionAffirmations || [];
+          const todayAffirmation = affirmations.length ? affirmations[dayOfYear % affirmations.length] : null;
+          return (
+            <div className="col-12" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+              <div style={{ background: '#fdf6f4', borderRadius: 18, padding: '24px 26px', border: '1px solid #d68d8433', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.13em', textTransform: 'uppercase', color: '#d68d84', fontWeight: 700 }}>{todayVerse.scripture}</div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 16, color: 'var(--ink)', lineHeight: 1.65, flex: 1 }}>
+                  &ldquo;{todayVerse.scriptureText}&rdquo;
+                </div>
+                <button
+                  onClick={() => setState(s => ({ ...s, page: 'devotion' }))}
+                  style={{ alignSelf: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, color: '#d68d84', fontWeight: 600, padding: 0, letterSpacing: '0.01em' }}
+                >
+                  Read today&rsquo;s full devotional →
+                </button>
+              </div>
+
+              <div style={{ background: '#fdf6f4', borderRadius: 18, padding: '28px 26px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 14, minHeight: 140 }}>
+                <div style={{ fontSize: 16, color: '#d68d84', lineHeight: 1 }}>✦</div>
+                {todayAffirmation
+                  ? <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--ink)', lineHeight: 1.45, maxWidth: 420 }}>{todayAffirmation.text}</div>
+                  : <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, color: 'var(--muted)', fontStyle: 'italic' }}>Add affirmations in the Devotion tab</div>}
+              </div>
+            </div>
+          );
+        })()}
+
         <div className="card col-7">
           <CardHead
             title="This week's focus"

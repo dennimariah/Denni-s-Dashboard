@@ -2,6 +2,7 @@
 
 import Icon from '@/components/ui/Icon';
 import { useState, useMemo, useEffect } from 'react';
+import { DEVOTIONALS } from '@/lib/devotionals';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -50,6 +51,71 @@ function CatPill({ cat, small }) {
 
 function blankEntry(date) {
   return { date, scripture: '', scriptureText: '', reflection: '', application: '', grateful1: '', grateful2: '', grateful3: '', prayerFocus: '' };
+}
+
+// ── GUIDED DEVOTIONAL ────────────────────────────────────────────────────────
+
+function GuidedDevotional({ devotional, onJournal }) {
+  const [challengeDone, setChallengeDone] = useState(false);
+
+  return (
+    <div className="col gap-md" style={{ lineHeight: 1 }}>
+      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontStyle: 'italic', color: 'var(--ink)', lineHeight: 1.2 }}>
+        {devotional.title}
+      </div>
+
+      <div className="text-mono fs-xs" style={{ color: ACCENT, letterSpacing: '0.13em', textTransform: 'uppercase' }}>
+        {devotional.scripture}
+      </div>
+
+      <div style={{ borderLeft: `3px solid ${ACCENT}`, paddingLeft: 20, margin: '2px 0' }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 17, color: 'var(--ink)', lineHeight: 1.65 }}>
+          &ldquo;{devotional.scriptureText}&rdquo;
+        </div>
+      </div>
+
+      <div className="col" style={{ gap: 14, marginTop: 4 }}>
+        <div className="text-mono fs-xs text-muted" style={{ letterSpacing: '0.1em' }}>REFLECTION</div>
+        {devotional.reflection.map((para, i) => (
+          <p key={i} style={{ fontSize: 14, color: 'var(--ink-soft)', lineHeight: 1.8, margin: 0 }}>{para}</p>
+        ))}
+      </div>
+
+      <div style={{ background: SOFT_BG, borderRadius: 14, padding: '20px 22px', border: `1px solid ${ACCENT}22`, marginTop: 4 }}>
+        <div className="text-mono fs-xs" style={{ color: ACCENT, letterSpacing: '0.1em', marginBottom: 12 }}>PRAYER</div>
+        <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 15, color: 'var(--ink)', lineHeight: 1.75 }}>
+          {devotional.prayer}
+        </div>
+      </div>
+
+      <div style={{ background: 'var(--card)', borderRadius: 14, padding: '18px 20px', border: `1px solid ${ACCENT}33` }}>
+        <div className="text-mono fs-xs" style={{ color: ACCENT, letterSpacing: '0.1em', marginBottom: 12 }}>TODAY&rsquo;S CHALLENGE</div>
+        <div className="row gap-sm" style={{ alignItems: 'flex-start' }}>
+          <button
+            onClick={() => setChallengeDone(d => !d)}
+            style={{
+              width: 22, height: 22, borderRadius: 6, flexShrink: 0, marginTop: 2,
+              border: challengeDone ? 'none' : `2px solid ${ACCENT}66`,
+              background: challengeDone ? ACCENT : 'transparent',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all .15s',
+            }}
+          >
+            {challengeDone && <Icon name="check" size={13} stroke={2.5} />}
+          </button>
+          <div style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.65, textDecoration: challengeDone ? 'line-through' : 'none', opacity: challengeDone ? 0.55 : 1, transition: 'opacity .2s' }}>
+            {devotional.challenge}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <button className="btn btn--pink" style={{ background: ACCENT, borderColor: ACCENT }} onClick={onJournal}>
+          <Icon name="edit" size={15} /> Journal this
+        </button>
+      </div>
+    </div>
+  );
 }
 
 // ── TODAY TAB ──────────────────────────────────────────────────────────────────
@@ -132,16 +198,29 @@ function TodayTab({ state, setState }) {
   const entries = state.devotionEntries || {};
   const today = todayStr();
   const [editing, setEditing] = useState(false);
+  const [guided, setGuided] = useState(false);
+  const [journalPrefill, setJournalPrefill] = useState(null);
   const [viewDay, setViewDay] = useState(null);
   const streak = streakFrom(entries);
+
+  const todayDevotional = DEVOTIONALS[new Date().getDay()];
 
   const saveEntry = (d) => {
     setState(s => ({ ...s, devotionEntries: { ...(s.devotionEntries || {}), [d.date]: { ...d } } }));
     setEditing(false);
+    setJournalPrefill(null);
+  };
+
+  const handleJournalThis = () => {
+    setJournalPrefill({ ...blankEntry(today), scripture: todayDevotional.scripture, scriptureText: todayDevotional.scriptureText });
+    setGuided(false);
+    setEditing(true);
   };
 
   const hasToday = !!entries[today];
   const days = useMemo(() => { const out = []; for (let i = 6; i >= 0; i--) out.push(shiftDate(today, -i)); return out; }, [today]);
+
+  const btnBase = { padding: '7px 18px', borderRadius: 22, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', border: '1px solid' };
 
   return (
     <div className="col gap-md">
@@ -151,18 +230,24 @@ function TodayTab({ state, setState }) {
             <div className="text-mono fs-xs" style={{ color: ACCENT, letterSpacing: '0.1em' }}>{fmtLong(today)}</div>
             <div className="text-serif" style={{ fontSize: 22, color: 'var(--ink)', marginTop: 2 }}>Today's devotion</div>
           </div>
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
             {streak > 0
               ? <div className="text-serif" style={{ fontSize: 18, color: ACCENT }}>{streak}-day streak 🔥</div>
               : <div style={{ fontSize: 13, color: 'var(--muted)' }}>Start your streak today</div>}
+            <div className="row" style={{ gap: 4 }}>
+              <button onClick={() => { setGuided(false); setEditing(false); }} style={{ ...btnBase, borderColor: !guided ? ACCENT : 'var(--line)', background: !guided ? ACCENT : 'var(--card)', color: !guided ? '#fff' : 'var(--ink-soft)' }}>Personal</button>
+              <button onClick={() => setGuided(true)} style={{ ...btnBase, borderColor: guided ? ACCENT : 'var(--line)', background: guided ? ACCENT : 'var(--card)', color: guided ? '#fff' : 'var(--ink-soft)' }}>Guided</button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="card" style={{ padding: 22 }}>
-        {(!hasToday || editing)
-          ? <EntryForm initial={entries[today] || blankEntry(today)} onSave={saveEntry} onCancel={editing ? () => setEditing(false) : null} />
-          : <EntryRead entry={entries[today]} onEdit={() => setEditing(true)} />}
+        {guided
+          ? <GuidedDevotional devotional={todayDevotional} onJournal={handleJournalThis} />
+          : (!hasToday || editing)
+            ? <EntryForm initial={journalPrefill || entries[today] || blankEntry(today)} onSave={saveEntry} onCancel={editing ? () => { setEditing(false); setJournalPrefill(null); } : null} />
+            : <EntryRead entry={entries[today]} onEdit={() => setEditing(true)} />}
       </div>
 
       {/* Recent strip */}

@@ -25,7 +25,7 @@ export async function GET() {
     if (!saved.habits?.length) merged.habits = defaults.habits;
     if (!saved.travelTrips?.length) merged.travelTrips = defaults.travelTrips;
     if (!saved.travelPackingTemplates?.length) merged.travelPackingTemplates = defaults.travelPackingTemplates;
-    if (!saved.devotionAffirmations?.length) merged.devotionAffirmations = defaults.devotionAffirmations;
+    if ((saved.devotionAffirmations?.length || 0) < 25) merged.devotionAffirmations = defaults.devotionAffirmations;
     return Response.json(merged);
   } catch (err) {
     console.error('GET /api/data error:', err);

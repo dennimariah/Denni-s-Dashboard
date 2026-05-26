@@ -6,16 +6,29 @@ const USER_ID = 'dennika';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { type = 'Weights', duration, calories, heartRate, date } = body;
 
-    const entry = {
-      type,
-      duration: Number(duration) || 0,
-      calories: Number(calories) || 0,
-      heartRate: heartRate ? Number(heartRate) : null,
-      date: date || new Date().toISOString().slice(0, 10),
-      loggedAt: new Date().toISOString(),
-    };
+    // Handle Health Auto Export format: { data: { workouts: [...] } }
+    // or simple format: { type, duration, calories, heartRate, date }
+    const workoutsRaw = body?.data?.workouts;
+    const entries = workoutsRaw
+      ? workoutsRaw.map(w => ({
+          type: (w.workoutActivityType || '').replace('HKWorkoutActivityType', '') || 'Workout',
+          duration: Math.round(Number(w.duration) || 0),
+          calories: Math.round(Number(w.totalEnergyBurned) || 0),
+          heartRate: w.averageHeartRate ? Math.round(Number(w.averageHeartRate)) : null,
+          date: w.startDate ? w.startDate.slice(0, 10) : new Date().toISOString().slice(0, 10),
+          loggedAt: new Date().toISOString(),
+        }))
+      : [{
+          type: body.type || 'Workout',
+          duration: Math.round(Number(body.duration) || 0),
+          calories: Math.round(Number(body.calories) || 0),
+          heartRate: body.heartRate ? Math.round(Number(body.heartRate)) : null,
+          date: body.date || new Date().toISOString().slice(0, 10),
+          loggedAt: new Date().toISOString(),
+        }];
+
+    const entry = entries[0];
 
     const sql = getDb();
 
@@ -31,7 +44,7 @@ export async function POST(request) {
     const current = rows.length > 0 ? rows[0].data : getDefaultState();
 
     const fitness = current.fitness || getDefaultState().fitness;
-    const watchWorkouts = [...(fitness.watchWorkouts || []), entry];
+    const watchWorkouts = [...(fitness.watchWorkouts || []), ...entries];
 
     const updated = {
       ...current,

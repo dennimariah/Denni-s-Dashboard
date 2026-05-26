@@ -15,8 +15,9 @@ import JournalView from '@/components/views/JournalView';
 import RecipesView from '@/components/views/RecipesView';
 import ContentView from '@/components/views/ContentView';
 import HairView from '@/components/views/HairView';
+import FitnessView from '@/components/views/FitnessView';
 
-const VIEWS = { today: TodayView, week: WeekView, habits: HabitsView, quarter: QuarterView, finance: FinanceView, journal: JournalView, recipes: RecipesView, content: ContentView, hair: HairView };
+const VIEWS = { today: TodayView, week: WeekView, habits: HabitsView, quarter: QuarterView, finance: FinanceView, journal: JournalView, recipes: RecipesView, content: ContentView, hair: HairView, fitness: FitnessView };
 
 const NAV = [
   { id: 'today', label: 'Today', icon: 'spark' },
@@ -28,6 +29,7 @@ const NAV = [
   { id: 'recipes', label: 'Kitchen', icon: 'chef' },
   { id: 'content', label: 'Content', icon: 'sparkle' },
   { id: 'hair', label: 'Hair', icon: 'leaf' },
+  { id: 'fitness', label: 'Fitness', icon: 'habit' },
 ];
 
 export default function Dashboard({ initialData }) {

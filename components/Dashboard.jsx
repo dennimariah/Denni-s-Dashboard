@@ -23,7 +23,7 @@ const NAV = [
   { id: 'today', label: 'Today', icon: 'spark' },
   { id: 'week', label: 'This week', icon: 'week' },
   { id: 'habits', label: 'Habits', icon: 'habit' },
-  { id: 'quarter', label: 'Quarter', icon: 'quarter' },
+  { id: 'quarter', label: 'Quarterly Goals', icon: 'quarter' },
   { id: 'finance', label: 'Finance', icon: 'money' },
   { id: 'journal', label: 'Journal', icon: 'book' },
   { id: 'recipes', label: 'Kitchen', icon: 'chef' },

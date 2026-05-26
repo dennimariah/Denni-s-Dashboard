@@ -68,6 +68,8 @@ export default function Icon({ name, size = 18, stroke = 1.6 }) {
       return <svg {...p}><path d="M5 3l1.5 3.5L10 8l-3.5 1.5L5 13l-1.5-3.5L0 8l3.5-1.5z" transform="translate(7 4)"/></svg>;
     case 'fire':
       return <svg {...p}><path d="M12 2s4 4 4 9a4 4 0 0 1-8 0c0-2 1-3 1-3s2 1 2 4"/></svg>;
+    case 'grip':
+      return <svg {...p}><circle cx="9" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>;
     default:
       return null;
   }

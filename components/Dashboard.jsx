@@ -5,6 +5,20 @@ import { cls, MOOD_OPTIONS } from '@/lib/helpers';
 import { THEMES, applyTheme } from '@/lib/themes';
 import { NavItem, Pill } from '@/components/ui/primitives';
 import Icon from '@/components/ui/Icon';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import TodayView from '@/components/views/TodayView';
 import WeekView from '@/components/views/WeekView';
@@ -40,6 +54,57 @@ const NAV = [
   { id: 'devotion', label: 'Devotion', icon: 'heart' },
 ];
 
+const ORDER_KEY = 'dashboard:sectionOrder';
+
+function loadOrder() {
+  if (typeof window === 'undefined') return null;
+  try { return JSON.parse(localStorage.getItem(ORDER_KEY)); } catch { return null; }
+}
+
+function saveOrder(order) {
+  try { localStorage.setItem(ORDER_KEY, JSON.stringify(order)); } catch {}
+}
+
+function SortableNavItem({ id, label, icon, active, badge, editMode, onClick }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    position: 'relative',
+    borderRadius: 10,
+    background: isDragging ? 'var(--card)' : undefined,
+    boxShadow: isDragging ? '0 4px 16px rgba(0,0,0,0.10)' : undefined,
+    opacity: isDragging ? 0.92 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <button
+        className={cls('sidebar__item', active && 'sidebar__item--active', editMode && 'sidebar__item--edit')}
+        onClick={() => !editMode && onClick(id)}
+        style={editMode ? { cursor: 'default', paddingLeft: 8 } : {}}
+      >
+        {editMode && (
+          <span
+            {...listeners}
+            style={{ color: 'var(--muted)', display: 'flex', alignItems: 'center', padding: '0 6px 0 2px', cursor: 'grab', flexShrink: 0 }}
+          >
+            <Icon name="grip" size={16} />
+          </span>
+        )}
+        <span className="sidebar__item-icon" style={editMode ? { opacity: 0.5 } : {}}>
+          <Icon name={icon} />
+        </span>
+        <span style={editMode ? { opacity: 0.65 } : {}}>{label}</span>
+        {!editMode && badge != null && badge > 0 && (
+          <span className="sidebar__item-badge">{badge}</span>
+        )}
+      </button>
+    </div>
+  );
+}
+
 export default function Dashboard({ initialData }) {
   const [state, setState] = useState(initialData);
   const [theme, setTheme] = useState('strawberry');
@@ -49,7 +114,28 @@ export default function Dashboard({ initialData }) {
   const [briefingStatus, setBriefingStatus] = useState(null);
   const [calLabel, setCalLabel] = useState('');
   const [calUrl, setCalUrl] = useState('');
+  const [navOrder, setNavOrder] = useState(() => loadOrder() || NAV.map(n => n.id));
+  const [editMode, setEditMode] = useState(false);
+  const [orderSaved, setOrderSaved] = useState(false);
   const saveTimer = useRef(null);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+    setNavOrder(prev => {
+      const oldIdx = prev.indexOf(active.id);
+      const newIdx = prev.indexOf(over.id);
+      return arrayMove(prev, oldIdx, newIdx);
+    });
+  };
+
+  const exitEditMode = () => {
+    setEditMode(false);
+    saveOrder(navOrder);
+    setOrderSaved(true);
+    setTimeout(() => setOrderSaved(false), 1500);
+  };
 
   useEffect(() => {
     applyTheme(theme);
@@ -77,7 +163,11 @@ export default function Dashboard({ initialData }) {
 
   const openTasks = state.tasks.filter(t => !t.done).length;
   const badges = { today: openTasks, week: openTasks };
-  const visibleNav = NAV.filter(n => state.show[n.id] !== false);
+  const orderedNav = navOrder
+    .map(id => NAV.find(n => n.id === id))
+    .filter(Boolean)
+    .concat(NAV.filter(n => !navOrder.includes(n.id)));
+  const visibleNav = orderedNav.filter(n => state.show[n.id] !== false);
 
   return (
     <div className="app">
@@ -90,10 +180,52 @@ export default function Dashboard({ initialData }) {
           </div>
         </div>
 
-        <div className="sidebar__section-label">Workspace</div>
-        {visibleNav.map(n => (
-          <NavItem key={n.id} id={n.id} label={n.label} icon={n.icon} active={state.page === n.id} badge={badges[n.id]} onClick={setPage} />
-        ))}
+        <div className="row row--between" style={{ alignItems: 'center', paddingRight: 4 }}>
+          <div className="sidebar__section-label" style={{ marginBottom: 0 }}>Workspace</div>
+          {editMode ? (
+            <button
+              className="btn btn--ghost"
+              style={{ fontSize: 11, padding: '3px 10px', height: 'auto', color: 'var(--primary)', borderColor: 'var(--primary)' }}
+              onClick={exitEditMode}
+            >
+              Done
+            </button>
+          ) : (
+            <button
+              className="btn btn--icon"
+              title="Edit order"
+              style={{ color: 'var(--muted)', width: 26, height: 26 }}
+              onClick={() => setEditMode(true)}
+            >
+              <Icon name="grip" size={15} />
+            </button>
+          )}
+        </div>
+
+        {orderSaved && (
+          <div style={{ fontSize: 11, color: 'var(--primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', padding: '4px 4px 2px', opacity: 1, transition: 'opacity 0.4s' }}>
+            ✓ Order saved
+          </div>
+        )}
+
+        <div style={editMode ? { background: 'var(--card)', borderRadius: 12, border: '1px solid var(--line)', padding: '4px 0', margin: '6px 0' } : { margin: '2px 0' }}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={visibleNav.map(n => n.id)} strategy={verticalListSortingStrategy}>
+              {visibleNav.map(n => (
+                <SortableNavItem
+                  key={n.id}
+                  id={n.id}
+                  label={n.label}
+                  icon={n.icon}
+                  active={state.page === n.id}
+                  badge={badges[n.id]}
+                  editMode={editMode}
+                  onClick={setPage}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        </div>
 
         <div className="sidebar__section-label">Shortcuts</div>
         <button className="sidebar__item" onClick={() => setShortcut('mood')}>

@@ -1,0 +1,4831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dennika's Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ------------------------------------------------------------------ */
+/* Dennika's Dashboard — playful pink                                 */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* Strawberry Cream (default theme) — vars overridden by Tweaks */
+  --bg: #fdf3ef;
+  --bg-soft: #fbe7e0;
+  --card: #ffffff;
+  --card-2: #fff7f3;
+  --ink: #3a1d28;
+  --ink-soft: #6b4250;
+  --muted: #a98591;
+  --line: #f3d9d9;
+  --line-soft: #f7e7e7;
+
+  --primary: #e8527a;
+  --primary-soft: #fbd7e1;
+  --primary-deep: #b1325c;
+
+  --accent-1: #f4a261;    /* peach */
+  --accent-1-soft: #fde3cf;
+  --accent-2: #88b896;    /* sage mint */
+  --accent-2-soft: #d8ecdc;
+  --accent-3: #b39bd8;    /* lilac */
+  --accent-3-soft: #ebe1f5;
+  --accent-4: #f7c548;    /* sunny */
+  --accent-4-soft: #fdecbc;
+
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  --shadow-sm: 0 1px 2px rgba(58, 29, 40, 0.06);
+  --shadow: 0 6px 20px -8px rgba(177, 50, 92, 0.18), 0 2px 4px rgba(58, 29, 40, 0.04);
+  --shadow-lg: 0 18px 40px -16px rgba(177, 50, 92, 0.28);
+
+  --font-serif: "Instrument Serif", "Times New Roman", serif;
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button { font-family: inherit; cursor: pointer; }
+button svg { pointer-events: none; }
+input, textarea { font-family: inherit; color: inherit; }
+
+/* ----- App shell ----- */
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at -10% -10%, var(--primary-soft) 0%, transparent 55%),
+    radial-gradient(900px 500px at 110% 10%, var(--accent-3-soft) 0%, transparent 55%),
+    var(--bg);
+}
+
+/* ----- Sidebar ----- */
+.sidebar {
+  padding: 22px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-right: 1px solid var(--line);
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 18px;
+}
+.sidebar__brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--accent-1));
+  display: grid;
+  place-items: center;
+  color: white;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  box-shadow: var(--shadow);
+}
+.sidebar__brand-name {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);
+}
+.sidebar__brand-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.sidebar__section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 14px 10px 6px;
+}
+.sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  color: var(--ink-soft);
+  font-weight: 500;
+  font-size: 13.5px;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  width: 100%;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebar__item:hover { background: var(--card-2); color: var(--ink); }
+.sidebar__item--active {
+  background: var(--primary);
+  color: white;
+  box-shadow: var(--shadow);
+}
+.sidebar__item--active:hover { background: var(--primary); color: white; }
+.sidebar__item-icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.sidebar__item-badge {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--primary-soft);
+  color: var(--primary-deep);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.sidebar__item--active .sidebar__item-badge {
+  background: rgba(255,255,255,0.25);
+  color: white;
+}
+.sidebar__footer {
+  margin-top: auto;
+  padding: 14px 10px 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-3), var(--primary));
+  color: white;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 18px;
+}
+.sidebar__user {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 13px;
+}
+.sidebar__streak {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+/* ----- Main ----- */
+.main {
+  padding: 28px 36px 80px;
+  min-width: 0;
+}
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.page-head > *:first-child { flex: 1 1 320px; min-width: 0; }
+.page-head > *:last-child { flex-shrink: 0; flex-wrap: wrap; }
+.page-head__title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 44px;
+  line-height: 1;
+  color: var(--ink);
+  margin: 0;
+}
+.page-head__greeting {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.page-head__date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+/* ----- Cards ----- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+}
+.card--tinted { background: var(--card-2); }
+.card--pink { background: var(--primary-soft); border-color: transparent; }
+.card--mint { background: var(--accent-2-soft); border-color: transparent; }
+.card--peach { background: var(--accent-1-soft); border-color: transparent; }
+.card--lilac { background: var(--accent-3-soft); border-color: transparent; }
+.card--sun { background: var(--accent-4-soft); border-color: transparent; }
+.card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.card__head > *:first-child { min-width: 0; flex: 1 1 auto; }
+.card__head > *:last-child:not(:first-child) { flex-shrink: 0; }
+.card__title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--ink);
+  overflow-wrap: break-word;
+}
+.card__sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ----- Bento ----- */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+.bento > * { min-width: 0; }
+.col-3  { grid-column: span 3; }
+.col-4  { grid-column: span 4; }
+.col-5  { grid-column: span 5; }
+.col-6  { grid-column: span 6; }
+.col-7  { grid-column: span 7; }
+.col-8  { grid-column: span 8; }
+.col-9  { grid-column: span 9; }
+.col-12 { grid-column: span 12; }
+
+/* ----- Tasks ----- */
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 6px;
+  border-bottom: 1px dashed var(--line);
+}
+.task:last-child { border-bottom: 0; }
+.task__check {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.task__check:hover { border-color: var(--primary); background: var(--primary-soft); }
+.task__check--done {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+.task__text {
+  flex: 1;
+  font-size: 14px;
+  color: var(--ink);
+}
+.task--done .task__text { color: var(--muted); text-decoration: line-through; }
+.task__meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ----- Pills / Tags ----- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--card-2);
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+}
+.pill--pink   { background: var(--primary-soft); color: var(--primary-deep); border-color: transparent; }
+.pill--mint   { background: var(--accent-2-soft); color: #3d6b4f; border-color: transparent; }
+.pill--peach  { background: var(--accent-1-soft); color: #8b4f1c; border-color: transparent; }
+.pill--lilac  { background: var(--accent-3-soft); color: #5e4b85; border-color: transparent; }
+.pill--sun    { background: var(--accent-4-soft); color: #8a6a16; border-color: transparent; }
+.pill--mono   { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ----- Progress ----- */
+.bar {
+  height: 8px;
+  background: var(--line-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent-1));
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+/* ----- Buttons ----- */
+.btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  background: var(--ink);
+  color: var(--card);
+  transition: transform 0.1s, background 0.15s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn--pink { background: var(--primary); color: white; }
+.btn--ghost { background: transparent; color: var(--ink-soft); }
+.btn--ghost:hover { background: var(--card-2); }
+.btn--icon {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: var(--card-2);
+  color: var(--ink-soft);
+}
+.btn--icon:hover { background: var(--primary-soft); color: var(--primary-deep); }
+
+/* ----- Habit grid ----- */
+.habit-grid {
+  display: grid;
+  gap: 6px;
+}
+.habit-row {
+  display: grid;
+  grid-template-columns: 180px repeat(7, minmax(0, 1fr)) 60px;
+  gap: 8px;
+  align-items: center;
+}
+.habit-row__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.habit-row__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.habit-cell {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 1.5px dashed var(--line);
+  background: var(--card);
+  display: grid;
+  place-items: center;
+  transition: all 0.12s;
+  font-size: 12px;
+  color: var(--muted);
+}
+.habit-cell:hover { border-color: var(--primary); border-style: solid; }
+.habit-cell--done {
+  border-style: solid;
+  border-color: transparent;
+  color: white;
+  font-weight: 700;
+}
+.habit-cell--today {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.habit-row__score {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.habit-day-head {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ----- Phone preview ----- */
+.phone {
+  background: linear-gradient(180deg, #1a1014 0%, #2a181f 100%);
+  border-radius: 28px;
+  padding: 14px 12px 16px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+.phone__notch {
+  width: 80px;
+  height: 18px;
+  background: #000;
+  border-radius: 999px;
+  margin: -4px auto 12px;
+}
+.phone__bubble {
+  background: var(--primary-soft);
+  border-radius: 18px 18px 18px 4px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  color: var(--ink);
+  white-space: pre-line;
+  line-height: 1.55;
+}
+.phone__time {
+  text-align: center;
+  font-family: var(--font-mono);
+  color: rgba(255,255,255,0.5);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.phone__handle {
+  text-align: center;
+  font-family: var(--font-mono);
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+
+/* ----- Mood ----- */
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+.mood-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.mood-emoji {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  background: var(--card-2);
+  border: 1.5px solid transparent;
+  transition: transform 0.1s, border-color 0.15s, background 0.15s;
+}
+.mood-emoji:hover { transform: scale(1.08); }
+.mood-emoji--active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.mood-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ----- Calendar / agenda ----- */
+.agenda-item {
+  display: grid;
+  grid-template-columns: 60px 4px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.agenda-item:last-child { border-bottom: 0; }
+.agenda-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+}
+.agenda-bar {
+  width: 4px;
+  height: 28px;
+  border-radius: 4px;
+}
+.agenda-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+.agenda-meta { font-size: 11.5px; color: var(--muted); }
+
+/* ----- Finance ----- */
+.cc {
+  border-radius: 18px;
+  padding: 16px;
+  color: white;
+  background: linear-gradient(135deg, var(--primary), var(--accent-1));
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 130px;
+  position: relative;
+  overflow: hidden;
+}
+.cc::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 50%;
+}
+.cc::before {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 30px;
+  width: 80px;
+  height: 80px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+}
+.cc__brand {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16px;
+  z-index: 1;
+}
+.cc__num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  opacity: 0.85;
+  z-index: 1;
+}
+.cc__balance-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.cc__balance {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 28px;
+  line-height: 1;
+  z-index: 1;
+}
+.cc--lilac { background: linear-gradient(135deg, var(--accent-3), var(--primary)); }
+.cc--mint  { background: linear-gradient(135deg, var(--accent-2), var(--accent-3)); }
+
+.budget-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.budget-label { font-weight: 500; }
+.budget-amounts {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ----- Gym tracker ----- */
+.gym-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.gym-cell {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: var(--card-2);
+  border: 1.5px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  transition: all 0.12s;
+  flex-direction: column;
+  position: relative;
+  padding: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+  word-break: break-word;
+}
+.gym-cell--done {
+  background: var(--primary);
+  color: white;
+  border-color: transparent;
+}
+.gym-cell--rest {
+  background: var(--accent-3-soft);
+  color: var(--accent-3);
+  border-color: transparent;
+}
+.gym-cell__day {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.gym-cell__icon { font-size: 16px; }
+
+/* ----- Journal ----- */
+.journal-entry {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.journal-entry__date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.journal-entry__mood {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 18px;
+}
+.journal-entry__title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  margin: 0 0 6px;
+}
+.journal-entry__body {
+  color: var(--ink-soft);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+.journal-editor {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  background: var(--card-2);
+  margin-bottom: 18px;
+}
+.journal-editor textarea {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.journal-editor input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+/* ----- Recipe ----- */
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.recipe-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+.recipe-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.recipe-card__img {
+  height: 130px;
+  display: grid;
+  place-items: center;
+  font-size: 48px;
+  position: relative;
+}
+.recipe-card__body { padding: 14px; }
+.recipe-card__title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.recipe-card__meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  gap: 10px;
+}
+.recipe-fav {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.85);
+  border: 0;
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+/* ----- Parking lot ----- */
+.idea-chip {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+}
+.idea-chip__bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+
+/* ----- Quarter goals ----- */
+.goal-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.goal-row:last-child { border-bottom: 0; }
+.goal-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  margin-top: 2px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.goal-check--done {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  font-size: 11px;
+}
+.goal-text { flex: 1; font-size: 13.5px; }
+.goal-text--done { color: var(--muted); text-decoration: line-through; }
+
+/* ----- Week nav ----- */
+.weeknav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px;
+  width: max-content;
+}
+.weeknav__btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: 0;
+  color: var(--ink-soft);
+  display: grid;
+  place-items: center;
+}
+.weeknav__btn:hover { background: var(--card-2); }
+.weeknav__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 0 10px;
+}
+
+/* ----- Editable text ----- */
+.editable {
+  border: 0;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  padding: 2px 4px;
+  border-radius: 6px;
+  margin: -2px -4px;
+}
+.editable:focus { background: var(--primary-soft); }
+.editable:hover:not(:focus) { background: var(--card-2); }
+
+/* ----- Confetti ----- */
+.confetti {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 12px;
+  pointer-events: none;
+  z-index: 100;
+  animation: confetti-fall 1.2s ease-out forwards;
+}
+@keyframes confetti-fall {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) rotate(720deg); opacity: 0; }
+}
+
+/* ----- Reflections / focus ----- */
+.focus-box {
+  background: var(--accent-1-soft);
+  border-radius: var(--radius);
+  padding: 18px;
+  border: 1px dashed rgba(0,0,0,0.04);
+}
+.focus-box__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.focus-box__text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+/* ----- Empty state placeholder ----- */
+.empty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  padding: 20px;
+  text-align: center;
+}
+
+/* ----- Utility ----- */
+.row { display: flex; align-items: center; gap: 10px; }
+.row--between { justify-content: space-between; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+.gap-sm { gap: 6px; }
+.gap-md { gap: 14px; }
+.gap-lg { gap: 22px; }
+.mt-sm { margin-top: 8px; }
+.mt-md { margin-top: 14px; }
+.mt-lg { margin-top: 22px; }
+.text-mono { font-family: var(--font-mono); }
+.text-serif { font-family: var(--font-serif); font-style: italic; }
+.text-muted { color: var(--muted); }
+.text-soft { color: var(--ink-soft); }
+.fs-display { font-family: var(--font-serif); font-style: italic; font-size: 36px; line-height: 1.1; }
+.fs-lg { font-size: 18px; }
+.fs-sm { font-size: 12.5px; }
+.fs-xs { font-size: 11px; }
+
+/* responsive */
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: relative; height: auto; }
+  .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9 { grid-column: span 12; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel">
+
+// tweaks-panel.jsx
+// Reusable Tweaks shell + form-control helpers.
+//
+// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
+// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
+// individual prototypes don't re-roll it. Ships a consistent set of controls so you
+// don't hand-draw <input type="range">, segmented radios, steppers, etc.
+//
+// Usage (in an HTML file that loads React + Babel):
+//
+//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+//     "primaryColor": "#D97757",
+//     "palette": ["#D97757", "#29261b", "#f6f4ef"],
+//     "fontSize": 16,
+//     "density": "regular",
+//     "dark": false
+//   }/*EDITMODE-END*/;
+//
+//   function App() {
+//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+//     return (
+//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
+//         Hello
+//         <TweaksPanel>
+//           <TweakSection label="Typography" />
+//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
+//                        onChange={(v) => setTweak('fontSize', v)} />
+//           <TweakRadio  label="Density" value={t.density}
+//                        options={['compact', 'regular', 'comfy']}
+//                        onChange={(v) => setTweak('density', v)} />
+//           <TweakSection label="Theme" />
+//           <TweakColor  label="Primary" value={t.primaryColor}
+//                        options={['#D97757', '#2A6FDB', '#1F8A5B', '#7A5AE0']}
+//                        onChange={(v) => setTweak('primaryColor', v)} />
+//           <TweakColor  label="Palette" value={t.palette}
+//                        options={[['#D97757', '#29261b', '#f6f4ef'],
+//                                  ['#475569', '#0f172a', '#f1f5f9']]}
+//                        onChange={(v) => setTweak('palette', v)} />
+//           <TweakToggle label="Dark mode" value={t.dark}
+//                        onChange={(v) => setTweak('dark', v)} />
+//         </TweaksPanel>
+//       </div>
+//     );
+//   }
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+
+  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
+    overflow-wrap:anywhere}
+
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+
+  .twk-num{display:flex;align-items:center;box-sizing:border-box;min-width:0;height:26px;padding:0 0 0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
+  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
+    user-select:none;padding-right:8px}
+  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
+    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
+    outline:none;color:inherit;-moz-appearance:textfield}
+  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
+    -webkit-appearance:none;margin:0}
+  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
+
+  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
+    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
+  .twk-btn:hover{background:rgba(0,0,0,.88)}
+  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
+  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
+
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
+    background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
+
+  .twk-chips{display:flex;gap:6px}
+  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
+    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
+    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
+    transition:transform .12s cubic-bezier(.3,.7,.4,1),box-shadow .12s}
+  .twk-chip:hover{transform:translateY(-1px);
+    box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
+  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),
+    0 2px 6px rgba(0,0,0,.15)}
+  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;
+    display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i:first-child{box-shadow:none}
+  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+`;
+
+// ── useTweaks ───────────────────────────────────────────────────────────────
+// Single source of truth for tweak values. setTweak persists via the host
+// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
+  // useState-style call doesn't write a "[object Object]" key into the persisted
+  // JSON block.
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+    // Same-window signal so in-page listeners (deck-stage rail thumbnails)
+    // can react — the parent message only reaches the host, not peers.
+    window.dispatchEvent(new CustomEvent('tweakchange', { detail: edits }));
+  }, []);
+  return [values, setTweak];
+}
+
+// ── TweaksPanel ─────────────────────────────────────────────────────────────
+// Floating shell. Registers the protocol listener BEFORE announcing
+// availability — if the announce ran first, the host's activate could land
+// before our handler exists and the toolbar toggle would silently no-op.
+// The close button posts __edit_mode_dismissed so the host's toolbar toggle
+// flips off in lockstep; the host echoes __deactivate_edit_mode back which
+// is what actually hides the panel.
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', clampToViewport);
+      return () => window.removeEventListener('resize', clampToViewport);
+    }
+    const ro = new ResizeObserver(clampToViewport);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel" data-omelette-chrome=""
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close tweaks"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">
+          {children}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Layout helpers ──────────────────────────────────────────────────────────
+
+function TweakSection({ label, children }) {
+  return (
+    <>
+      <div className="twk-sect">{label}</div>
+      {children}
+    </>
+  );
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={(e) => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              role="switch" aria-checked={!!value}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  // The active value is read by pointer-move handlers attached for the lifetime
+  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
+  // Segments wrap mid-word once per-segment width runs out. The track is
+  // ~248px (280 panel − 28 body pad − 4 seg pad), each button loses 12px
+  // to its own padding, and 11.5px system-ui averages ~6.3px/char — so 2
+  // options fit ~16 chars each, 3 fit ~10. Past that (or >3 options), fall
+  // back to a dropdown rather than wrap.
+  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
+  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
+  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
+  if (!fitsAsSegments) {
+    // <select> emits strings — map back to the original option value so the
+    // fallback stays type-preserving (numbers, booleans) like the segment path.
+    const resolve = (s) => {
+      const m = options.find((o) => String(typeof o === 'object' ? o.value : o) === s);
+      return m === undefined ? s : typeof m === 'object' ? m.value : m;
+    };
+    return <TweakSelect label={label} value={value} options={options}
+                        onChange={(s) => onChange(resolve(s))} />;
+  }
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => {
+      if (!trackRef.current) return;
+      const v = segAt(ev.clientX);
+      if (v !== valueRef.current) onChange(v);
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+
+function TweakText({ label, value, placeholder, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <input className="twk-field" type="text" value={value} placeholder={placeholder}
+             onChange={(e) => onChange(e.target.value)} />
+    </TweakRow>
+  );
+}
+
+function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
+  const clamp = (n) => {
+    if (min != null && n < min) return min;
+    if (max != null && n > max) return max;
+    return n;
+  };
+  const startRef = React.useRef({ x: 0, val: 0 });
+  const onScrubStart = (e) => {
+    e.preventDefault();
+    startRef.current = { x: e.clientX, val: value };
+    const decimals = (String(step).split('.')[1] || '').length;
+    const move = (ev) => {
+      const dx = ev.clientX - startRef.current.x;
+      const raw = startRef.current.val + dx * step;
+      const snapped = Math.round(raw / step) * step;
+      onChange(clamp(Number(snapped.toFixed(decimals))));
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <div className="twk-num">
+      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
+      <input type="number" value={value} min={min} max={max} step={step}
+             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
+      {unit && <span className="twk-num-unit">{unit}</span>}
+    </div>
+  );
+}
+
+// Relative-luminance contrast pick — checkmarks drawn over a swatch need to
+// read on both #111 and #fafafa without per-option configuration. Hex input
+// only (#rgb / #rrggbb); named or rgb()/hsl() colors fall through to "light".
+function __twkIsLight(hex) {
+  const h = String(hex).replace('#', '');
+  const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
+  const n = parseInt(x.slice(0, 6), 16);
+  if (Number.isNaN(n)) return true;
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return r * 299 + g * 587 + b * 114 > 148000;
+}
+
+const __TwkCheck = ({ light }) => (
+  <svg viewBox="0 0 14 14" aria-hidden="true">
+    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
+          strokeLinecap="round" strokeLinejoin="round"
+          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
+  </svg>
+);
+
+// TweakColor — curated color/palette picker. Each option is either a single
+// hex string or an array of 1-5 hex strings; the card adapts — a lone color
+// renders solid, a palette renders colors[0] as the hero (left ~2/3) with the
+// rest stacked in a sharp column on the right. onChange emits the
+// option in the shape it was passed (string stays string, array stays array).
+// Without options it falls back to the native color input for back-compat.
+function TweakColor({ label, value, options, onChange }) {
+  if (!options || !options.length) {
+    return (
+      <div className="twk-row twk-row-h">
+        <div className="twk-lbl"><span>{label}</span></div>
+        <input type="color" className="twk-swatch" value={value}
+               onChange={(e) => onChange(e.target.value)} />
+      </div>
+    );
+  }
+  // Native <input type=color> emits lowercase hex per the HTML spec, so
+  // compare case-insensitively. String() guards JSON.stringify(undefined),
+  // which returns the primitive undefined (no .toLowerCase).
+  const key = (o) => String(JSON.stringify(o)).toLowerCase();
+  const cur = key(value);
+  return (
+    <TweakRow label={label}>
+      <div className="twk-chips" role="radiogroup">
+        {options.map((o, i) => {
+          const colors = Array.isArray(o) ? o : [o];
+          const [hero, ...rest] = colors;
+          const sup = rest.slice(0, 4);
+          const on = key(o) === cur;
+          return (
+            <button key={i} type="button" className="twk-chip" role="radio"
+                    aria-checked={on} data-on={on ? '1' : '0'}
+                    aria-label={colors.join(', ')} title={colors.join(' · ')}
+                    style={{ background: hero }}
+                    onClick={() => onChange(o)}>
+              {sup.length > 0 && (
+                <span>
+                  {sup.map((c, j) => <i key={j} style={{ background: c }} />)}
+                </span>
+              )}
+              {on && <__TwkCheck light={__twkIsLight(hero)} />}
+            </button>
+          );
+        })}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakButton({ label, onClick, secondary = false }) {
+  return (
+    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
+            onClick={onClick}>{label}</button>
+  );
+}
+
+Object.assign(window, {
+  useTweaks, TweaksPanel, TweakSection, TweakRow,
+  TweakSlider, TweakToggle, TweakRadio, TweakSelect,
+  TweakText, TweakNumber, TweakColor, TweakButton,
+});
+
+</script>
+<script type="text/babel">
+// ------------------------------------------------------------------
+// Seed data + helpers. Exposed on window so other Babel scripts see it.
+// ------------------------------------------------------------------
+
+const SEED_TASKS = [];
+
+const SEED_HABITS = [
+  { id: "h1", label: "Move my body",   icon: "🌸", color: "#e8527a", bg: "#fbd7e1", goal: 5, section: "daily" },
+  { id: "h2", label: "Water (8 glasses)", icon: "💧", color: "#7aaee5", bg: "#dceaf7", goal: 7, section: "daily" },
+  { id: "h3", label: "Read 20 min",    icon: "📖", color: "#b39bd8", bg: "#ebe1f5", goal: 6, section: "daily" },
+  { id: "h4", label: "Skincare routine", icon: "✨", color: "#f4a261", bg: "#fde3cf", goal: 7, section: "daily" },
+  { id: "h5", label: "No phone in bed", icon: "🌙", color: "#88b896", bg: "#d8ecdc", goal: 5, section: "daily" },
+  { id: "h6", label: "Morning pages",  icon: "🪷", color: "#d68d84", bg: "#f8dad5", goal: 4, section: "devotional" },
+  { id: "h7", label: "Gratitude list", icon: "🍓", color: "#e8527a", bg: "#fbd7e1", goal: 5, section: "devotional" },
+];
+
+// Compact bitmap of 7 days. true = done.
+function makeHabitLog(pattern) {
+  // pattern: array of 0/1 of length 7
+  return pattern.map(Boolean);
+}
+
+const SEED_HABIT_LOGS = {
+  h1: makeHabitLog([0,0,0,0,0,0,0]),
+  h2: makeHabitLog([0,0,0,0,0,0,0]),
+  h3: makeHabitLog([0,0,0,0,0,0,0]),
+  h4: makeHabitLog([0,0,0,0,0,0,0]),
+  h5: makeHabitLog([0,0,0,0,0,0,0]),
+  h6: makeHabitLog([0,0,0,0,0,0,0]),
+  h7: makeHabitLog([0,0,0,0,0,0,0]),
+};
+
+const SEED_AGENDA = [];
+
+const SEED_GYM_WEEK = [
+  { day: "Mon", type: "Workout", done: false },
+  { day: "Tue", type: "Workout", done: false },
+  { day: "Wed", type: "Rest",    done: false, rest: true },
+  { day: "Thu", type: "Workout", done: false },
+  { day: "Fri", type: "Workout", done: false },
+  { day: "Sat", type: "Workout", done: false },
+  { day: "Sun", type: "Rest",    done: false, rest: true },
+];
+
+const SEED_CARDS = [];
+
+const SEED_BUDGET = [
+  { id: "b1", category: "Groceries",          spent: 0, budget: 500, color: "var(--accent-2)" },
+  { id: "b2", category: "Dining out",         spent: 0, budget: 250, color: "var(--primary)" },
+  { id: "b3", category: "Beauty + Self-care", spent: 0, budget: 200, color: "var(--accent-3)" },
+  { id: "b4", category: "Fitness",            spent: 0, budget: 150, color: "var(--accent-1)" },
+  { id: "b5", category: "Books + Hobbies",    spent: 0, budget: 100, color: "var(--accent-4)" },
+  { id: "b6", category: "Subscriptions",      spent: 0, budget:  90, color: "var(--accent-3)" },
+];
+
+const SEED_SAVINGS = [];
+
+const SEED_QUARTER_GOALS = [];
+
+const SEED_PARKING_LOT = [];
+
+const SEED_JOURNAL = [];
+
+const SEED_RECIPES = [];
+
+const SEED_CONTENT = [];
+
+const SEED_TRANSACTIONS = [];
+
+const TRANSACTION_ICONS = [
+  "🥬", "🛒", "🍽", "☕", "🧘🏻‍♀️", "💄", "🎧", "📚", "💸", "✨",
+  "🍷", "🚖", "⛽", "🏥", "🎁", "💐", "🍰", "🍕", "🛍", "🏡",
+];
+
+const SEED_MOOD_WEEK = [
+  { day: "Mon", mood: 0, emoji: null },
+  { day: "Tue", mood: 0, emoji: null },
+  { day: "Wed", mood: 0, emoji: null },
+  { day: "Thu", mood: 0, emoji: null },
+  { day: "Fri", mood: 0, emoji: null },
+  { day: "Sat", mood: 0, emoji: null },
+  { day: "Sun", mood: 0, emoji: null },
+];
+
+const MOOD_OPTIONS = [
+  { id: "stormy",  emoji: "🌧",  label: "Stormy" },
+  { id: "low",     emoji: "🌫",  label: "Low" },
+  { id: "okay",    emoji: "🌿",  label: "Okay" },
+  { id: "good",    emoji: "🌷",  label: "Good" },
+  { id: "glow",    emoji: "🌸",  label: "Glowing" },
+  { id: "magic",   emoji: "✨",  label: "Magic" },
+  { id: "wild",    emoji: "🔥",  label: "Wild" },
+];
+
+const DAYS_OF_WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+// ----- Themes -----
+const THEMES = {
+  strawberry: {
+    label: "Strawberry Cream",
+    swatches: ["#fdf3ef", "#e8527a", "#f4a261", "#88b896", "#b39bd8"],
+    vars: {
+      "--bg": "#fdf3ef",
+      "--bg-soft": "#fbe7e0",
+      "--card": "#ffffff",
+      "--card-2": "#fff7f3",
+      "--ink": "#3a1d28",
+      "--ink-soft": "#6b4250",
+      "--muted": "#a98591",
+      "--line": "#f3d9d9",
+      "--line-soft": "#f7e7e7",
+      "--primary": "#e8527a",
+      "--primary-soft": "#fbd7e1",
+      "--primary-deep": "#b1325c",
+      "--accent-1": "#f4a261",
+      "--accent-1-soft": "#fde3cf",
+      "--accent-2": "#88b896",
+      "--accent-2-soft": "#d8ecdc",
+      "--accent-3": "#b39bd8",
+      "--accent-3-soft": "#ebe1f5",
+      "--accent-4": "#f7c548",
+      "--accent-4-soft": "#fdecbc",
+    },
+  },
+  cottoncandy: {
+    label: "Cotton Candy",
+    swatches: ["#fbf2f7", "#f48fb1", "#a8d8f0", "#c7b8ea", "#fbd9c5"],
+    vars: {
+      "--bg": "#fbf2f7",
+      "--bg-soft": "#f6e1ee",
+      "--card": "#ffffff",
+      "--card-2": "#fdf4f9",
+      "--ink": "#3d1e35",
+      "--ink-soft": "#6b3f5e",
+      "--muted": "#b39ab0",
+      "--line": "#f1d8e5",
+      "--line-soft": "#f7e7ef",
+      "--primary": "#f48fb1",
+      "--primary-soft": "#fbe0eb",
+      "--primary-deep": "#c4658a",
+      "--accent-1": "#fbb286",
+      "--accent-1-soft": "#fde3cf",
+      "--accent-2": "#a8d8f0",
+      "--accent-2-soft": "#daedf8",
+      "--accent-3": "#c7b8ea",
+      "--accent-3-soft": "#ece5f7",
+      "--accent-4": "#fcdd8c",
+      "--accent-4-soft": "#fdf1cd",
+    },
+  },
+  hibiscus: {
+    label: "Hibiscus",
+    swatches: ["#fff5f7", "#d6336c", "#ff8c69", "#f4a261", "#b08bd1"],
+    vars: {
+      "--bg": "#fff5f7",
+      "--bg-soft": "#ffe0e8",
+      "--card": "#ffffff",
+      "--card-2": "#fff0f4",
+      "--ink": "#2d0a1a",
+      "--ink-soft": "#5e2238",
+      "--muted": "#a8758a",
+      "--line": "#f4d0dc",
+      "--line-soft": "#fae0e8",
+      "--primary": "#d6336c",
+      "--primary-soft": "#fbcfdd",
+      "--primary-deep": "#931f49",
+      "--accent-1": "#ff8c69",
+      "--accent-1-soft": "#ffd9c9",
+      "--accent-2": "#8eb89a",
+      "--accent-2-soft": "#d6ecdc",
+      "--accent-3": "#b08bd1",
+      "--accent-3-soft": "#e6d9f0",
+      "--accent-4": "#f5b942",
+      "--accent-4-soft": "#fce4ba",
+    },
+  },
+  peony: {
+    label: "Peony Garden",
+    swatches: ["#f5f0ed", "#c4658a", "#7d9b6f", "#cda678", "#a8c9b3"],
+    vars: {
+      "--bg": "#f5f0ed",
+      "--bg-soft": "#ede0d8",
+      "--card": "#ffffff",
+      "--card-2": "#faf5f2",
+      "--ink": "#2d2422",
+      "--ink-soft": "#5c4944",
+      "--muted": "#a89c95",
+      "--line": "#e6d8d0",
+      "--line-soft": "#ede2db",
+      "--primary": "#c4658a",
+      "--primary-soft": "#f1d4df",
+      "--primary-deep": "#8a4063",
+      "--accent-1": "#cda678",
+      "--accent-1-soft": "#ecd9bd",
+      "--accent-2": "#7d9b6f",
+      "--accent-2-soft": "#d3dfcb",
+      "--accent-3": "#a8c9b3",
+      "--accent-3-soft": "#d9e8de",
+      "--accent-4": "#e0b95d",
+      "--accent-4-soft": "#f4e0a3",
+    },
+  },
+  lavender: {
+    label: "Lavender Plum",
+    swatches: ["#f6f3fa", "#9b6dc9", "#e87aa6", "#b09bd6", "#f2c08c"],
+    vars: {
+      "--bg": "#f6f3fa",
+      "--bg-soft": "#ebe2f0",
+      "--card": "#ffffff",
+      "--card-2": "#f8f4fb",
+      "--ink": "#2a1a3a",
+      "--ink-soft": "#553f72",
+      "--muted": "#9c87b3",
+      "--line": "#e4d8ed",
+      "--line-soft": "#eee5f3",
+      "--primary": "#9b6dc9",
+      "--primary-soft": "#e2d2f0",
+      "--primary-deep": "#6a4093",
+      "--accent-1": "#e87aa6",
+      "--accent-1-soft": "#fbd8e4",
+      "--accent-2": "#8eb89a",
+      "--accent-2-soft": "#d8ecdc",
+      "--accent-3": "#b09bd6",
+      "--accent-3-soft": "#e2d8f0",
+      "--accent-4": "#f2c08c",
+      "--accent-4-soft": "#fbe2c8",
+    },
+  },
+};
+
+// ------------------------------------------------------------------
+// Helpers
+// ------------------------------------------------------------------
+function cls(...a) { return a.filter(Boolean).join(" "); }
+function currency(n) { return "$" + n.toLocaleString(); }
+function pct(part, whole) { return whole ? Math.round((part / whole) * 100) : 0; }
+
+function applyTheme(themeKey) {
+  const theme = THEMES[themeKey] || THEMES.strawberry;
+  const root = document.documentElement;
+  Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+}
+
+Object.assign(window, {
+  SEED_TASKS, SEED_HABITS, SEED_HABIT_LOGS, SEED_AGENDA, SEED_GYM_WEEK,
+  SEED_CARDS, SEED_BUDGET, SEED_SAVINGS, SEED_QUARTER_GOALS, SEED_PARKING_LOT,
+  SEED_JOURNAL, SEED_RECIPES, SEED_MOOD_WEEK, SEED_CONTENT, SEED_TRANSACTIONS, TRANSACTION_ICONS,
+  MOOD_OPTIONS, DAYS_OF_WEEK, THEMES,
+  cls, currency, pct, applyTheme,
+});
+
+</script>
+<script type="text/babel">
+// Shared small UI primitives: icons, cards, tags
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+// ----- Icons (inline svg, stroked, all share consistent style) -----
+const Icon = ({ name, size = 18, stroke = 1.6 }) => {
+  const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none",
+              stroke: "currentColor", strokeWidth: stroke, strokeLinecap: "round", strokeLinejoin: "round" };
+  switch (name) {
+    case "home":   return <svg {...p}><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>;
+    case "calendar": return <svg {...p}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>;
+    case "check":  return <svg {...p}><path d="M5 12l4 4 10-10"/></svg>;
+    case "plus":   return <svg {...p}><path d="M12 5v14M5 12h14"/></svg>;
+    case "minus":  return <svg {...p}><path d="M5 12h14"/></svg>;
+    case "arrow-l": return <svg {...p}><path d="M15 6l-6 6 6 6"/></svg>;
+    case "arrow-r": return <svg {...p}><path d="M9 6l6 6-6 6"/></svg>;
+    case "habit":  return <svg {...p}><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>;
+    case "week":   return <svg {...p}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 11h18"/></svg>;
+    case "quarter":return <svg {...p}><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 3"/></svg>;
+    case "money":  return <svg {...p}><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>;
+    case "book":   return <svg {...p}><path d="M4 4h7a3 3 0 0 1 3 3v13M20 4h-7a3 3 0 0 0-3 3v13"/></svg>;
+    case "spark":  return <svg {...p}><path d="M12 3l1.7 4.6L18 9l-4.3 1.4L12 15l-1.7-4.6L6 9l4.3-1.4z"/><path d="M5 18l.7 1.7L7 20l-1.3.3L5 22l-.7-1.7L3 20l1.3-.3z"/></svg>;
+    case "heart":  return <svg {...p}><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>;
+    case "moon":   return <svg {...p}><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.7 6.7 0 0 0 21 12.8z"/></svg>;
+    case "dumbbell": return <svg {...p}><path d="M3 12h2M19 12h2M6 8v8M18 8v8M9 6v12M15 6v12"/></svg>;
+    case "chef":   return <svg {...p}><path d="M8 11a4 4 0 1 1 8 0v8H8z"/><path d="M9 14h6"/></svg>;
+    case "leaf":   return <svg {...p}><path d="M11 20A7 7 0 0 1 4 13c0-6 7-9 14-9 0 7-3 14-9 14"/><path d="M2 22l7-7"/></svg>;
+    case "phone":  return <svg {...p}><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>;
+    case "edit":   return <svg {...p}><path d="M12 20h9"/><path d="M16.5 3.5a2 2 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>;
+    case "trash":  return <svg {...p}><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/></svg>;
+    case "x":      return <svg {...p}><path d="M6 6l12 12M18 6l-12 12"/></svg>;
+    case "star":   return <svg {...p}><path d="M12 3l2.6 5.7 6.3.6-4.7 4.4 1.3 6.3L12 17l-5.5 3 1.3-6.3L3 9.3l6.3-.6z"/></svg>;
+    case "circle": return <svg {...p}><circle cx="12" cy="12" r="9"/></svg>;
+    case "search": return <svg {...p}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>;
+    case "settings": return <svg {...p}><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.4l2-1.5-2-3.4-2.4.8a7 7 0 0 0-2.4-1.4L13.5 2h-3l-.6 2.6a7 7 0 0 0-2.4 1.4L5 5.2 3 8.6l2 1.5A7 7 0 0 0 5 12a7 7 0 0 0 .1 1.4l-2 1.5 2 3.4 2.4-.8a7 7 0 0 0 2.4 1.4L10.5 22h3l.6-2.6a7 7 0 0 0 2.4-1.4l2.4.8 2-3.4-2-1.5A7 7 0 0 0 19 12z"/></svg>;
+    case "sparkle":return <svg {...p}><path d="M5 3l1.5 3.5L10 8l-3.5 1.5L5 13l-1.5-3.5L0 8l3.5-1.5z" transform="translate(7 4)"/></svg>;
+    case "fire":   return <svg {...p}><path d="M12 2s4 4 4 9a4 4 0 0 1-8 0c0-2 1-3 1-3s2 1 2 4"/></svg>;
+    default: return null;
+  }
+};
+
+// Sidebar nav button
+const NavItem = ({ id, label, icon, active, badge, onClick }) => (
+  <button
+    className={cls("sidebar__item", active && "sidebar__item--active")}
+    onClick={() => onClick(id)}
+  >
+    <span className="sidebar__item-icon"><Icon name={icon} /></span>
+    <span>{label}</span>
+    {badge != null && <span className="sidebar__item-badge">{badge}</span>}
+  </button>
+);
+
+// Editable inline text
+const Editable = ({ value, onChange, placeholder = "", style = {}, multiline = false }) => {
+  if (multiline) {
+    return (
+      <textarea
+        className="editable"
+        value={value}
+        placeholder={placeholder}
+        rows={Math.max(2, value.split("\n").length)}
+        style={{ resize: "none", ...style }}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
+  }
+  return (
+    <input
+      className="editable"
+      value={value}
+      placeholder={placeholder}
+      style={style}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
+};
+
+// Confetti burst at coords (x, y), called by tasks/habits on completion
+function burstConfetti(x, y) {
+  const colors = ["#e8527a", "#f4a261", "#88b896", "#b39bd8", "#f7c548"];
+  for (let i = 0; i < 16; i++) {
+    const el = document.createElement("div");
+    el.className = "confetti";
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    el.style.background = colors[i % colors.length];
+    const angle = (i / 16) * Math.PI * 2;
+    const dist = 60 + Math.random() * 80;
+    el.style.setProperty("--tx", Math.cos(angle) * dist + "px");
+    el.style.setProperty("--ty", (Math.sin(angle) * dist + 100) + "px");
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1300);
+  }
+  // tiny pop via WebAudio
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(660, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.06);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.18);
+  } catch (e) {}
+}
+
+// Reusable card head
+const CardHead = ({ title, sub, right }) => (
+  <div className="card__head">
+    <div>
+      <h3 className="card__title">{title}</h3>
+      {sub && <div className="card__sub mt-sm">{sub}</div>}
+    </div>
+    {right}
+  </div>
+);
+
+const Bar = ({ value, max = 100, color }) => (
+  <div className="bar">
+    <div className="bar__fill" style={{
+      width: Math.min(100, (value / max) * 100) + "%",
+      ...(color ? { background: color } : {})
+    }}/>
+  </div>
+);
+
+const Pill = ({ tone = "pink", mono = false, children }) => (
+  <span className={cls("pill", `pill--${tone}`, mono && "pill--mono")}>{children}</span>
+);
+
+Object.assign(window, { Icon, NavItem, Editable, burstConfetti, CardHead, Bar, Pill });
+
+</script>
+<script type="text/babel">
+// Today view — bento dashboard
+
+const TodayView = ({ state, setState }) => {
+  const { tasks, agenda, gymWeek, habits, habitLogs, moodWeek, journal, parking } = state;
+
+  // Dynamic date — always reflect the real current day
+  const _now = new Date();
+  const TODAY_IDX = (_now.getDay() + 6) % 7; // Mon=0 … Sun=6
+  const _todayShort = DAYS_OF_WEEK[TODAY_IDX];
+  const _greeting = _now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  const _briefDate = _now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+
+  const todayTasks = tasks.filter(t => t.day === _todayShort).slice(0, 5);
+  const taskDone = todayTasks.filter(t => t.done).length;
+
+  const toggleTask = (id, e) => {
+    if (e && !tasks.find(t => t.id === id).done) {
+      const r = e.currentTarget.getBoundingClientRect();
+      burstConfetti(r.left + r.width / 2, r.top + r.height / 2);
+    }
+    setState(s => ({ ...s, tasks: s.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t) }));
+  };
+
+  const setMoodToday = (option) => {
+    setState(s => ({
+      ...s,
+      moodWeek: s.moodWeek.map((m, i) => i === TODAY_IDX ? { ...m, emoji: option.emoji, mood: 4 } : m)
+    }));
+  };
+
+  const habitsToday = habits.filter(h => h.section === "daily").slice(0, 5);
+  const habitsCompleteToday = habitsToday.filter(h => habitLogs[h.id][TODAY_IDX]).length;
+
+  const toggleHabit = (id, e) => {
+    if (e) {
+      const r = e.currentTarget.getBoundingClientRect();
+      if (!habitLogs[id][TODAY_IDX]) burstConfetti(r.left + r.width / 2, r.top + r.height / 2);
+    }
+    setState(s => {
+      const next = [...s.habitLogs[id]];
+      next[TODAY_IDX] = !next[TODAY_IDX];
+      return { ...s, habitLogs: { ...s.habitLogs, [id]: next } };
+    });
+  };
+
+  const totalAgenda = agenda.length;
+  const briefingMsg = `Good morning Dennika ✦
+${_briefDate}
+
+📅 Today:
+${agenda.length ? agenda.slice(0, 3).map(a => `• ${a.time} ${a.title}`).join("\n") : "• No events yet"}
+
+✅ Tasks (${taskDone}/${todayTasks.length}):
+${todayTasks.length ? todayTasks.map((t, i) => `${i + 1}. ${t.text}`).join("\n") : "• Nothing yet"}
+
+Reply "done 1 2" to check off`;
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="page-head__greeting">{_greeting}</div>
+          <h1 className="page-head__title">Good morning, Dennika ✦</h1>
+        </div>
+        <div className="row gap-md">
+          <Pill tone="pink" mono>{`day ${taskDone}/${todayTasks.length} tasks`}</Pill>
+          <Pill tone="mint" mono>{`${habitsCompleteToday}/${habitsToday.length} habits`}</Pill>
+          <Pill tone="sun" mono>14-day streak 🔥</Pill>
+        </div>
+      </div>
+
+      <div className="bento">
+
+        {/* Focus + top tasks */}
+        <div className="card col-7">
+          <CardHead
+            title="This week's focus"
+            sub={(() => { const now = new Date(); const d = now.getDay(); const diff = d === 0 ? -6 : 1 - d; const mon = new Date(now); mon.setDate(now.getDate() + diff); const sun = new Date(mon); sun.setDate(mon.getDate() + 6); const f = x => x.toLocaleDateString("en-US",{month:"short",day:"numeric"}); return `${f(mon)} – ${f(sun)}`; })()}
+            right={<button className="btn btn--ghost"><Icon name="edit" size={14}/></button>}
+          />
+          <div className="focus-box">
+            <div className="focus-box__label">North star</div>
+            <div className="focus-box__text">{state.focus || <span style={{color:"var(--muted)",fontStyle:"italic"}}>Set your focus in the Week view →</span>}</div>
+          </div>
+
+          <div className="mt-lg">
+            <div className="row row--between" style={{ marginBottom: 8 }}>
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase" }}>Today's checklist</div>
+              <div className="text-mono fs-xs text-muted">{taskDone}/{todayTasks.length}</div>
+            </div>
+            {todayTasks.map(t => (
+              <div key={t.id} className={cls("task", t.done && "task--done")}>
+                <button
+                  className={cls("task__check", t.done && "task__check--done")}
+                  onClick={(e) => toggleTask(t.id, e)}
+                >
+                  {t.done && <Icon name="check" size={14} stroke={2.4}/>}
+                </button>
+                <span className="task__text">{t.text}</span>
+                <span className="task__meta">{t.day}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Today's agenda */}
+        <div className="card col-5">
+          <CardHead
+            title="Today's agenda"
+            sub={`${totalAgenda} events`}
+            right={<Pill tone="lilac" mono>Synced</Pill>}
+          />
+          {agenda.map(a => (
+            <div key={a.id} className="agenda-item">
+              <div className="agenda-time">{a.time}</div>
+              <div className="agenda-bar" style={{ background: a.color }}/>
+              <div>
+                <div className="agenda-title">{a.title}</div>
+                <div className="agenda-meta">{a.meta}</div>
+              </div>
+              <button className="btn btn--icon" title="Details"><Icon name="arrow-r" size={14}/></button>
+            </div>
+          ))}
+        </div>
+
+        {/* Mood today */}
+        <div className="card col-5">
+          <CardHead title="How are you feeling?" sub="Today" />
+          <div className="mood-grid">
+            {MOOD_OPTIONS.map(opt => {
+              const active = state.moodWeek[1].emoji === opt.emoji;
+              return (
+                <button key={opt.id} className="mood-pick" onClick={() => setMoodToday(opt)}>
+                  <span className={cls("mood-emoji", active && "mood-emoji--active")}>{opt.emoji}</span>
+                  <span className="mood-label">{opt.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-lg row gap-sm" style={{ flexWrap: "wrap" }}>
+            {moodWeek.map((m, i) => (
+              <div key={i} style={{ flex: 1, textAlign: "center" }}>
+                <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.08em" }}>{m.day}</div>
+                <div style={{ fontSize: 22, height: 30, marginTop: 4 }}>{m.emoji || "·"}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Daily habits */}
+        <div className="card col-7">
+          <CardHead
+            title="Daily habits"
+            sub={`${habitsCompleteToday} of ${habitsToday.length} done today`}
+          />
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {habitsToday.map(h => {
+              const done = habitLogs[h.id][TODAY_IDX];
+              const weekCount = habitLogs[h.id].filter(Boolean).length;
+              return (
+                <div key={h.id} className="row" style={{ padding: "6px 0", borderBottom: "1px dashed var(--line)" }}>
+                  <span className="habit-row__icon" style={{ background: h.bg, color: h.color }}>{h.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 500 }}>{h.label}</div>
+                    <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.08em", marginTop: 2 }}>
+                      {weekCount}/{h.goal} this week
+                    </div>
+                  </div>
+                  <button
+                    className={cls("task__check", done && "task__check--done")}
+                    onClick={(e) => toggleHabit(h.id, e)}
+                    style={done ? { background: h.color, borderColor: h.color } : {}}
+                  >
+                    {done && <Icon name="check" size={14} stroke={2.4}/>}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Morning briefing (SMS preview) */}
+        {state.show.briefing && (
+        <div className="card card--pink col-4">
+          <CardHead
+            title="Morning briefing"
+            sub="8:00 am · iMessage"
+            right={<Pill tone="pink" mono>Live</Pill>}
+          />
+          <div className="phone">
+            <div className="phone__notch"/>
+            <div className="phone__time">Today · 8:00 am</div>
+            <div className="phone__handle">Dennika's Dashboard</div>
+            <div className="phone__bubble">{briefingMsg}</div>
+          </div>
+        </div>)}
+
+        {/* Gym this week mini */}
+        <div className={cls("card", state.show.briefing ? "col-4" : "col-6")}>
+          <CardHead
+            title="Movement this week"
+            sub={`${gymWeek.filter(g => g.done).length}/5 goal`}
+          />
+          <div className="gym-grid">
+            {gymWeek.map((g, i) => (
+              <div key={i} className={cls("gym-cell", g.done && "gym-cell--done", g.rest && "gym-cell--rest")}>
+                <span className="gym-cell__day">{g.day}</span>
+                <span className="gym-cell__icon">
+                  {g.rest ? "☁︎" : g.done ? "✓" : "·"}
+                </span>
+                <span style={{ fontSize: 9, marginTop: 2 }}>{g.type}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-md row gap-sm">
+            <Pill tone="mint" mono>3 sessions</Pill>
+            <Pill tone="lilac" mono>2 rest days</Pill>
+          </div>
+        </div>
+
+        {/* Parking lot */}
+        <div className={cls("card card--lilac", state.show.briefing ? "col-4" : "col-6")}>
+          <CardHead
+            title="Parking lot"
+            sub="Ideas to come back to"
+            right={<button className="btn btn--icon"><Icon name="plus" size={14}/></button>}
+          />
+          <div className="col gap-sm">
+            {parking.slice(0, 4).map((p, i) => (
+              <div key={i} className="idea-chip">
+                <span className="idea-chip__bullet"/>
+                <span>{p}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Latest journal */}
+        {journal.length > 0 && (
+        <div className="card col-12 card--tinted">
+          <CardHead
+            title="From your journal"
+            sub={journal[0].date}
+            right={<button className="btn btn--ghost" onClick={() => setState(s => ({ ...s, page: "journal" }))}>Open journal →</button>}
+          />
+          <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 24, alignItems: "start" }}>
+            <div style={{ fontSize: 56, lineHeight: 1 }}>{journal[0].mood}</div>
+            <div>
+              <h4 className="text-serif" style={{ fontSize: 26, margin: "0 0 8px" }}>{journal[0].title}</h4>
+              <p className="text-soft" style={{ margin: 0, lineHeight: 1.65 }}>{journal[0].body.split("\n\n")[0]}</p>
+            </div>
+          </div>
+        </div>
+        )}
+
+      </div>
+    </>
+  );
+};
+
+window.TodayView = TodayView;
+
+</script>
+<script type="text/babel">
+// Week view — full task list by day + weekly focus + gym
+
+const WeekView = ({ state, setState }) => {
+  const { tasks, gymWeek } = state;
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  const toggleTask = (id, e) => {
+    if (e && !tasks.find(t => t.id === id).done) {
+      const r = e.currentTarget.getBoundingClientRect();
+      burstConfetti(r.left + r.width / 2, r.top + r.height / 2);
+    }
+    setState(s => ({ ...s, tasks: s.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t) }));
+  };
+
+  const addTaskToDay = (day) => {
+    const id = "t" + Date.now();
+    setState(s => ({ ...s, tasks: [...s.tasks, { id, text: "New task", done: false, day }] }));
+  };
+
+  const editTask = (id, text) => {
+    setState(s => ({ ...s, tasks: s.tasks.map(t => t.id === id ? { ...t, text } : t) }));
+  };
+
+  const removeTask = (id) => {
+    setState(s => ({ ...s, tasks: s.tasks.filter(t => t.id !== id) }));
+  };
+
+  const taskByDay = DAYS_OF_WEEK.map(d => ({
+    day: d,
+    items: tasks.filter(t => t.day === d),
+  }));
+
+  const totalDone = tasks.filter(t => t.done).length;
+  const labels = ["Last week", "This week", "Next week", "+2 weeks"];
+
+  // Compute the Mon–Sun range for this week and adjacent weeks
+  const _getWeekRange = (offsetWeeks) => {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun,1=Mon...
+    const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek) + offsetWeeks * 7;
+    const mon = new Date(now); mon.setDate(now.getDate() + diffToMon);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    const fmt = d => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return `${fmt(mon)} – ${fmt(sun)}`;
+  };
+  const dateRange = [-1, 0, 1, 2].map(_getWeekRange);
+
+  // Day-of-month numbers for the current week's Mon–Sun
+  const _getWeekDates = (offsetWeeks) => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek) + offsetWeeks * 7;
+    return DAYS_OF_WEEK.map((_, i) => {
+      const d = new Date(now); d.setDate(now.getDate() + diffToMon + i);
+      return d.getDate();
+    });
+  };
+  const weekDates = _getWeekDates(weekOffset);
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="page-head__greeting">Week view</div>
+          <h1 className="page-head__title">{labels[weekOffset + 1] || "This week"}</h1>
+          <div className="page-head__date mt-sm">{dateRange[weekOffset + 1]}</div>
+        </div>
+        <div className="row gap-md">
+          <div className="weeknav">
+            <button className="weeknav__btn" onClick={() => setWeekOffset(o => Math.max(-1, o - 1))}><Icon name="arrow-l" size={14}/></button>
+            <span className="weeknav__label">{labels[weekOffset + 1]}</span>
+            <button className="weeknav__btn" onClick={() => setWeekOffset(o => Math.min(2, o + 1))}><Icon name="arrow-r" size={14}/></button>
+          </div>
+          <Pill tone="pink" mono>{totalDone}/{tasks.length} done</Pill>
+        </div>
+      </div>
+
+      <div className="bento">
+        {/* Weekly focus + reflections */}
+        <div className="card col-7">
+          <CardHead title="Weekly focus" sub="What matters this week" />
+          <div className="focus-box">
+            <div className="focus-box__label">North star</div>
+            <Editable
+              value={state.focus}
+              onChange={(v) => setState(s => ({ ...s, focus: v }))}
+              style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 26, lineHeight: 1.2 }}
+              multiline
+            />
+          </div>
+          <div className="bento mt-md" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
+            {[
+              { label: "Wins so far", placeholder: "What's going well?", key: "wins" },
+              { label: "Push through", placeholder: "Where I need grit", key: "push" },
+            ].map(f => (
+              <div key={f.key} className="card card--tinted" style={{ padding: 16 }}>
+                <div className="card__sub" style={{ marginBottom: 6 }}>{f.label}</div>
+                <Editable
+                  value={state.reflections[f.key]}
+                  onChange={(v) => setState(s => ({ ...s, reflections: { ...s.reflections, [f.key]: v } }))}
+                  placeholder={f.placeholder}
+                  multiline
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Gym tracker */}
+        <div className="card col-5">
+          <CardHead
+            title="Gym sessions"
+            sub={`${gymWeek.filter(g => g.done).length}/5 weekly goal`}
+            right={<button className="btn btn--icon"><Icon name="plus" size={14}/></button>}
+          />
+          <div className="gym-grid">
+            {gymWeek.map((g, i) => (
+              <button
+                key={i}
+                className={cls("gym-cell", g.done && "gym-cell--done", g.rest && "gym-cell--rest")}
+                onClick={() => setState(s => ({ ...s, gymWeek: s.gymWeek.map((x, j) => j === i ? { ...x, done: !x.done } : x) }))}
+              >
+                <span className="gym-cell__day">{g.day}</span>
+                <span className="gym-cell__icon">{g.rest ? "☁︎" : g.done ? "✓" : "·"}</span>
+                <span style={{ fontSize: 9, marginTop: 2 }}>{g.type}</span>
+              </button>
+            ))}
+          </div>
+          <div className="mt-lg">
+            <div className="row row--between" style={{ marginBottom: 6 }}>
+              <span className="text-mono fs-xs text-muted">Last 13 weeks</span>
+              <span className="text-mono fs-xs text-muted">avg 4.1/wk</span>
+            </div>
+            <div className="row gap-sm" style={{ alignItems: "flex-end", height: 60 }}>
+              {[3, 4, 5, 4, 5, 3, 4, 5, 4, 5, 5, 4, 3].map((v, i) => (
+                <div key={i}
+                  style={{
+                    flex: 1,
+                    height: (v / 5) * 100 + "%",
+                    background: "var(--primary)",
+                    borderRadius: 4,
+                    opacity: i === 12 ? 1 : 0.55,
+                  }}/>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Tasks by day grid */}
+        {taskByDay.map((col, i) => {
+          const isToday = weekOffset === 0 && col.day === DAYS_OF_WEEK[(new Date().getDay() + 6) % 7];
+          return (
+            <div key={col.day} className={cls("card", "col-3", isToday && "card--pink")} style={{ minHeight: 200 }}>
+              <div className="row row--between" style={{ marginBottom: 10 }}>
+                <div>
+                  <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em" }}>{col.day}</div>
+                  <div className="text-serif" style={{ fontSize: 22 }}>{weekDates[i]}</div>
+                </div>
+                {isToday && <Pill tone="pink" mono>today</Pill>}
+              </div>
+              {col.items.length === 0 && (
+                <div className="empty" style={{ padding: "12px 0" }}>nothing yet</div>
+              )}
+              {col.items.map(t => (
+                <div key={t.id} className={cls("task", t.done && "task--done")} style={{ padding: "6px 0", borderBottom: "1px dashed var(--line)" }}>
+                  <button
+                    className={cls("task__check", t.done && "task__check--done")}
+                    onClick={(e) => toggleTask(t.id, e)}
+                    style={{ width: 18, height: 18 }}
+                  >
+                    {t.done && <Icon name="check" size={11} stroke={2.4}/>}
+                  </button>
+                  <Editable
+                    value={t.text}
+                    onChange={(v) => editTask(t.id, v)}
+                    style={{ fontSize: 12.5, padding: "0 4px", textDecoration: t.done ? "line-through" : "none", color: t.done ? "var(--muted)" : "var(--ink)" }}
+                  />
+                  <button className="btn btn--ghost" style={{ padding: 2, color: "var(--muted)" }} onClick={() => removeTask(t.id)}>
+                    <Icon name="x" size={12}/>
+                  </button>
+                </div>
+              ))}
+              <button
+                className="btn btn--ghost"
+                style={{ marginTop: 10, fontSize: 12, padding: "4px 8px" }}
+                onClick={() => addTaskToDay(col.day)}
+              >
+                <Icon name="plus" size={12}/> Add
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+};
+
+window.WeekView = WeekView;
+
+</script>
+<script type="text/babel">
+// Habit tracker — full weekly grid
+
+const HabitsView = ({ state, setState }) => {
+  const { habits, habitLogs } = state;
+
+  const toggleCell = (habitId, dayIdx, e) => {
+    if (e && !habitLogs[habitId][dayIdx]) {
+      const r = e.currentTarget.getBoundingClientRect();
+      burstConfetti(r.left + r.width / 2, r.top + r.height / 2);
+    }
+    setState(s => {
+      const arr = [...s.habitLogs[habitId]];
+      arr[dayIdx] = !arr[dayIdx];
+      return { ...s, habitLogs: { ...s.habitLogs, [habitId]: arr } };
+    });
+  };
+
+  const daily = habits.filter(h => h.section === "daily");
+  const devo  = habits.filter(h => h.section === "devotional");
+
+  const overallDone = habits.reduce((sum, h) => sum + habitLogs[h.id].filter(Boolean).length, 0);
+  const overallGoal = habits.reduce((sum, h) => sum + h.goal, 0);
+  const overallPct = pct(overallDone, overallGoal);
+
+  const Section = ({ title, items }) => (
+    <div className="card mt-md">
+      <CardHead
+        title={title}
+        sub={`${items.length} habits`}
+        right={<button className="btn btn--ghost"><Icon name="edit" size={14}/> Manage</button>}
+      />
+
+      {/* Day labels row */}
+      <div className="habit-row" style={{ marginBottom: 4 }}>
+        <div></div>
+        {DAYS_OF_WEEK.map((d, i) => (
+          <div key={d} className="habit-day-head">{d}<br/><span style={{ fontSize: 9, opacity: 0.7 }}>{(() => { const now = new Date(); const day = now.getDay(); const diff = (day === 0 ? -6 : 1 - day) + i; const dt = new Date(now); dt.setDate(now.getDate() + diff); return dt.getDate(); })()}</span></div>
+        ))}
+        <div className="habit-day-head">Score</div>
+      </div>
+
+      <div className="habit-grid">
+        {items.map(h => {
+          const log = habitLogs[h.id];
+          const count = log.filter(Boolean).length;
+          const hit = count >= h.goal;
+          return (
+            <div key={h.id} className="habit-row">
+              <div className="habit-row__head">
+                <span className="habit-row__icon" style={{ background: h.bg, color: h.color }}>{h.icon}</span>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.label}</div>
+                  <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.06em" }}>goal {h.goal}/wk</div>
+                </div>
+              </div>
+              {log.map((done, i) => (
+                <button
+                  key={i}
+                  className={cls("habit-cell", done && "habit-cell--done", i === (new Date().getDay() + 6) % 7 && "habit-cell--today")}
+                  style={done ? { background: h.color, color: "white" } : {}}
+                  onClick={(e) => toggleCell(h.id, i, e)}
+                >
+                  {done ? "✓" : ""}
+                </button>
+              ))}
+              <div className="habit-row__score" style={{ color: hit ? h.color : "var(--ink-soft)", fontWeight: hit ? 700 : 500 }}>
+                {count}/{h.goal}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // Summary cards
+  const summary = habits.map(h => {
+    const count = habitLogs[h.id].filter(Boolean).length;
+    return { ...h, count, percent: pct(count, h.goal) };
+  });
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="page-head__greeting">Habits · {(() => { const now = new Date(); const d = now.getDay(); const diff = d === 0 ? -6 : 1 - d; const mon = new Date(now); mon.setDate(now.getDate() + diff); const sun = new Date(mon); sun.setDate(mon.getDate() + 6); const f = x => x.toLocaleDateString("en-US",{month:"short",day:"numeric"}); return `${f(mon)} – ${f(sun)}`; })()}</div>
+          <h1 className="page-head__title">Habit tracker</h1>
+        </div>
+        <div className="row gap-md">
+          <div className="card" style={{ padding: "10px 18px", display: "flex", alignItems: "baseline", gap: 10 }}>
+            <span className="text-serif" style={{ fontSize: 28, color: "var(--primary)" }}>{overallPct}%</span>
+            <span className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.1em" }}>this week</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Summary cards row */}
+      <div className="bento" style={{ marginBottom: 0 }}>
+        {summary.slice(0, 5).map(h => (
+          <div key={h.id} className="card col-3" style={{ background: h.bg, borderColor: "transparent", padding: 16 }}>
+            <div className="row" style={{ marginBottom: 8 }}>
+              <span className="habit-row__icon" style={{ background: "white", color: h.color }}>{h.icon}</span>
+              <span className="text-mono fs-xs" style={{ color: h.color, fontWeight: 600 }}>{h.percent}%</span>
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>{h.label}</div>
+            <div className="text-mono fs-xs" style={{ color: h.color, opacity: 0.8, marginTop: 2, letterSpacing: "0.06em" }}>
+              {h.count}/{h.goal}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Section title="Daily" items={daily} />
+      <Section title="Devotional" items={devo} />
+    </>
+  );
+};
+
+window.HabitsView = HabitsView;
+
+</script>
+<script type="text/babel">
+// Quarter view — goals + parking lot + quarterly stats
+
+const QuarterView = ({ state, setState }) => {
+  const { quarterGoals, parking } = state;
+
+  const categories = ["Health", "Finance", "Business", "Personal"];
+  const catColor = {
+    Health:   { bg: "var(--primary-soft)",  text: "var(--primary-deep)",  accent: "var(--primary)" },
+    Finance:  { bg: "var(--accent-2-soft)", text: "#3d6b4f",              accent: "var(--accent-2)" },
+    Business: { bg: "var(--accent-3-soft)", text: "#5e4b85",              accent: "var(--accent-3)" },
+    Personal: { bg: "var(--accent-1-soft)", text: "#8b4f1c",              accent: "var(--accent-1)" },
+  };
+
+  const toggleGoal = (id, e) => {
+    if (e && !quarterGoals.find(g => g.id === id).done) {
+      const r = e.currentTarget.getBoundingClientRect();
+      burstConfetti(r.left + r.width / 2, r.top + r.height / 2);
+    }
+    setState(s => ({ ...s, quarterGoals: s.quarterGoals.map(g => g.id === id ? { ...g, done: !g.done } : g) }));
+  };
+
+  const editGoal = (id, text) => {
+    setState(s => ({ ...s, quarterGoals: s.quarterGoals.map(g => g.id === id ? { ...g, text } : g) }));
+  };
+
+  const addGoal = (cat) => {
+    setState(s => ({ ...s, quarterGoals: [...s.quarterGoals, { id: "g" + Date.now(), category: cat, text: "New goal", done: false }] }));
+  };
+
+  const addParking = () => {
+    setState(s => ({ ...s, parking: ["New idea", ...s.parking] }));
+  };
+
+  const editParking = (i, text) => {
+    setState(s => ({ ...s, parking: s.parking.map((p, j) => j === i ? text : p) }));
+  };
+
+  const removeParking = (i) => {
+    setState(s => ({ ...s, parking: s.parking.filter((_, j) => j !== i) }));
+  };
+
+  const totalDone = quarterGoals.filter(g => g.done).length;
+  const totalPct = pct(totalDone, quarterGoals.length);
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="page-head__greeting">Q2 · April – June 2026</div>
+          <h1 className="page-head__title">The bigger picture</h1>
+          <div className="page-head__date mt-sm">38 days remaining</div>
+        </div>
+        <div className="row gap-md">
+          <div className="card" style={{ padding: "10px 18px", display: "flex", alignItems: "baseline", gap: 10 }}>
+            <span className="text-serif" style={{ fontSize: 28, color: "var(--primary)" }}>{totalPct}%</span>
+            <span className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.1em" }}>quarter complete</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="bento">
+        {/* Quarter at-a-glance */}
+        <div className="card col-12 card--tinted">
+          <div className="bento" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+            {[
+              { label: "Goals completed", value: `${totalDone}/${quarterGoals.length}`, sub: "across 4 categories" },
+              { label: "Books read",      value: "4",                   sub: "of 6 target" },
+              { label: "Gym sessions",    value: "47",                  sub: "vs 52 target" },
+              { label: "Savings added",   value: "$2,180",              sub: "this quarter" },
+            ].map((s, i) => (
+              <div key={i}>
+                <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase" }}>{s.label}</div>
+                <div className="text-serif" style={{ fontSize: 36, color: "var(--ink)", marginTop: 4 }}>{s.value}</div>
+                <div className="fs-xs text-muted">{s.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Goal categories */}
+        {categories.map(cat => {
+          const items = quarterGoals.filter(g => g.category === cat);
+          const done = items.filter(g => g.done).length;
+          const c = catColor[cat];
+          return (
+            <div key={cat} className="card col-6">
+              <CardHead
+                title={cat}
+                sub={`${done} / ${items.length} goals`}
+                right={<button className="btn btn--icon" onClick={() => addGoal(cat)}><Icon name="plus" size={14}/></button>}
+              />
+              <Bar value={done} max={items.length || 1} color={c.accent} />
+              <div className="mt-md">
+                {items.map(g => (
+                  <div key={g.id} className="goal-row">
+                    <button
+                      className={cls("goal-check", g.done && "goal-check--done")}
+                      style={g.done ? { background: c.accent, borderColor: c.accent } : {}}
+                      onClick={(e) => toggleGoal(g.id, e)}
+                    >
+                      {g.done && <Icon name="check" size={11} stroke={2.6}/>}
+                    </button>
+                    <Editable
+                      value={g.text}
+                      onChange={(v) => editGoal(g.id, v)}
+                      style={{ fontSize: 13.5, color: g.done ? "var(--muted)" : "var(--ink)", textDecoration: g.done ? "line-through" : "none" }}
+                    />
+                  </div>
+                ))}
+                {items.length === 0 && <div className="empty">no goals yet — add one</div>}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Parking lot */}
+        <div className="card col-7 card--lilac">
+          <CardHead
+            title="Parking lot"
+            sub="Ideas to come back to"
+            right={<button className="btn btn--icon" onClick={addParking}><Icon name="plus" size={14}/></button>}
+          />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+            {parking.map((p, i) => (
+              <div key={i} className="idea-chip" style={{ background: "rgba(255,255,255,0.7)" }}>
+                <span className="idea-chip__bullet"/>
+                <Editable value={p} onChange={(v) => editParking(i, v)} style={{ fontSize: 13 }}/>
+                <button className="btn btn--ghost" style={{ padding: 2 }} onClick={() => removeParking(i)}>
+                  <Icon name="x" size={11}/>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Achievements */}
+        <div className="card col-5 card--peach">
+          <CardHead
+            title="Wins this quarter"
+            sub="What you're proud of"
+            right={<button className="btn btn--icon"><Icon name="plus" size={14}/></button>}
+          />
+          <div className="col gap-sm">
+            {[
+              { txt: "Hit 4 weeks straight of pilates 🌸", color: "var(--primary)" },
+              { txt: "Paid off the small Amex card 💸",     color: "var(--accent-2)" },
+              { txt: "Finished my morning routine system ✨", color: "var(--accent-3)" },
+              { txt: "Sonoma weekend was actually restful 🍇", color: "var(--accent-1)" },
+            ].map((w, i) => (
+              <div key={i} className="idea-chip" style={{ background: "rgba(255,255,255,0.75)" }}>
+                <span className="idea-chip__bullet" style={{ background: w.color }}/>
+                <span>{w.txt}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+window.QuarterView = QuarterView;
+
+</script>
+<script type="text/babel">
+// Finance + budget view
+
+const FinanceView = ({ state, setState }) => {
+  const { cards, budget, savings, transactions } = state;
+  const [txOpen, setTxOpen] = useState(false);
+  const [editingTx, setEditingTx] = useState(null);
+
+  // Compute budget spending from transactions instead of static field
+  const liveBudget = budget.map(b => {
+    const txSpent = transactions
+      .filter(t => t.category === b.category && t.amount < 0)
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    return { ...b, spent: txSpent || b.spent };
+  });
+
+  const totalDebt = cards.reduce((s, c) => s + c.balance, 0);
+  const totalLimit = cards.reduce((s, c) => s + c.limit, 0);
+  const totalSpent = liveBudget.reduce((s, b) => s + b.spent, 0);
+  const totalBudget = liveBudget.reduce((s, b) => s + b.budget, 0);
+  const totalSaved = savings.reduce((s, x) => s + x.saved, 0);
+  const totalSavingsGoal = savings.reduce((s, x) => s + x.goal, 0);
+  const income = transactions.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="page-head__greeting">Finance · May 2026</div>
+          <h1 className="page-head__title">Money & vibes</h1>
+        </div>
+        <div className="row gap-md">
+          <Pill tone="pink" mono>{currency(totalDebt)} owed</Pill>
+          <Pill tone="mint" mono>{currency(totalSaved)} saved</Pill>
+          <Pill tone="lilac" mono>{Math.round(((totalBudget - totalSpent) / totalBudget) * 100)}% budget left</Pill>
+          <button className="btn btn--pink" onClick={() => { setEditingTx(null); setTxOpen(true); }}>
+            <Icon name="plus" size={14}/> Log transaction
+          </button>
+        </div>
+      </div>
+
+      <div className="bento">
+        {/* Top stats */}
+        <div className="card col-12 card--tinted">
+          <div className="bento" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+            {[
+              { label: "Net worth",          value: currency(totalSaved - totalDebt), sub: "this month",         tone: "var(--primary)" },
+              { label: "Spent this month",   value: currency(totalSpent),             sub: `of ${currency(totalBudget)}`, tone: "var(--accent-1)" },
+              { label: "Total saved",        value: currency(totalSaved),             sub: `of ${currency(totalSavingsGoal)} goal`, tone: "var(--accent-2)" },
+              { label: "Credit utilization", value: Math.round(totalDebt / totalLimit * 100) + "%", sub: `${currency(totalDebt)} / ${currency(totalLimit)}`, tone: "var(--accent-3)" },
+            ].map((s, i) => (
+              <div key={i}>
+                <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase" }}>{s.label}</div>
+                <div className="text-serif" style={{ fontSize: 36, color: s.tone, marginTop: 4 }}>{s.value}</div>
+                <div className="fs-xs text-muted">{s.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Credit cards */}
+        <div className="card col-7">
+          <CardHead
+            title="Credit cards"
+            sub={`${cards.length} cards · ${currency(totalDebt)} total`}
+            right={<button className="btn btn--icon"><Icon name="plus" size={14}/></button>}
+          />
+          <div className="bento" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+            {cards.map(c => {
+              const util = pct(c.balance, c.limit);
+              const gradMap = {
+                "var(--primary)":   "linear-gradient(135deg, var(--primary), var(--accent-1))",
+                "var(--accent-3)":  "linear-gradient(135deg, var(--accent-3), var(--primary))",
+                "var(--accent-1)":  "linear-gradient(135deg, var(--accent-1), var(--accent-4))",
+              };
+              return (
+                <div key={c.id} className="cc" style={{ background: gradMap[c.color] || gradMap["var(--primary)"] }}>
+                  <div className="row row--between" style={{ zIndex: 1 }}>
+                    <div className="cc__brand">{c.name}</div>
+                    <div style={{ width: 28, height: 18, borderRadius: 4, background: "rgba(255,255,255,0.3)" }}/>
+                  </div>
+                  <div style={{ zIndex: 1 }}>
+                    <div className="cc__balance-label">balance</div>
+                    <div className="cc__balance">{currency(c.balance)}</div>
+                  </div>
+                  <div className="row row--between" style={{ zIndex: 1, fontSize: 10 }}>
+                    <span className="cc__num">•••• {c.last4}</span>
+                    <span className="cc__num">{util}% used</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Savings goals */}
+        <div className="card col-5">
+          <CardHead
+            title="Savings goals"
+            sub={`${savings.length} buckets`}
+            right={<button className="btn btn--icon"><Icon name="plus" size={14}/></button>}
+          />
+          <div className="col gap-md">
+            {savings.map(s => (
+              <div key={s.id}>
+                <div className="row row--between" style={{ marginBottom: 4 }}>
+                  <span style={{ fontWeight: 500 }}>{s.name}</span>
+                  <span className="text-mono fs-xs text-muted">{currency(s.saved)} / {currency(s.goal)}</span>
+                </div>
+                <Bar value={s.saved} max={s.goal} color={s.color}/>
+                <div className="text-mono fs-xs text-muted mt-sm" style={{ letterSpacing: "0.06em" }}>
+                  {pct(s.saved, s.goal)}% · {currency(s.goal - s.saved)} to go
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Budget breakdown */}
+        <div className="card col-8">
+          <CardHead
+            title="Monthly budget"
+            sub="May 2026 · 8 days remaining"
+            right={
+              <div className="row gap-sm">
+                <Pill tone="mint" mono>{currency(totalBudget - totalSpent)} left</Pill>
+                <button className="btn btn--icon"><Icon name="plus" size={14}/></button>
+              </div>
+            }
+          />
+          <div className="col gap-md">
+            {liveBudget.map(b => {
+              const pctSpent = pct(b.spent, b.budget);
+              const over = b.spent > b.budget;
+              return (
+                <div key={b.id}>
+                  <div className="budget-row">
+                    <span className="budget-label">{b.category}</span>
+                    <span className="budget-amounts">
+                      <span style={{ color: over ? "var(--primary)" : "var(--ink)", fontWeight: 600 }}>{currency(b.spent)}</span>
+                      <span style={{ margin: "0 4px", color: "var(--muted)" }}>/</span>
+                      <span>{currency(b.budget)}</span>
+                    </span>
+                  </div>
+                  <Bar value={Math.min(b.spent, b.budget)} max={b.budget} color={b.color}/>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Recent transactions */}
+        <div className="card col-4">
+          <CardHead
+            title="Recent"
+            sub={`${transactions.length} transactions`}
+            right={<button className="btn btn--icon" onClick={() => { setEditingTx(null); setTxOpen(true); }}><Icon name="plus" size={14}/></button>}
+          />
+          <div className="col gap-sm" style={{ maxHeight: 360, overflow: "auto" }}>
+            {transactions.length === 0 && <div className="empty">No transactions yet</div>}
+            {transactions.map(t => (
+              <button
+                key={t.id}
+                className="row"
+                style={{
+                  padding: "6px 4px",
+                  borderBottom: "1px dashed var(--line)",
+                  background: "transparent",
+                  border: 0,
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  width: "100%",
+                  fontFamily: "inherit",
+                  color: "inherit",
+                }}
+                onClick={() => { setEditingTx(t); setTxOpen(true); }}
+                onMouseEnter={(e) => e.currentTarget.style.background = "var(--card-2)"}
+                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+              >
+                <span className="habit-row__icon" style={{ background: "var(--card-2)" }}>{t.icon || "💸"}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 500, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.vendor}</div>
+                  <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.06em" }}>{t.category} · {t.date}</div>
+                </div>
+                <div className="text-mono fs-sm" style={{ color: t.amount > 0 ? "var(--accent-2)" : "var(--ink)", fontWeight: 600 }}>
+                  {t.amount > 0 ? "+" : "-"}{currency(Math.abs(t.amount))}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {txOpen && (
+        <TransactionModal
+          editing={editingTx}
+          budget={budget}
+          onSave={(tx) => {
+            setState(s => ({
+              ...s,
+              transactions: editingTx
+                ? s.transactions.map(t => t.id === editingTx.id ? { ...tx, id: editingTx.id } : t)
+                : [{ ...tx, id: "tx" + Date.now() }, ...s.transactions],
+            }));
+            setTxOpen(false);
+            setEditingTx(null);
+          }}
+          onDelete={editingTx ? () => {
+            setState(s => ({ ...s, transactions: s.transactions.filter(t => t.id !== editingTx.id) }));
+            setTxOpen(false);
+            setEditingTx(null);
+          } : null}
+          onClose={() => { setTxOpen(false); setEditingTx(null); }}
+        />
+      )}
+    </>
+  );
+};
+
+window.FinanceView = FinanceView;
+
+// ----------------- Transaction modal -----------------
+const TransactionModal = ({ editing, budget, onSave, onDelete, onClose }) => {
+  const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const [form, setForm] = useState(editing || {
+    vendor: "",
+    amount: "",
+    category: budget[0]?.category || "Groceries",
+    icon: "💸",
+    date: today,
+    type: "expense",
+  });
+  // Normalize: when amount typed positive, mode (expense/income) decides sign.
+  const [type, setType] = useState(editing ? (editing.amount > 0 ? "income" : "expense") : "expense");
+
+  const categories = ["Income", ...budget.map(b => b.category), "Other"];
+
+  const submit = () => {
+    const amtNum = parseFloat(form.amount);
+    if (!form.vendor.trim() || isNaN(amtNum) || amtNum === 0) return;
+    const signed = type === "expense" ? -Math.abs(amtNum) : Math.abs(amtNum);
+    onSave({
+      vendor: form.vendor.trim(),
+      amount: signed,
+      category: type === "income" ? "Income" : form.category,
+      icon: form.icon || (type === "income" ? "✨" : "💸"),
+      date: form.date || today,
+    });
+  };
+
+  return (
+    <div
+      style={{ position: "fixed", inset: 0, background: "rgba(58,29,40,0.42)", zIndex: 60, display: "grid", placeItems: "center", padding: 24, backdropFilter: "blur(4px)" }}
+      onClick={onClose}>
+      <div
+        className="card"
+        style={{ maxWidth: 500, width: "100%", padding: 0, overflow: "hidden", boxShadow: "var(--shadow-lg)" }}
+        onClick={(e) => e.stopPropagation()}>
+        <div style={{ height: 6, background: type === "income" ? "var(--accent-2)" : "var(--primary)" }}/>
+        <div style={{ padding: 22 }}>
+          <div className="row row--between" style={{ alignItems: "flex-start", marginBottom: 18 }}>
+            <div>
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.14em", textTransform: "uppercase" }}>{editing ? "Edit" : "Log"} transaction</div>
+              <h3 className="text-serif" style={{ fontSize: 30, margin: "4px 0 0", lineHeight: 1.1 }}>
+                {type === "income" ? "Money in" : "What did you spend on?"}
+              </h3>
+            </div>
+            <button className="btn btn--icon" onClick={onClose}><Icon name="x" size={14}/></button>
+          </div>
+
+          {/* Expense / Income toggle */}
+          <div className="row gap-sm" style={{ marginBottom: 14, background: "var(--card-2)", padding: 4, borderRadius: 12 }}>
+            {[
+              { id: "expense", label: "Expense", color: "var(--primary)" },
+              { id: "income",  label: "Income",  color: "var(--accent-2)" },
+            ].map(t => (
+              <button
+                key={t.id}
+                onClick={() => setType(t.id)}
+                style={{
+                  flex: 1,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  border: 0,
+                  background: type === t.id ? t.color : "transparent",
+                  color: type === t.id ? "white" : "var(--ink-soft)",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  transition: "background 0.15s",
+                  fontFamily: "inherit",
+                }}>{t.label}</button>
+            ))}
+          </div>
+
+          {/* Amount */}
+          <div style={{ background: "var(--card-2)", borderRadius: 14, padding: "18px 18px 14px", marginBottom: 14, textAlign: "center" }}>
+            <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 8 }}>Amount</div>
+            <div className="row" style={{ justifyContent: "center", alignItems: "baseline", gap: 4 }}>
+              <span className="text-serif" style={{ fontSize: 38, color: type === "income" ? "var(--accent-2)" : "var(--primary)" }}>
+                {type === "income" ? "+" : "-"}$
+              </span>
+              <input
+                type="number"
+                step="0.01"
+                value={form.amount}
+                onChange={(e) => setForm(f => ({ ...f, amount: e.target.value }))}
+                placeholder="0.00"
+                autoFocus
+                style={{
+                  width: 200,
+                  border: 0,
+                  background: "transparent",
+                  fontFamily: "var(--font-serif)",
+                  fontStyle: "italic",
+                  fontSize: 44,
+                  textAlign: "left",
+                  outline: "none",
+                  color: "var(--ink)",
+                }}/>
+            </div>
+          </div>
+
+          {/* Vendor + date */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 110px", gap: 10, marginBottom: 14 }}>
+            <div>
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Vendor</div>
+              <input
+                value={form.vendor}
+                onChange={(e) => setForm(f => ({ ...f, vendor: e.target.value }))}
+                placeholder="Whole Foods, Spotify…"
+                style={{ width: "100%", border: "1px solid var(--line)", borderRadius: 10, padding: "10px 12px", fontSize: 14, background: "var(--card)", outline: "none" }}/>
+            </div>
+            <div>
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Date</div>
+              <input
+                value={form.date}
+                onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))}
+                style={{ width: "100%", border: "1px solid var(--line)", borderRadius: 10, padding: "10px 12px", fontSize: 13, fontFamily: "var(--font-mono)", background: "var(--card)", outline: "none" }}/>
+            </div>
+          </div>
+
+          {/* Category (only when expense) */}
+          {type === "expense" && (
+            <>
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Category</div>
+              <div className="row gap-sm" style={{ flexWrap: "wrap", marginBottom: 14 }}>
+                {categories.filter(c => c !== "Income").map(cat => {
+                  const b = budget.find(x => x.category === cat);
+                  return (
+                    <button
+                      key={cat}
+                      className="pill pill--mono"
+                      style={{
+                        cursor: "pointer",
+                        background: form.category === cat ? (b?.color || "var(--primary)") : "var(--card-2)",
+                        color: form.category === cat ? "white" : "var(--ink-soft)",
+                        border: "1px solid " + (form.category === cat ? (b?.color || "var(--primary)") : "var(--line)"),
+                      }}
+                      onClick={() => setForm(f => ({ ...f, category: cat }))}>
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* Icon */}
+          <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Icon</div>
+          <div className="row gap-sm" style={{ flexWrap: "wrap", marginBottom: 18 }}>
+            {TRANSACTION_ICONS.map(emo => (
+              <button
+                key={emo}
+                onClick={() => setForm(f => ({ ...f, icon: emo }))}
+                style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: form.icon === emo ? "var(--primary-soft)" : "var(--card-2)",
+                  border: form.icon === emo ? "1.5px solid var(--primary)" : "1.5px solid transparent",
+                  cursor: "pointer",
+                  fontSize: 16,
+                  display: "grid",
+                  placeItems: "center",
+                  padding: 0,
+                }}>{emo}</button>
+            ))}
+          </div>
+
+          <div className="row row--between">
+            <div>
+              {onDelete && (
+                <button className="btn btn--ghost" style={{ color: "var(--primary)" }} onClick={onDelete}>
+                  <Icon name="trash" size={13}/> Delete
+                </button>
+              )}
+            </div>
+            <div className="row gap-sm">
+              <button className="btn btn--ghost" onClick={onClose}>Cancel</button>
+              <button className="btn btn--pink" onClick={submit}>
+                <Icon name="check" size={14}/> {editing ? "Save" : "Log it"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+window.TransactionModal = TransactionModal;
+
+</script>
+<script type="text/babel">
+// Journal view — list + new entry editor
+
+const JournalView = ({ state, setState }) => {
+  const { journal, moodWeek } = state;
+  const [draft, setDraft] = useState({ title: "", body: "", mood: "🌸" });
+  const [filter, setFilter] = useState("all");
+
+  const save = () => {
+    if (!draft.title.trim() && !draft.body.trim()) return;
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    setState(s => ({
+      ...s,
+      journal: [{ id: "j" + Date.now(), date: dateStr, ...draft }, ...s.journal],
+    }));
+    setDraft({ title: "", body: "", mood: "🌸" });
+  };
+
+  const remove = (id) => {
+    setState(s => ({ ...s, journal: s.journal.filter(j => j.id !== id) }));
+  };
+
+  const entries = journal;
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="page-head__greeting">Journal</div>
+          <h1 className="page-head__title">Field notes from your life</h1>
+          <div className="page-head__date mt-sm">{journal.length} {journal.length === 1 ? "entry" : "entries"}{journal[0] ? ` · most recent ${journal[0].date}` : ""}</div>
+        </div>
+        <div className="row gap-md">
+          {MOOD_OPTIONS.slice(2, 7).map(m => (
+            <button
+              key={m.id}
+              className={cls("mood-emoji", draft.mood === m.emoji && "mood-emoji--active")}
+              style={{ width: 36, height: 36, fontSize: 18 }}
+              onClick={() => setDraft(d => ({ ...d, mood: m.emoji }))}
+              title={m.label}
+            >
+              {m.emoji}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="bento">
+        <div className="col-8">
+          {/* Editor */}
+          <div className="journal-editor">
+            <div className="row row--between" style={{ marginBottom: 8 }}>
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                New entry · {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+              </div>
+              <div className="row gap-sm">
+                <span style={{ fontSize: 20 }}>{draft.mood}</span>
+                <span className="text-mono fs-xs text-muted">mood</span>
+              </div>
+            </div>
+            <input
+              placeholder="A title for today…"
+              value={draft.title}
+              onChange={(e) => setDraft(d => ({ ...d, title: e.target.value }))}
+            />
+            <textarea
+              placeholder="What's on your mind? What happened today? What are you grateful for, working through, dreaming about…"
+              value={draft.body}
+              onChange={(e) => setDraft(d => ({ ...d, body: e.target.value }))}
+            />
+            <div className="row row--between mt-md">
+              <div className="text-mono fs-xs text-muted">
+                {draft.body.split(/\s+/).filter(Boolean).length} words
+              </div>
+              <button className="btn btn--pink" onClick={save}>
+                <Icon name="spark" size={14}/> Save entry
+              </button>
+            </div>
+          </div>
+
+          {/* Entries list */}
+          <div style={{ marginTop: 22 }}>
+            <div className="row row--between" style={{ marginBottom: 12 }}>
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.14em", textTransform: "uppercase" }}>Past entries</div>
+              <div className="row gap-sm">
+                {["all", "good", "okay", "low"].map(f => (
+                  <button
+                    key={f}
+                    className="pill pill--mono"
+                    style={{
+                      cursor: "pointer",
+                      background: filter === f ? "var(--primary)" : "var(--card-2)",
+                      color: filter === f ? "white" : "var(--ink-soft)",
+                    }}
+                    onClick={() => setFilter(f)}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {entries.map(e => (
+              <div key={e.id} className="journal-entry">
+                <div className="journal-entry__mood">{e.mood}</div>
+                <div className="journal-entry__date">{e.date}</div>
+                <h3 className="journal-entry__title">{e.title}</h3>
+                <p className="journal-entry__body">{e.body}</p>
+                <button
+                  className="btn btn--ghost"
+                  style={{ position: "absolute", top: 14, right: 50, padding: 4 }}
+                  onClick={() => remove(e.id)}
+                  title="Delete"
+                >
+                  <Icon name="trash" size={14}/>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Sidebar — mood trends + prompts */}
+        <div className="col-4">
+          <div className="card card--pink">
+            <CardHead title="This week's mood" sub="7-day weather" />
+            <div className="row gap-sm" style={{ alignItems: "flex-end" }}>
+              {moodWeek.map((m, i) => (
+                <div key={i} style={{ flex: 1, textAlign: "center" }}>
+                  <div style={{ fontSize: 26, height: 32 }}>{m.emoji || "·"}</div>
+                  <div className="text-mono fs-xs" style={{ marginTop: 2, color: "var(--primary-deep)" }}>{m.day}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-md text-soft fs-sm" style={{ lineHeight: 1.55 }}>
+              Mostly steady this week with a Wednesday peak. Take note of what worked.
+            </div>
+          </div>
+
+          <div className="card mt-md">
+            <CardHead title="Writing prompts" sub="If you need a nudge" />
+            <div className="col gap-sm">
+              {[
+                "What's something you'd love to forget about today?",
+                "Three things you're grateful for, big or small.",
+                "If today were a color, what would it be?",
+                "What did your body need today, and did you give it?",
+                "Who took up too much space in your head?",
+              ].map((p, i) => (
+                <button
+                  key={i}
+                  className="idea-chip"
+                  style={{ background: "var(--card-2)", textAlign: "left", cursor: "pointer", border: "1px solid var(--line)" }}
+                  onClick={() => setDraft(d => ({ ...d, title: p }))}
+                >
+                  <span className="idea-chip__bullet" style={{ background: "var(--accent-3)" }}/>
+                  <span>{p}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="card card--mint mt-md">
+            <CardHead title="Streaks" sub="Consistency" />
+            <div className="col gap-sm">
+              <div className="row row--between">
+                <span>Journaling</span>
+                <Pill tone="mint" mono>11 days</Pill>
+              </div>
+              <div className="row row--between">
+                <span>Longest streak</span>
+                <Pill tone="mint" mono>34 days</Pill>
+              </div>
+              <div className="row row--between">
+                <span>Entries this year</span>
+                <Pill tone="mint" mono>87</Pill>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+window.JournalView = JournalView;
+
+</script>
+<script type="text/babel">
+// Recipe log view
+
+const RecipesView = ({ state, setState }) => {
+  const { recipes } = state;
+  const [filter, setFilter] = useState("all");
+  const [open, setOpen] = useState(null);
+
+  const types = ["all", "Breakfast", "Lunch", "Dinner", "Side", "Snack", "Dessert"];
+
+  const filtered = filter === "all" ? recipes : recipes.filter(r => r.type === filter);
+  const favs = recipes.filter(r => r.fav).length;
+
+  const toggleFav = (id) => {
+    setState(s => ({ ...s, recipes: s.recipes.map(r => r.id === id ? { ...r, fav: !r.fav } : r) }));
+  };
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="page-head__greeting">Kitchen · {recipes.length} recipes</div>
+          <h1 className="page-head__title">Recipe library</h1>
+          <div className="page-head__date mt-sm">{favs} favorites · 3 tried this month</div>
+        </div>
+        <div className="row gap-md">
+          <button className="btn btn--ghost"><Icon name="search" size={14}/> Search</button>
+          <button className="btn btn--pink"><Icon name="plus" size={14}/> Add recipe</button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="row gap-sm" style={{ flexWrap: "wrap", marginBottom: 18 }}>
+        {types.map(t => (
+          <button
+            key={t}
+            className="pill pill--mono"
+            style={{
+              cursor: "pointer",
+              background: filter === t ? "var(--primary)" : "var(--card)",
+              color: filter === t ? "white" : "var(--ink-soft)",
+              border: filter === t ? "1px solid var(--primary)" : "1px solid var(--line)",
+            }}
+            onClick={() => setFilter(t)}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      <div className="recipe-grid">
+        {filtered.map(r => (
+          <div key={r.id} className="recipe-card" onClick={() => setOpen(r)}>
+            <div className="recipe-card__img" style={{ background: r.bg }}>
+              {r.icon}
+              <button
+                className="recipe-fav"
+                onClick={(e) => { e.stopPropagation(); toggleFav(r.id); }}
+                title="Favorite"
+              >
+                {r.fav ? "♥" : "♡"}
+              </button>
+            </div>
+            <div className="recipe-card__body">
+              <h4 className="recipe-card__title">{r.name}</h4>
+              <div className="recipe-card__meta">
+                <span>{r.time}</span>
+                <span>·</span>
+                <span>{r.type}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Recipe modal */}
+      {open && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(58,29,40,0.4)", zIndex: 50, display: "grid", placeItems: "center", padding: 20 }}
+          onClick={() => setOpen(null)}
+        >
+          <div
+            className="card"
+            style={{ maxWidth: 560, width: "100%", maxHeight: "85vh", overflow: "auto", padding: 0 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ background: open.bg, height: 180, display: "grid", placeItems: "center", fontSize: 80, borderRadius: "var(--radius-lg) var(--radius-lg) 0 0", position: "relative" }}>
+              {open.icon}
+              <button
+                className="btn btn--icon"
+                style={{ position: "absolute", top: 14, right: 14, background: "rgba(255,255,255,0.8)" }}
+                onClick={() => setOpen(null)}
+              >
+                <Icon name="x" size={14}/>
+              </button>
+            </div>
+            <div style={{ padding: 24 }}>
+              <div className="row gap-sm" style={{ marginBottom: 6 }}>
+                <Pill tone="pink" mono>{open.type}</Pill>
+                <Pill tone="lilac" mono>{open.time}</Pill>
+              </div>
+              <h2 className="text-serif" style={{ fontSize: 32, margin: "8px 0 14px" }}>{open.name}</h2>
+
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>Ingredients</div>
+              <ul style={{ paddingLeft: 18, color: "var(--ink-soft)", lineHeight: 1.8 }}>
+                <li>1 cup of the main thing</li>
+                <li>2 tbsp of the secret thing</li>
+                <li>Salt, pepper, a squeeze of lemon</li>
+                <li>Whatever herb you have on hand</li>
+              </ul>
+
+              <div className="text-mono fs-xs text-muted mt-md" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>Steps</div>
+              <ol style={{ paddingLeft: 18, color: "var(--ink-soft)", lineHeight: 1.8 }}>
+                <li>Get your mise en place sorted, queen.</li>
+                <li>Heat the pan medium-low; add the fat.</li>
+                <li>Combine, taste, season. Trust yourself.</li>
+                <li>Plate it pretty. Photograph optional.</li>
+              </ol>
+
+              <div className="row mt-lg gap-sm">
+                <button className="btn btn--pink"><Icon name="check" size={14}/> I made this</button>
+                <button className="btn btn--ghost"><Icon name="edit" size={14}/> Edit</button>
+                <button className="btn btn--ghost" onClick={() => toggleFav(open.id)}>
+                  {open.fav ? "♥ Favorited" : "♡ Save"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+window.RecipesView = RecipesView;
+
+</script>
+<script type="text/babel">
+// Content ideas — capture board for newsletter / posts / videos
+
+const ContentView = ({ state, setState }) => {
+  const { content } = state;
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterFormat, setFilterFormat] = useState("all");
+  const [draftOpen, setDraftOpen] = useState(false);
+  const [draft, setDraft] = useState({ title: "", format: "Newsletter", status: "Idea", notes: "" });
+
+  const formats = ["Newsletter", "TikTok", "Instagram", "Blog", "Podcast", "Video"];
+  const statuses = ["Idea", "Drafting", "Scheduled", "Published"];
+
+  const formatColor = {
+    Newsletter: { bg: "var(--primary-soft)",  text: "var(--primary-deep)", accent: "var(--primary)"   },
+    TikTok:     { bg: "var(--accent-3-soft)", text: "#5e4b85",             accent: "var(--accent-3)"  },
+    Instagram:  { bg: "var(--accent-1-soft)", text: "#8b4f1c",             accent: "var(--accent-1)"  },
+    Blog:       { bg: "var(--accent-2-soft)", text: "#3d6b4f",             accent: "var(--accent-2)"  },
+    Podcast:    { bg: "var(--accent-4-soft)", text: "#8a6a16",             accent: "var(--accent-4)"  },
+    Video:      { bg: "var(--primary-soft)",  text: "var(--primary-deep)", accent: "var(--primary)"   },
+  };
+
+  const statusColor = {
+    Idea:       "var(--accent-3)",
+    Drafting:   "var(--accent-1)",
+    Scheduled:  "var(--accent-4)",
+    Published:  "var(--accent-2)",
+  };
+
+  const filtered = content.filter(c =>
+    (filterStatus === "all" || c.status === filterStatus) &&
+    (filterFormat === "all" || c.format === filterFormat)
+  );
+
+  const counts = {
+    Idea:      content.filter(c => c.status === "Idea").length,
+    Drafting:  content.filter(c => c.status === "Drafting").length,
+    Scheduled: content.filter(c => c.status === "Scheduled").length,
+    Published: content.filter(c => c.status === "Published").length,
+  };
+
+  const updateItem = (id, patch) => {
+    setState(s => ({ ...s, content: s.content.map(c => c.id === id ? { ...c, ...patch } : c) }));
+  };
+
+  const removeItem = (id) => {
+    setState(s => ({ ...s, content: s.content.filter(c => c.id !== id) }));
+  };
+
+  const cycleStatus = (id) => {
+    const item = content.find(c => c.id === id);
+    const idx = statuses.indexOf(item.status);
+    const next = statuses[(idx + 1) % statuses.length];
+    const today = new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"});
+    updateItem(id, { status: next, ...(next === "Published" ? { publishedAt: today } : {}) });
+  };
+
+  const saveDraft = () => {
+    if (!draft.title.trim()) return;
+    setState(s => ({
+      ...s,
+      content: [{ id: "c" + Date.now(), starred: false, tags: [], ...draft }, ...s.content],
+    }));
+    setDraft({ title: "", format: "Newsletter", status: "Idea", notes: "" });
+    setDraftOpen(false);
+  };
+
+  const toggleStar = (id) => {
+    const item = content.find(c => c.id === id);
+    updateItem(id, { starred: !item.starred });
+  };
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="page-head__greeting">Content · Q2 plan</div>
+          <h1 className="page-head__title">Things to make</h1>
+          <div className="page-head__date mt-sm">{content.length} pieces in flight · {counts.Published} published this month</div>
+        </div>
+        <div className="row gap-md">
+          <button className="btn btn--pink" onClick={() => setDraftOpen(true)}>
+            <Icon name="plus" size={14}/> Capture idea
+          </button>
+        </div>
+      </div>
+
+      {/* Stage counters */}
+      <div className="bento" style={{ marginBottom: 0 }}>
+        {statuses.map(st => (
+          <button
+            key={st}
+            className={cls("card", "col-3")}
+            style={{
+              borderColor: filterStatus === st ? statusColor[st] : "var(--line)",
+              borderWidth: filterStatus === st ? 2 : 1,
+              background: filterStatus === st ? "var(--card-2)" : "var(--card)",
+              cursor: "pointer",
+              padding: 18,
+              textAlign: "left",
+              fontFamily: "inherit",
+            }}
+            onClick={() => setFilterStatus(filterStatus === st ? "all" : st)}
+          >
+            <div className="row row--between" style={{ marginBottom: 8 }}>
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: statusColor[st] }}/>
+              <span className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.1em" }}>{counts[st]} items</span>
+            </div>
+            <div className="text-serif" style={{ fontSize: 28, color: "var(--ink)", lineHeight: 1 }}>{counts[st]}</div>
+            <div className="text-mono fs-xs" style={{ letterSpacing: "0.1em", textTransform: "uppercase", color: statusColor[st], marginTop: 4, fontWeight: 600 }}>{st}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Format filters */}
+      <div className="row gap-sm" style={{ flexWrap: "wrap", margin: "16px 0" }}>
+        {["all", ...formats].map(f => (
+          <button
+            key={f}
+            className="pill pill--mono"
+            style={{
+              cursor: "pointer",
+              background: filterFormat === f ? "var(--primary)" : "var(--card)",
+              color: filterFormat === f ? "white" : "var(--ink-soft)",
+              border: filterFormat === f ? "1px solid var(--primary)" : "1px solid var(--line)",
+            }}
+            onClick={() => setFilterFormat(f)}
+          >
+            {f}
+          </button>
+        ))}
+        <span style={{ flex: 1 }}/>
+        <Pill tone="lilac" mono>{filtered.length} showing</Pill>
+      </div>
+
+      {/* Kanban-ish board: 4 columns by status */}
+      <div className="bento">
+        {statuses.map(st => {
+          const items = (filterStatus === "all" ? content : content.filter(c => c.status === st))
+            .filter(c => c.status === st)
+            .filter(c => filterFormat === "all" || c.format === filterFormat);
+          return (
+            <div key={st} className="card col-3" style={{ minHeight: 360, background: "var(--card-2)", padding: 16 }}>
+              <div className="row row--between" style={{ marginBottom: 14 }}>
+                <div className="row gap-sm">
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: statusColor[st] }}/>
+                  <span className="text-mono fs-xs" style={{ letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--ink-soft)", fontWeight: 600 }}>{st}</span>
+                </div>
+                <span className="text-mono fs-xs text-muted">{items.length}</span>
+              </div>
+
+              <div className="col gap-sm">
+                {items.length === 0 && (
+                  <div className="empty" style={{ padding: "20px 0", border: "1.5px dashed var(--line)", borderRadius: 12 }}>
+                    empty · capture one
+                  </div>
+                )}
+                {items.map(c => {
+                  const fc = formatColor[c.format] || formatColor.Newsletter;
+                  return (
+                    <div key={c.id} style={{
+                      background: "var(--card)",
+                      border: "1px solid var(--line)",
+                      borderLeft: `3px solid ${fc.accent}`,
+                      borderRadius: 12,
+                      padding: 12,
+                    }}>
+                      <div className="row row--between" style={{ marginBottom: 6, alignItems: "flex-start" }}>
+                        <span className="pill pill--mono" style={{ background: fc.bg, color: fc.text, border: "none", fontSize: 9 }}>
+                          {c.format}
+                        </span>
+                        <button
+                          className="btn btn--ghost"
+                          style={{ padding: 2, color: c.starred ? "var(--primary)" : "var(--muted)", fontSize: 14, lineHeight: 1 }}
+                          onClick={() => toggleStar(c.id)}
+                          title="Star"
+                        >
+                          {c.starred ? "★" : "☆"}
+                        </button>
+                      </div>
+                      <Editable
+                        value={c.title}
+                        onChange={(v) => updateItem(c.id, { title: v })}
+                        style={{ fontWeight: 600, fontSize: 13.5, lineHeight: 1.3 }}
+                      />
+                      {c.notes && (
+                        <Editable
+                          value={c.notes}
+                          onChange={(v) => updateItem(c.id, { notes: v })}
+                          style={{ fontSize: 12, color: "var(--ink-soft)", marginTop: 4, lineHeight: 1.4 }}
+                          multiline
+                        />
+                      )}
+                      {c.tags && c.tags.length > 0 && (
+                        <div className="row gap-sm" style={{ marginTop: 8, flexWrap: "wrap", gap: 4 }}>
+                          {c.tags.map((tag, i) => (
+                            <span key={i} className="pill pill--mono" style={{ fontSize: 9, padding: "2px 7px" }}>#{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="row row--between" style={{ marginTop: 10 }}>
+                        <button
+                          className="btn btn--ghost"
+                          style={{ padding: "4px 8px", fontSize: 11, color: statusColor[st] }}
+                          onClick={() => cycleStatus(c.id)}
+                        >
+                          {st === "Published" ? "↻ Reset" : "→ Move"}
+                        </button>
+                        {c.publishedAt && (
+                          <span className="text-mono fs-xs text-muted">{c.publishedAt}</span>
+                        )}
+                        <button
+                          className="btn btn--ghost"
+                          style={{ padding: 2, color: "var(--muted)" }}
+                          onClick={() => removeItem(c.id)}
+                          title="Delete"
+                        >
+                          <Icon name="x" size={11}/>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Capture modal */}
+      {draftOpen && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(58,29,40,0.42)", zIndex: 60, display: "grid", placeItems: "center", padding: 24, backdropFilter: "blur(4px)" }}
+          onClick={() => setDraftOpen(false)}
+        >
+          <div
+            className="card"
+            style={{ maxWidth: 480, width: "100%", padding: 0, overflow: "hidden", boxShadow: "var(--shadow-lg)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ height: 6, background: "var(--primary)" }}/>
+            <div style={{ padding: 22 }}>
+              <div className="row row--between" style={{ alignItems: "flex-start", marginBottom: 18 }}>
+                <div>
+                  <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.14em", textTransform: "uppercase" }}>Quick capture</div>
+                  <h3 className="text-serif" style={{ fontSize: 30, margin: "4px 0 0", lineHeight: 1.1 }}>New idea</h3>
+                </div>
+                <button className="btn btn--icon" onClick={() => setDraftOpen(false)}><Icon name="x" size={14}/></button>
+              </div>
+
+              <input
+                placeholder="What's the idea?"
+                value={draft.title}
+                onChange={(e) => setDraft(d => ({ ...d, title: e.target.value }))}
+                style={{ width: "100%", border: 0, background: "var(--card-2)", borderRadius: 12, padding: "12px 14px", fontSize: 16, outline: "none", marginBottom: 12 }}
+                autoFocus
+              />
+
+              <textarea
+                placeholder="Notes, angle, hook…"
+                value={draft.notes}
+                onChange={(e) => setDraft(d => ({ ...d, notes: e.target.value }))}
+                style={{ width: "100%", border: 0, background: "var(--card-2)", borderRadius: 12, padding: "12px 14px", fontSize: 13.5, lineHeight: 1.55, outline: "none", minHeight: 80, resize: "vertical", marginBottom: 16 }}
+              />
+
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Format</div>
+              <div className="row gap-sm" style={{ flexWrap: "wrap", marginBottom: 14 }}>
+                {formats.map(f => (
+                  <button
+                    key={f}
+                    className="pill pill--mono"
+                    style={{
+                      cursor: "pointer",
+                      background: draft.format === f ? formatColor[f].accent : "var(--card-2)",
+                      color: draft.format === f ? "white" : "var(--ink-soft)",
+                      border: "1px solid " + (draft.format === f ? formatColor[f].accent : "var(--line)"),
+                    }}
+                    onClick={() => setDraft(d => ({ ...d, format: f }))}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Status</div>
+              <div className="row gap-sm" style={{ flexWrap: "wrap", marginBottom: 18 }}>
+                {statuses.map(st => (
+                  <button
+                    key={st}
+                    className="pill pill--mono"
+                    style={{
+                      cursor: "pointer",
+                      background: draft.status === st ? statusColor[st] : "var(--card-2)",
+                      color: draft.status === st ? "white" : "var(--ink-soft)",
+                      border: "1px solid " + (draft.status === st ? statusColor[st] : "var(--line)"),
+                    }}
+                    onClick={() => setDraft(d => ({ ...d, status: st }))}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+
+              <div className="row row--between">
+                <div className="text-mono fs-xs text-muted">⌘ + Enter to save</div>
+                <div className="row gap-sm">
+                  <button className="btn btn--ghost" onClick={() => setDraftOpen(false)}>Cancel</button>
+                  <button className="btn btn--pink" onClick={saveDraft}><Icon name="check" size={14}/> Capture</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+window.ContentView = ContentView;
+
+</script>
+<script type="text/babel">
+// Hair Regimen — adapted to the dashboard palette
+// Original: dark gold/cream/brown · Now: pink/cream + sage accents on light
+
+const HAIR_WEEKS = {
+  1: {
+    label: "Week 1", subtitle: "Post-Smoothing — Recovery Mode",
+    tag: "RECOVERY", tagTone: "mint",
+    shampoo: "Design Essentials Almond & Avocado (moisturizing)",
+    dc: "Amika Hydro Rush (blue) — pure moisture only",
+    proteinNote: null,
+    notes: "You just completed your smoothing treatment. Your hair needs pure moisture and zero protein stress for the next several weeks. Be gentle, be consistent.",
+    washDaySteps: [
+      { id: "prepoo", label: "Pre-Poo (30–60 min before shower)", steps: [
+        "Apply Sunny Isle JBCO generously from mid-shaft to ends",
+        "Apply The Ordinary Density Serum to scalp",
+        "Massage with scalp tool for 5 full minutes",
+        "Cover with a plastic cap and let it sit while you get ready",
+      ]},
+      { id: "cleanse", label: "Cleanse", steps: [
+        "Shampoo: Design Essentials Almond & Avocado",
+        "Focus entirely on your scalp — do not scrub the ends",
+        "Let the suds rinse through the ends naturally",
+      ]},
+      { id: "dc", label: "Deep Condition", steps: [
+        "DC: Amika Hydro Rush (blue)",
+        "Divide hair into 4–6 sections",
+        "Apply generously mid-shaft to ends — not scalp",
+        "Cover with plastic cap",
+        "Sit under hooded dryer or heat cap for 30 minutes — heat is mandatory for high porosity",
+        "Rinse with COOL water to begin closing the cuticle",
+      ]},
+      { id: "seal", label: "Cuticle Seal (every week, no exceptions)", steps: [
+        "Apply Redken Acidic Bonding Concentrate as a rinse-out",
+        "Distribute through hair, leave 2 minutes",
+        "Rinse — physically closes your raised high porosity cuticle before heat",
+      ]},
+      { id: "lco", label: "LCO Application (section by section)", steps: [
+        "Towel blot gently — do not rub",
+        "Section hair into 4–6 parts and clip",
+        "L: Mizani 25 Miracle Milk leave-in",
+        "C: TGIN Butter Cream Daily Moisturizer",
+        "O: Sunny Isle JBCO from mid-shaft to ends ONLY (not scalp)",
+        "Do not skip the order — cream before oil seals moisture in",
+      ]},
+      { id: "heat", label: "Heat Styling", steps: [
+        "Apply thermal protectant spray over each section",
+        "Blow dry on MEDIUM heat — Laifen Swift — use tension method",
+        "Apply Mizani Press Agent Serum before flat iron",
+        "Flat iron: ONE slow pass per section — do not chase it",
+        "Let each section cool before touching",
+      ]},
+    ],
+  },
+  2: {
+    label: "Week 2", subtitle: "Still in Smoothing Recovery Window",
+    tag: "MOISTURE", tagTone: "mint",
+    shampoo: "Design Essentials Almond & Avocado (moisturizing)",
+    dc: "Listen to your hair this week (see note below)",
+    proteinNote: null,
+    notes: "Start reading your hair's signals to choose your DC. Soft, limp, or overly pliable? → Amika Hydro Rush (pure moisture). Weak, stretchy, or snapping? → Biolage Don't Despair Repair (light protein). This is how you learn your hair.",
+    washDaySteps: [
+      { id: "prepoo", label: "Pre-Poo", steps: [
+        "Sunny Isle JBCO mid-shaft to ends",
+        "The Ordinary Density Serum to scalp",
+        "Scalp massage 5 minutes",
+        "Plastic cap on, let it sit",
+      ]},
+      { id: "cleanse", label: "Cleanse", steps: [
+        "Design Essentials Almond & Avocado",
+        "Scalp focus only — no scrubbing the ends",
+      ]},
+      { id: "dc", label: "Deep Condition", steps: [
+        "Dry/limp/soft → Amika Hydro Rush",
+        "Weak/stretchy/snapping → Biolage Don't Despair",
+        "Section by section, mid-shaft to ends",
+        "Plastic cap + heat cap — 30 min",
+        "Cool water rinse",
+      ]},
+      { id: "seal", label: "Cuticle Seal", steps: [
+        "Redken ABC — 2 min, rinse",
+        "Every single week regardless of what else changes",
+      ]},
+      { id: "lco", label: "LCO Application", steps: [
+        "Towel blot gently",
+        "Mizani 25 Miracle Milk (L)",
+        "TGIN Butter Cream (C)",
+        "Sunny Isle JBCO ends only (O)",
+      ]},
+      { id: "heat", label: "Heat Styling", steps: [
+        "Thermal protectant spray",
+        "Blow dry medium heat",
+        "Press Agent Serum before flat iron",
+        "One slow pass — no repeats",
+      ]},
+    ],
+  },
+  3: {
+    label: "Week 3", subtitle: "Moisture-Only Continues",
+    tag: "MOISTURE", tagTone: "mint",
+    shampoo: "Design Essentials Almond & Avocado",
+    dc: "Listen to your hair — Amika OR Biolage",
+    proteinNote: null,
+    notes: "By now your hair should feel noticeably more responsive. Keep listening and choosing your DC accordingly. Temple area should be showing less breakage — look for baby hairs as a sign your follicles are responding.",
+    washDaySteps: [
+      { id: "prepoo", label: "Pre-Poo", steps: [
+        "Sunny Isle JBCO mid-shaft to ends",
+        "Density Serum to scalp",
+        "5-minute scalp massage",
+        "Plastic cap on while you wait",
+      ]},
+      { id: "cleanse", label: "Cleanse", steps: [
+        "Design Essentials Almond & Avocado",
+        "Scalp only — suds rinse through ends",
+      ]},
+      { id: "dc", label: "Deep Condition", steps: [
+        "Dry/limp → Amika Hydro Rush",
+        "Weak/stretchy → Biolage Don't Despair",
+        "Mid-shaft to ends, plastic cap",
+        "Heat cap or hooded dryer — 30 min",
+        "Cool water rinse",
+      ]},
+      { id: "seal", label: "Cuticle Seal", steps: [
+        "Redken ABC — 2 min, rinse",
+        "Every week without exception",
+      ]},
+      { id: "lco", label: "LCO Application", steps: [
+        "Towel blot gently",
+        "Camille Rose Honey Hydrate — wig weeks only, not in LCO",
+        "Mizani 25 Miracle Milk (L)",
+        "TGIN Butter Cream (C)",
+        "Sunny Isle JBCO ends only (O)",
+      ]},
+      { id: "heat", label: "Heat Styling", steps: [
+        "Thermal protectant spray",
+        "Blow dry medium heat",
+        "Press Agent Serum",
+        "One slow pass — do not re-pass",
+      ]},
+    ],
+  },
+  4: {
+    label: "Week 4", subtitle: "Monthly Clarify Day",
+    tag: "CLARIFY", tagTone: "peach",
+    shampoo: "OUAI Detox Shampoo — removes a month of buildup",
+    dc: "Amika Hydro Rush — always follow a clarify with pure moisture",
+    proteinNote: "⚡ After this wash day, Week 5 introduces light protein for the first time. Your hair will be ready.",
+    notes: "Monthly reset. Clarifying removes all product buildup — smoothing residue, LCO layers, thermal protectants. You may need to lather twice. This is also Olaplex No. 3 day — apply during pre-poo before shampooing.",
+    washDaySteps: [
+      { id: "prepoo", label: "Pre-Poo — Critical on Clarify Days", steps: [
+        "Olaplex No. 3 to damp hair first — sit 30–45 min",
+        "Sunny Isle JBCO generously mid-shaft to ends over the No. 3",
+        "Density Serum to scalp",
+        "Scalp massage 5 min",
+        "Plastic cap — sit minimum 30 min",
+      ]},
+      { id: "cleanse", label: "Cleanse", steps: [
+        "OUAI Detox (clarifying)",
+        "Lather twice — first removes buildup, second cleans",
+        "Scalp focus",
+      ]},
+      { id: "dc", label: "Deep Condition", steps: [
+        "Amika Hydro Rush ONLY — pure moisture after a clarify",
+        "Be extra generous",
+        "Plastic cap + heat — 30 min",
+        "Cool water rinse",
+      ]},
+      { id: "seal", label: "Cuticle Seal", steps: [
+        "Redken ABC — especially important after clarifying",
+        "2 min, rinse thoroughly",
+      ]},
+      { id: "lco", label: "LCO Application", steps: [
+        "Towel blot gently",
+        "Be generous — clarify needs extra moisture",
+        "Mizani 25 (L) → TGIN Butter (C) → JBCO ends (O)",
+      ]},
+      { id: "heat", label: "Heat Styling", steps: [
+        "Thermal protectant spray",
+        "Blow dry medium heat",
+        "Press Agent Serum",
+        "One slow pass — no repeats",
+      ]},
+    ],
+  },
+};
+
+const HAIR_NIGHTLY = [
+  { id: "ordinary_scalp", label: "The Ordinary Density Serum on scalp",     detail: "Apply in sections, fingertip pad massage — 5 min circular motions" },
+  { id: "cecred_temples", label: "Cecred Edge Drops on temples & hairline", detail: "One dropper press per temple — gentle circles only" },
+  { id: "jbco_ends",      label: "Sunny Isle JBCO on ends",                  detail: "2–3 drops warmed between fingertips — light coating only" },
+  { id: "silk_scarf",     label: "Silk/satin scarf — tied at the nape",      detail: "Fold so the knot sits at the back, not over temples" },
+  { id: "bonnet",         label: "Satin bonnet over scarf",                  detail: "Double-layer friction protection" },
+];
+
+const HAIR_PROT_STYLES = [
+  { ok: true,  style: "Sleek low bun",            note: "Scrunchie only — never rubber band" },
+  { ok: true,  style: "Half up, half down",       note: "Avoid clips that crease the hair" },
+  { ok: true,  style: "Flat twists under wig",    note: "Stop ½″ before temples. Wig grip band, no gel. Max 5–7 days." },
+  { ok: true,  style: "Low silk press ponytail",  note: "Low placement only, minimal tension" },
+  { ok: false, style: "Tight cornrows at hairline", note: "Traction risk — especially at temples" },
+  { ok: false, style: "High tension styles",      note: "Mid-shaft breakage gets worse with tension" },
+  { ok: false, style: "Edge control on temples",  note: "Oil only on that area until it recovers" },
+];
+
+const HAIR_MASTER_CYCLE = [
+  { wk: 1, desc: "Moisturizing shampoo · Amika Hydro Rush · Post-smoothing recovery", protein: false },
+  { wk: 2, desc: "Moisturizing shampoo · Amika or Biolage · Listen to your hair",     protein: false },
+  { wk: 3, desc: "Moisturizing shampoo · Amika or Biolage · Listen to your hair",     protein: false },
+  { wk: 4, desc: "OUAI Clarify · Amika Hydro Rush · Olaplex No. 3 · Monthly clarify", protein: false },
+  { wk: 5, desc: "Moisturizing shampoo · ApHogee 2 Min Keratin (light protein)",      protein: true  },
+  { wk: 6, desc: "Moisturizing shampoo · Moisture DC · Back to moisture",             protein: false },
+  { wk: 7, desc: "Moisturizing shampoo · ApHogee 2 Min Keratin (light protein)",      protein: true  },
+  { wk: 8, desc: "OUAI Clarify · ApHogee Two-Step + Smoothing Treatment · Same day", protein: true, big: true },
+];
+
+const HAIR_LOLA = [
+  {
+    name: "Umectação Oliva — Olive Oil Deep Mask",
+    tag: "DC ROTATION",
+    tagTone: "mint",
+    desc: "Humectant treatment — olive oil penetrates the cortex. Use as your third DC option when hair feels extremely dry, dull, or brittle. More intensive than Amika, less protein-focused than Biolage.",
+    howto: [
+      "Regular: apply mid-shaft to ends after shampoo, plastic cap, 30 min under heat, rinse",
+      "SOS overnight: apply to dry hair the night before wash day, loose bun, sleep, shampoo out",
+      "Rotate in with Amika and Biolage based on strand test results",
+    ],
+  },
+  {
+    name: "Xapadinha — Disciplining Smoothing Mask",
+    tag: "PRESS WEEKS ONLY",
+    tagTone: "peach",
+    desc: "Smoothing mask aligns the hair fiber and reduces frizz by up to 40%. Use as your DC on weeks you're flat-ironing — makes blow dry/press easier and helps styles last.",
+    howto: [
+      "Press weeks ONLY — do not use on natural texture or bun weeks",
+      "After shampoo, section by section mid-shaft to ends",
+      "Plastic cap + heat — 30 min",
+      "Rinse, then Redken ABC — locks the smoothing effect in further",
+    ],
+  },
+  {
+    name: "Rapunzel Tônico do Crescimento — Growth Tonic",
+    tag: "SCALP GROWTH",
+    tagTone: "sun",
+    desc: "Leave-on growth tonic with Jaborandi, Rosemary, Caffeine, Ginkgo, Nettle, Ginger. Jaborandi is a Brazilian follicle stimulant — combined with Rosemary and Caffeine, one of the strongest natural growth formulas.",
+    howto: [
+      "Apply to clean dry or slightly damp scalp — do NOT rinse",
+      "Massage in gently — scalp only, not the strands",
+      "Alternate with The Ordinary Density Serum on different days",
+      "Mon / Wed / Fri → Rapunzel Tônico",
+      "Tue / Thu / Sat → The Ordinary Density Serum",
+      "Sun (wash day pre-poo) → The Ordinary Density Serum",
+    ],
+  },
+];
+
+const HAIR_NEVER = [
+  "Apply heat without your double thermal protection stack",
+  "Skip wash day — weekly is non-negotiable at your heat frequency",
+  "Use rubber bands anywhere in your hair",
+  "Use alcohol-based edge control",
+  "Do more than one flat iron pass per section",
+  "Braid, clip, or apply product to your temple area",
+  "Go to sleep without your oil, scarf, and bonnet",
+  "Do hard protein and smoothing treatment on separate days",
+];
+
+const HAIR_STRAND = [
+  { result: "Stretches and snaps back slowly",      meaning: "✅ Balanced — maintain current routine",                                       color: "var(--accent-2)" },
+  { result: "Stretches a lot, goes limp or mushy",  meaning: "💧 Moisture overload — use Biolage Don't Despair this week",                   color: "var(--primary)" },
+  { result: "Barely stretches, snaps immediately",  meaning: "⚡ Protein deficient — use Biolage or move up your ApHogee Two Minute",        color: "var(--accent-1)" },
+];
+
+// ----------------- View -----------------
+
+const HairView = ({ state, setState }) => {
+  const { hair } = state;
+  const [activeWeek, setActiveWeek] = useState(hair.activeWeek || 1);
+  const [expanded, setExpanded] = useState(null);
+
+  const setHair = (patch) => setState(s => ({ ...s, hair: { ...s.hair, ...patch } }));
+
+  const toggleNightly = (id, e) => {
+    if (e && !hair.nightlyDone[id]) {
+      const r = e.currentTarget.getBoundingClientRect();
+      burstConfetti(r.left + r.width / 2, r.top + r.height / 2);
+    }
+    setHair({ nightlyDone: { ...hair.nightlyDone, [id]: !hair.nightlyDone[id] } });
+  };
+
+  const toggleScalp = (day, e) => {
+    if (e && !hair.scalpDays[day]) {
+      const r = e.currentTarget.getBoundingClientRect();
+      burstConfetti(r.left + r.width / 2, r.top + r.height / 2);
+    }
+    setHair({ scalpDays: { ...hair.scalpDays, [day]: !hair.scalpDays[day] } });
+  };
+
+  const week = HAIR_WEEKS[activeWeek];
+  const nightlyCount = Object.values(hair.nightlyDone).filter(Boolean).length;
+  const scalpCount = Object.values(hair.scalpDays).filter(Boolean).length;
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <div className="page-head__greeting">The Silk Collective Studio · Length Retention</div>
+          <h1 className="page-head__title">Hair regimen</h1>
+          <div className="page-head__date mt-sm">High porosity · 4B coils · Post-smoothing protocol</div>
+        </div>
+        <div className="row gap-md">
+          <Pill tone="pink" mono>{nightlyCount}/5 tonight</Pill>
+          <Pill tone="mint" mono>{scalpCount}/3–4 scalp days</Pill>
+          <Pill tone="lilac" mono>Week {activeWeek} of 8</Pill>
+        </div>
+      </div>
+
+      {/* Temple priority banner */}
+      <div className="card card--peach" style={{ marginBottom: 16, borderLeft: "4px solid var(--accent-1)" }}>
+        <div className="row gap-sm" style={{ alignItems: "flex-start" }}>
+          <span style={{ fontSize: 22, lineHeight: 1 }}>⚠</span>
+          <div>
+            <div className="text-mono fs-xs" style={{ letterSpacing: "0.18em", color: "#8b4f1c", fontWeight: 700, marginBottom: 4 }}>TEMPLE PRIORITY ZONE</div>
+            <div style={{ fontSize: 13.5, color: "var(--ink)", lineHeight: 1.55 }}>
+              Zero product on temples except nightly oil. No braids, no edge control, no clips within ½″ of your hairline. Nightly Mielle + JBCO only.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Week selector + week card */}
+      <div className="bento">
+        <div className="card col-12">
+          <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 10 }}>Current week</div>
+          <div className="row gap-sm" style={{ marginBottom: 18 }}>
+            {[1, 2, 3, 4].map(w => (
+              <button
+                key={w}
+                onClick={() => { setActiveWeek(w); setExpanded(null); setHair({ activeWeek: w }); }}
+                style={{
+                  flex: 1,
+                  padding: "14px 8px",
+                  borderRadius: 14,
+                  border: activeWeek === w ? "2px solid var(--primary)" : "1px solid var(--line)",
+                  background: activeWeek === w ? "var(--primary-soft)" : "var(--card-2)",
+                  color: activeWeek === w ? "var(--primary-deep)" : "var(--ink-soft)",
+                  fontWeight: activeWeek === w ? 700 : 500,
+                  fontSize: 14,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  transition: "all 0.15s",
+                }}
+              >
+                <div className="text-mono fs-xs" style={{ letterSpacing: "0.1em", opacity: 0.8 }}>WEEK</div>
+                <div className="text-serif" style={{ fontSize: 26, marginTop: 2 }}>{w}</div>
+              </button>
+            ))}
+          </div>
+
+          <div className="row row--between" style={{ alignItems: "flex-start", marginBottom: 10 }}>
+            <div>
+              <h2 className="text-serif" style={{ fontSize: 28, margin: 0 }}>{week.label}</h2>
+              <div className="text-mono fs-xs text-muted mt-sm" style={{ letterSpacing: "0.08em" }}>{week.subtitle}</div>
+            </div>
+            <Pill tone={week.tagTone} mono>{week.tag}</Pill>
+          </div>
+          <div style={{ borderTop: "1px dashed var(--line)", paddingTop: 14, marginTop: 12, color: "var(--ink-soft)", fontSize: 13.5, lineHeight: 1.65 }}>
+            {week.notes}
+          </div>
+          {week.proteinNote && (
+            <div className="card card--sun" style={{ marginTop: 12, padding: 12 }}>
+              <div style={{ fontSize: 13, color: "#8a6a16", fontWeight: 500 }}>{week.proteinNote}</div>
+            </div>
+          )}
+        </div>
+
+        {/* This week's products */}
+        <div className="card col-7">
+          <CardHead title="This week's products" sub="The 5 you'll touch on wash day" />
+          <div className="col gap-sm">
+            {[
+              ["Shampoo",                       week.shampoo],
+              ["Deep conditioner",              week.dc],
+              ["Cuticle seal · every week",     "Redken Acidic Bonding Concentrate · 2 min rinse-out · never skip"],
+              ["LCO stack · every wash day",    "Mizani 25 Miracle Milk (L) → TGIN Butter Cream (C) → JBCO ends (O)"],
+              ["Heat protection · double layer","Thermal spray (Kenra/IGK/DE) before blow dry + Mizani Press Agent before flat iron"],
+            ].map(([label, val]) => (
+              <div key={label} className="idea-chip" style={{ alignItems: "flex-start", padding: "12px 14px" }}>
+                <span className="idea-chip__bullet" style={{ marginTop: 8 }}/>
+                <div style={{ flex: 1 }}>
+                  <div className="text-mono fs-xs" style={{ letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--primary-deep)", fontWeight: 600, marginBottom: 4 }}>{label}</div>
+                  <div style={{ fontSize: 13.5, color: "var(--ink)", lineHeight: 1.5 }}>{val}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Nightly routine */}
+        <div className="card col-5 card--pink">
+          <CardHead
+            title="Nightly routine"
+            sub="No water. Oil only. Every night."
+            right={<Pill tone="pink" mono>{nightlyCount}/5</Pill>}
+          />
+          <div className="col gap-sm">
+            {HAIR_NIGHTLY.map(t => {
+              const done = !!hair.nightlyDone[t.id];
+              return (
+                <button
+                  key={t.id}
+                  onClick={(e) => toggleNightly(t.id, e)}
+                  className="row"
+                  style={{
+                    alignItems: "flex-start",
+                    gap: 12,
+                    padding: 12,
+                    background: done ? "var(--accent-2-soft)" : "rgba(255,255,255,0.7)",
+                    border: "1px solid " + (done ? "var(--accent-2)" : "transparent"),
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    fontFamily: "inherit",
+                    color: "inherit",
+                  }}
+                >
+                  <span
+                    className={cls("task__check", done && "task__check--done")}
+                    style={done ? { background: "var(--accent-2)", borderColor: "var(--accent-2)", width: 20, height: 20, flexShrink: 0 } : { width: 20, height: 20, flexShrink: 0 }}
+                  >
+                    {done && <Icon name="check" size={12} stroke={2.4}/>}
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: done ? "#3d6b4f" : "var(--ink)" }}>{t.label}</div>
+                    <div className="fs-xs text-muted" style={{ marginTop: 2, lineHeight: 1.4 }}>{t.detail}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Wash day steps */}
+        <div className="card col-12">
+          <CardHead title="Wash day · step by step" sub="Tap any step to expand" />
+          <div className="col gap-sm">
+            {week.washDaySteps.map((section, idx) => {
+              const open = expanded === section.id;
+              return (
+                <div key={section.id} style={{
+                  background: "var(--card-2)",
+                  borderRadius: 14,
+                  border: "1px solid " + (open ? "var(--primary)" : "var(--line)"),
+                  overflow: "hidden",
+                  transition: "border-color 0.15s",
+                }}>
+                  <button
+                    onClick={() => setExpanded(open ? null : section.id)}
+                    className="row row--between"
+                    style={{
+                      width: "100%", padding: "12px 14px",
+                      background: "transparent", border: 0,
+                      cursor: "pointer", textAlign: "left",
+                      fontFamily: "inherit", color: "inherit",
+                    }}
+                  >
+                    <div className="row" style={{ gap: 12 }}>
+                      <span style={{
+                        width: 28, height: 28, borderRadius: "50%",
+                        background: "linear-gradient(135deg, var(--primary), var(--accent-1))",
+                        display: "grid", placeItems: "center",
+                        color: "white", fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 14, fontWeight: 600,
+                        flexShrink: 0,
+                      }}>{idx + 1}</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>{section.label}</span>
+                    </div>
+                    <span style={{ color: "var(--primary)", fontSize: 20, lineHeight: 1, fontFamily: "var(--font-serif)" }}>
+                      {open ? "−" : "+"}
+                    </span>
+                  </button>
+                  {open && (
+                    <div style={{ padding: "0 14px 14px 54px", borderTop: "1px dashed var(--line)" }}>
+                      {section.steps.map((step, si) => (
+                        <div key={si} className="row" style={{ gap: 8, marginTop: 10, alignItems: "flex-start" }}>
+                          <span style={{ color: "var(--primary)", fontSize: 13, marginTop: 1, flexShrink: 0 }}>›</span>
+                          <span style={{ fontSize: 13, color: "var(--ink-soft)", lineHeight: 1.55 }}>{step}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Scalp tracker */}
+        <div className="card col-6 card--mint">
+          <CardHead
+            title="Scalp massage tracker"
+            sub="Density Serum · 5 min minimum"
+            right={<Pill tone="mint" mono>{scalpCount}/3–4</Pill>}
+          />
+          <div className="gym-grid">
+            {DAYS_OF_WEEK.map(day => {
+              const done = !!hair.scalpDays[day];
+              return (
+                <button
+                  key={day}
+                  onClick={(e) => toggleScalp(day, e)}
+                  className={cls("gym-cell", done && "gym-cell--done")}
+                  style={done ? { background: "var(--accent-2)" } : {}}
+                >
+                  <span className="gym-cell__day">{day}</span>
+                  <span className="gym-cell__icon">{done ? "🌿" : "·"}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-md fs-xs text-soft" style={{ lineHeight: 1.5 }}>
+            Mon/Wed/Fri → Rapunzel Tônico · Tue/Thu/Sat → Density Serum · Sun → wash day pre-poo
+          </div>
+        </div>
+
+        {/* Mid-week refresh */}
+        <div className="card col-6 card--lilac">
+          <CardHead title="Mid-week refresh" sub="Day 3–4" />
+          <div className="col gap-sm">
+            {[
+              "Boar bristle brush — smooth frizz, redistribute oils",
+              "Light JBCO over the surface with fingertips",
+              "Re-wrap at night as usual",
+              "Do NOT flat iron mid-week — low bun or pin curls",
+              "If touching up: low bun or sleek ponytail to wash day",
+            ].map((tip, i) => (
+              <div key={i} className="row" style={{ gap: 8, alignItems: "flex-start" }}>
+                <span style={{ color: "var(--accent-3)", fontSize: 13, marginTop: 1, flexShrink: 0 }}>›</span>
+                <span style={{ fontSize: 13, color: "var(--ink-soft)", lineHeight: 1.55 }}>{tip}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Protective styles */}
+        <div className="card col-7">
+          <CardHead title="Protective styles" sub="What's safe, what's not" />
+          <div className="col gap-sm">
+            {HAIR_PROT_STYLES.map((s, i) => (
+              <div key={i} className="row" style={{
+                gap: 12, alignItems: "flex-start",
+                background: "var(--card-2)",
+                border: "1px solid var(--line)",
+                borderLeft: "3px solid " + (s.ok ? "var(--accent-2)" : "var(--primary)"),
+                borderRadius: 12,
+                padding: "10px 14px",
+              }}>
+                <span style={{ fontSize: 14, marginTop: 1, flexShrink: 0, color: s.ok ? "var(--accent-2)" : "var(--primary)" }}>
+                  {s.ok ? "✓" : "✗"}
+                </span>
+                <div>
+                  <div style={{ fontSize: 13.5, fontWeight: 600, color: s.ok ? "var(--ink)" : "var(--ink-soft)" }}>{s.style}</div>
+                  <div className="fs-xs text-muted" style={{ marginTop: 2 }}>{s.note}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Strand test */}
+        <div className="card col-5">
+          <CardHead title="Weekly strand test" sub="Before every wash day" />
+          <div style={{ fontSize: 13, color: "var(--ink-soft)", lineHeight: 1.55, marginBottom: 12 }}>
+            Pull one shed hair. Hold each end and stretch slowly. Read the result:
+          </div>
+          <div className="col gap-sm">
+            {HAIR_STRAND.map((item, i) => (
+              <div key={i} style={{
+                background: "var(--card-2)",
+                borderRadius: 12,
+                padding: 12,
+                borderLeft: "3px solid " + item.color,
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)", marginBottom: 3 }}>{item.result}</div>
+                <div className="fs-xs text-muted">{item.meaning}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 8-week master cycle */}
+        <div className="card col-12">
+          <CardHead title="8-week master cycle" sub="The big picture" />
+          <div className="col gap-sm">
+            {HAIR_MASTER_CYCLE.map(({ wk, desc, protein, big }) => {
+              const current = wk === activeWeek;
+              return (
+                <div key={wk} className="row" style={{
+                  gap: 14, alignItems: "flex-start",
+                  padding: "10px 14px",
+                  background: current ? "var(--primary-soft)" : "var(--card-2)",
+                  borderRadius: 12,
+                  border: "1px solid " + (current ? "var(--primary)" : "var(--line)"),
+                }}>
+                  <span style={{
+                    width: 30, height: 30, flexShrink: 0,
+                    borderRadius: "50%",
+                    background: current
+                      ? "linear-gradient(135deg, var(--primary), var(--accent-1))"
+                      : big ? "var(--accent-1-soft)" : protein ? "var(--accent-4-soft)" : "var(--card)",
+                    border: "1px solid " + (current ? "var(--primary)" : "var(--line)"),
+                    display: "grid", placeItems: "center",
+                    fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 14, fontWeight: 600,
+                    color: current ? "white" : "var(--ink)",
+                  }}>{wk}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, color: current ? "var(--ink)" : "var(--ink-soft)", lineHeight: 1.5, fontWeight: current ? 600 : 500 }}>{desc}</div>
+                    {big && <div className="text-mono fs-xs" style={{ letterSpacing: "0.1em", color: "var(--accent-1)", marginTop: 2, fontWeight: 600 }}>← FULL RESET DAY · SAME SESSION</div>}
+                  </div>
+                  {protein && !current && <Pill tone="sun" mono>protein</Pill>}
+                  {big && !current && <Pill tone="peach" mono>reset</Pill>}
+                  {current && <Pill tone="pink" mono>you are here</Pill>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Monthly progress */}
+        <div className="card col-6 card--sun">
+          <CardHead title="📸 Monthly progress photo" sub="Same wash day each month" />
+          <div style={{ fontSize: 13, color: "var(--ink-soft)", lineHeight: 1.6, marginBottom: 12 }}>
+            Growth is slow and you won't see it without documentation. Hair grows ~½″ per month — retention is what makes that stick. Take your photo on your Week 4 clarify day every cycle.
+          </div>
+          <div className="col gap-sm">
+            {[
+              "Blow out hair fully — no shrinkage",
+              "Hold a tape measure alongside your hair",
+              "Same angle, same lighting, every time",
+              "Compare every 8 weeks minimum",
+              "Temple area gets its own close-up — track separately",
+            ].map((tip, i) => (
+              <div key={i} className="row" style={{ gap: 8, alignItems: "flex-start" }}>
+                <span style={{ color: "#8a6a16", fontSize: 13, marginTop: 1, flexShrink: 0 }}>›</span>
+                <span style={{ fontSize: 13, color: "var(--ink-soft)", lineHeight: 1.55 }}>{tip}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Never break */}
+        <div className="card col-6" style={{ background: "#fff5f5", borderColor: "#f7d0d0" }}>
+          <CardHead title="Never break these rules" sub="Non-negotiables" />
+          <div className="col gap-sm">
+            {HAIR_NEVER.map((rule, i) => (
+              <div key={i} className="row" style={{ gap: 8, alignItems: "flex-start" }}>
+                <span style={{ color: "#b1325c", fontSize: 13, marginTop: 1, flexShrink: 0, fontWeight: 700 }}>✗</span>
+                <span style={{ fontSize: 13, color: "var(--ink-soft)", lineHeight: 1.55 }}>{rule}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Lola products */}
+        <div className="col-12">
+          <div className="text-mono fs-xs" style={{ letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--primary-deep)", fontWeight: 600, margin: "16px 0 10px" }}>
+            🇧🇷 Lola from Rio · How to use
+          </div>
+          <div className="bento" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+            {HAIR_LOLA.map((prod, i) => (
+              <div key={i} className="card" style={{ padding: 16 }}>
+                <div className="row row--between" style={{ alignItems: "flex-start", marginBottom: 8, gap: 8 }}>
+                  <div className="text-serif" style={{ fontSize: 17, lineHeight: 1.2, flex: 1 }}>{prod.name}</div>
+                  <Pill tone={prod.tagTone} mono>{prod.tag}</Pill>
+                </div>
+                <div style={{ fontSize: 12.5, color: "var(--ink-soft)", lineHeight: 1.6, marginBottom: 12 }}>{prod.desc}</div>
+                <div style={{ borderTop: "1px dashed var(--line)", paddingTop: 10 }}>
+                  <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>How to use</div>
+                  <div className="col gap-sm">
+                    {prod.howto.map((step, si) => (
+                      <div key={si} className="row" style={{ gap: 6, alignItems: "flex-start" }}>
+                        <span style={{ color: "var(--primary)", fontSize: 12, marginTop: 1, flexShrink: 0 }}>›</span>
+                        <span style={{ fontSize: 12, color: "var(--ink-soft)", lineHeight: 1.55 }}>{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+window.HairView = HairView;
+
+</script>
+<script type="text/babel">
+// Main app
+const { useState: useS, useEffect: useE } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "strawberry",
+  "show": {
+    "today": true,
+    "week": true,
+    "habits": true,
+    "quarter": true,
+    "finance": true,
+    "journal": true,
+    "recipes": true,
+    "content": true,
+    "hair": true,
+    "briefing": true
+  }
+} /*EDITMODE-END*/;
+
+const App = () => {
+  const [tweak, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [shortcut, setShortcut] = useS(null);
+
+  const STORAGE_KEY = "dennika-dashboard-v1";
+
+  const _defaultState = {
+    page: "today",
+    tasks: SEED_TASKS,
+    habits: SEED_HABITS,
+    habitLogs: SEED_HABIT_LOGS,
+    agenda: SEED_AGENDA,
+    gymWeek: SEED_GYM_WEEK,
+    cards: SEED_CARDS,
+    budget: SEED_BUDGET,
+    savings: SEED_SAVINGS,
+    quarterGoals: SEED_QUARTER_GOALS,
+    parking: SEED_PARKING_LOT,
+    journal: SEED_JOURNAL,
+    recipes: SEED_RECIPES,
+    content: SEED_CONTENT,
+    transactions: SEED_TRANSACTIONS,
+    moodWeek: SEED_MOOD_WEEK,
+    hair: { activeWeek: 1, nightlyDone: {}, scalpDays: {} },
+    focus: "",
+    reflections: { wins: "", push: "" },
+    show: TWEAK_DEFAULTS.show
+  };
+
+  const [state, setState] = useS(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return { ..._defaultState, ...JSON.parse(saved) };
+    } catch (e) {}
+    return _defaultState;
+  });
+
+  // Persist every state change to localStorage (debounced 400ms)
+  const _saveTimer = React.useRef(null);
+  useE(() => {
+    clearTimeout(_saveTimer.current);
+    _saveTimer.current = setTimeout(() => {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }, 400);
+  }, [state]);
+
+  // Sync visibility tweaks down into state
+  useE(() => {
+    setState((s) => ({ ...s, show: tweak.show }));
+  }, [tweak.show]);
+
+  // Apply theme on mount + when changed
+  useE(() => {
+    applyTheme(tweak.theme);
+  }, [tweak.theme]);
+
+  const nav = [
+  { id: "today", label: "Today", icon: "spark" },
+  { id: "week", label: "This week", icon: "week" },
+  { id: "habits", label: "Habits", icon: "habit" },
+  { id: "quarter", label: "Quarter", icon: "quarter" },
+  { id: "finance", label: "Finance", icon: "money" },
+  { id: "journal", label: "Journal", icon: "book" },
+  { id: "recipes", label: "Kitchen", icon: "chef" },
+  { id: "content", label: "Content", icon: "sparkle" },
+  { id: "hair", label: "Hair", icon: "leaf" }].
+  filter((n) => state.show[n.id] !== false);
+
+  // Counts for sidebar badges
+  const openTasks = state.tasks.filter((t) => !t.done).length;
+  const badges = {
+    today: openTasks,
+    week: openTasks
+  };
+
+  const VIEWS = {
+    today: TodayView,
+    week: WeekView,
+    habits: HabitsView,
+    quarter: QuarterView,
+    finance: FinanceView,
+    journal: JournalView,
+    recipes: RecipesView,
+    content: ContentView,
+    hair: HairView
+  };
+  const ActiveView = VIEWS[state.page] || TodayView;
+
+  const setPage = (id) => setState((s) => ({ ...s, page: id }));
+
+  return (
+    <div className="app" data-screen-label={state.page}>
+      <aside className="sidebar">
+        <div className="sidebar__brand">
+          <div className="sidebar__brand-mark">D</div>
+          <div>
+            <div className="sidebar__brand-name">Dennika</div>
+            <div className="sidebar__brand-sub">Personal OS · v2</div>
+          </div>
+        </div>
+
+        <div className="sidebar__section-label">Workspace</div>
+        {nav.map((n) =>
+        <NavItem
+          key={n.id}
+          id={n.id}
+          label={n.label}
+          icon={n.icon}
+          active={state.page === n.id}
+          badge={badges[n.id]}
+          onClick={setPage} />
+
+        )}
+
+        <div className="sidebar__section-label">Shortcuts</div>
+        <button className="sidebar__item" data-comment-anchor="5296f3d0d6-button-109-9" onClick={() => setShortcut("mood")}>
+          <span className="sidebar__item-icon"><Icon name="heart" /></span>
+          <span>Mood check-in</span>
+        </button>
+        <button className="sidebar__item" onClick={() => setShortcut("briefing")}>
+          <span className="sidebar__item-icon"><Icon name="phone" /></span>
+          <span>Briefing settings</span>
+        </button>
+
+        <div className="sidebar__footer">
+          <div className="sidebar__avatar">D</div>
+          <div>
+            <div className="sidebar__user">Dennika</div>
+            <div className="sidebar__streak">14-day streak 🔥</div>
+          </div>
+        </div>
+      </aside>
+
+      <main className="main" data-screen-label={state.page}>
+        <ActiveView state={state} setState={setState} />
+      </main>
+
+      <DashboardTweaks tweak={tweak} setTweak={setTweak} />
+      {shortcut === "mood" && <MoodCheckInModal state={state} setState={setState} onClose={() => setShortcut(null)} />}
+      {shortcut === "briefing" && <BriefingSettingsModal onClose={() => setShortcut(null)} />}
+    </div>);
+
+};
+
+// ----------------- Shortcut modals -----------------
+const Modal = ({ title, sub, onClose, children, accent = "var(--primary)" }) => (
+  <div
+    style={{ position: "fixed", inset: 0, background: "rgba(58,29,40,0.42)", zIndex: 60, display: "grid", placeItems: "center", padding: 24, backdropFilter: "blur(4px)" }}
+    onClick={onClose}>
+    <div
+      className="card"
+      style={{ maxWidth: 460, width: "100%", padding: 0, overflow: "hidden", boxShadow: "var(--shadow-lg)" }}
+      onClick={(e) => e.stopPropagation()}>
+      <div style={{ height: 6, background: accent }}/>
+      <div style={{ padding: 22 }}>
+        <div className="row row--between" style={{ alignItems: "flex-start", marginBottom: 18 }}>
+          <div>
+            <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.14em", textTransform: "uppercase" }}>{sub}</div>
+            <h3 className="text-serif" style={{ fontSize: 30, margin: "4px 0 0", lineHeight: 1.1 }}>{title}</h3>
+          </div>
+          <button className="btn btn--icon" onClick={onClose}><Icon name="x" size={14}/></button>
+        </div>
+        {children}
+      </div>
+    </div>
+  </div>
+);
+
+const MoodCheckInModal = ({ state, setState, onClose }) => {
+  const [chosen, setChosen] = useS(state.moodWeek[1].emoji);
+  const [note, setNote] = useS("");
+
+  const save = () => {
+    setState((s) => ({
+      ...s,
+      moodWeek: s.moodWeek.map((m, i) => i === 1 ? { ...m, emoji: chosen, mood: 4 } : m)
+    }));
+    onClose();
+  };
+
+  return (
+    <Modal title="How are you, really?" sub={`Mood check-in · ${new Date().toLocaleDateString("en-US",{weekday:"long"})}`} onClose={onClose}>
+      <div className="mood-grid" style={{ gap: 10 }}>
+        {MOOD_OPTIONS.map((opt) => {
+          const active = chosen === opt.emoji;
+          return (
+            <button key={opt.id} className="mood-pick" onClick={() => setChosen(opt.emoji)}>
+              <span className={cls("mood-emoji", active && "mood-emoji--active")} style={{ width: 48, height: 48, fontSize: 24 }}>{opt.emoji}</span>
+              <span className="mood-label">{opt.label}</span>
+            </button>);
+        })}
+      </div>
+
+      <div className="mt-lg">
+        <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>One-line note (optional)</div>
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="What's shaping the day?"
+          style={{ width: "100%", minHeight: 70, border: "1px solid var(--line)", borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.5, background: "var(--card-2)", outline: "none", resize: "vertical" }}/>
+      </div>
+
+      <div className="row row--between mt-lg">
+        <div className="text-mono fs-xs text-muted">Auto-logs to your journal mood trend</div>
+        <div className="row gap-sm">
+          <button className="btn btn--ghost" onClick={onClose}>Skip</button>
+          <button className="btn btn--pink" onClick={save}><Icon name="check" size={14}/> Save</button>
+        </div>
+      </div>
+    </Modal>);
+};
+
+const BriefingSettingsModal = ({ onClose }) => {
+  const [time, setTime] = useS("08:00");
+  const [channel, setChannel] = useS("iMessage");
+  const [includes, setIncludes] = useS({
+    weather: true,
+    agenda: true,
+    tasks: true,
+    focus: true,
+    habits: false,
+    quote: true
+  });
+
+  const toggle = (k) => setIncludes((i) => ({ ...i, [k]: !i[k] }));
+
+  const include = [
+    ["weather", "Today's weather"],
+    ["agenda",  "Calendar events"],
+    ["tasks",   "Open tasks (1–5)"],
+    ["focus",   "Weekly focus"],
+    ["habits",  "Today's habit list"],
+    ["quote",   "Tiny morning quote"]
+  ];
+
+  return (
+    <Modal title="Morning briefing" sub="Settings · sends every morning" onClose={onClose} accent="var(--accent-3)">
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+        <div>
+          <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Delivery time</div>
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            style={{ width: "100%", border: "1px solid var(--line)", borderRadius: 10, padding: "10px 12px", fontSize: 14, fontFamily: "var(--font-mono)", background: "var(--card-2)", outline: "none" }}/>
+        </div>
+        <div>
+          <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Channel</div>
+          <div className="row gap-sm" style={{ gap: 4 }}>
+            {["iMessage", "SMS", "Email"].map((c) => (
+              <button
+                key={c}
+                onClick={() => setChannel(c)}
+                style={{
+                  flex: 1,
+                  padding: "10px 8px",
+                  border: channel === c ? "1px solid var(--primary)" : "1px solid var(--line)",
+                  background: channel === c ? "var(--primary-soft)" : "var(--card)",
+                  color: channel === c ? "var(--primary-deep)" : "var(--ink-soft)",
+                  fontWeight: channel === c ? 600 : 500,
+                  borderRadius: 10,
+                  fontSize: 12.5,
+                  cursor: "pointer"
+                }}>{c}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="text-mono fs-xs text-muted" style={{ letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>What to include</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        {include.map(([k, label]) => {
+          const on = includes[k];
+          return (
+            <button
+              key={k}
+              onClick={() => toggle(k)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: "1px solid var(--line)",
+                background: on ? "var(--primary-soft)" : "var(--card-2)",
+                cursor: "pointer",
+                textAlign: "left",
+                fontFamily: "inherit",
+                fontSize: 13,
+                color: on ? "var(--primary-deep)" : "var(--ink-soft)",
+                fontWeight: on ? 600 : 500
+              }}>
+              <span style={{
+                width: 16, height: 16, borderRadius: 5,
+                background: on ? "var(--primary)" : "white",
+                border: on ? "0" : "1.5px solid var(--line)",
+                color: "white", display: "grid", placeItems: "center", flexShrink: 0
+              }}>
+                {on && <Icon name="check" size={11} stroke={2.6}/>}
+              </span>
+              {label}
+            </button>);
+        })}
+      </div>
+
+      <div className="card card--pink" style={{ marginTop: 18, padding: 14 }}>
+        <div className="text-mono fs-xs" style={{ letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--primary-deep)", marginBottom: 6 }}>Preview · arrives at {time}</div>
+        <div style={{ whiteSpace: "pre-line", fontSize: 12.5, lineHeight: 1.55, color: "var(--ink)" }}>
+{`Good morning Dennika ✦
+${includes.weather ? "70° and sunny, light breeze\n" : ""}${includes.agenda ? "📅 3 events today\n" : ""}${includes.tasks ? "✅ 4 open tasks\n" : ""}${includes.focus ? '"Move slow. Finish the newsletter."\n' : ""}${includes.habits ? "🌸 5 habits queued\n" : ""}${includes.quote ? "✨ \"Begin gently.\"" : ""}`}
+        </div>
+      </div>
+
+      <div className="row row--between mt-lg">
+        <div className="text-mono fs-xs text-muted">Delivered via {channel}</div>
+        <div className="row gap-sm">
+          <button className="btn btn--ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn--pink" onClick={onClose}><Icon name="check" size={14}/> Save</button>
+        </div>
+      </div>
+    </Modal>);
+};
+
+// ----------------- Tweaks panel -----------------
+const DashboardTweaks = ({ tweak, setTweak }) => {
+  const toggleShow = (key) => {
+    setTweak("show", { ...tweak.show, [key]: !tweak.show[key] });
+  };
+
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection title="Color theme" subtitle="Swap palettes anywhere">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {Object.entries(THEMES).map(([key, t]) => {
+            const active = tweak.theme === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setTweak("theme", key)}
+                style={{
+                  border: active ? "2px solid var(--primary)" : "1px solid var(--line)",
+                  borderRadius: 12,
+                  padding: 10,
+                  background: t.vars["--card"],
+                  cursor: "pointer",
+                  textAlign: "left",
+                  fontFamily: "inherit"
+                }}>
+                
+                <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
+                  {t.swatches.map((c, i) =>
+                  <div key={i} style={{ width: 18, height: 18, borderRadius: "50%", background: c, border: i === 0 ? "1px solid #00000010" : "none" }} />
+                  )}
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: t.vars["--ink"] }}>{t.label}</div>
+              </button>);
+
+          })}
+        </div>
+      </TweakSection>
+
+      <TweakSection title="Show components" subtitle="Toggle widgets and views on/off">
+        {[
+        ["today", "Today dashboard"],
+        ["week", "Week view"],
+        ["habits", "Habit tracker"],
+        ["quarter", "Quarter view"],
+        ["finance", "Finance & budget"],
+        ["journal", "Journal"],
+        ["recipes", "Recipe library"],
+        ["content", "Content ideas"],
+        ["hair", "Hair regimen"],
+        ["briefing", "SMS briefing preview"]].
+        map(([key, label]) =>
+        <TweakToggle
+          key={key}
+          label={label}
+          value={!!tweak.show[key]}
+          onChange={() => toggleShow(key)} />
+
+        )}
+      </TweakSection>
+
+      <TweakSection title="Tips">
+        <div style={{ fontSize: 11.5, lineHeight: 1.55, color: "var(--muted)", fontFamily: "var(--font-mono)" }}>
+          · Click any checkbox to feel a confetti pop<br />
+          · Tap habit cells to toggle daily marks<br />
+          · Click on any task or goal text to edit<br />
+          · The mood emojis on Today save your day's vibe
+        </div>
+      </TweakSection>
+    </TweaksPanel>);
+
+};
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>

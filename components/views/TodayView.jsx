@@ -1,11 +1,20 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { MOOD_OPTIONS, DAYS_OF_WEEK, cls } from '@/lib/helpers';
 import { CardHead, Pill, burstConfetti } from '@/components/ui/primitives';
 import Icon from '@/components/ui/Icon';
 
 export default function TodayView({ state, setState }) {
-  const { tasks, agenda, gymWeek, habits, habitLogs, moodWeek, journal, parking } = state;
+  const { tasks, gymWeek, habits, habitLogs, moodWeek, journal, parking } = state;
+  const [calendar, setCalendar] = useState({ connected: null, events: [] });
+
+  useEffect(() => {
+    fetch('/api/calendar')
+      .then(r => r.json())
+      .then(setCalendar)
+      .catch(() => {});
+  }, []);
 
   const now = new Date();
   const TODAY_IDX = (now.getDay() + 6) % 7;
@@ -46,10 +55,10 @@ export default function TodayView({ state, setState }) {
   };
 
   const briefingMsg = `Good morning Dennika ✦\n${greeting}\n\n📅 Today:\n${
-    agenda.slice(0, 3).map(a => `• ${a.time} ${a.title}`).join('\n') || '• No events'
+    calendar.events.slice(0, 3).map(a => `• ${a.time} ${a.title}`).join('\n') || '• No events'
   }\n\n✅ Tasks (${taskDone}/${todayTasks.length}):\n${
     todayTasks.map((t, i) => `${i + 1}. ${t.text}`).join('\n') || '• All clear'
-  }\n\nReply "done 1 2" to check off`;
+  }`;
 
   const latestJournal = journal[0];
 
@@ -111,22 +120,33 @@ export default function TodayView({ state, setState }) {
         <div className="card col-5">
           <CardHead
             title="Today's agenda"
-            sub={`${agenda.length} events`}
-            right={<Pill tone="lilac" mono>Google Cal soon</Pill>}
+            sub={calendar.connected ? `${calendar.events.length} events` : 'Google Calendar'}
+            right={
+              calendar.connected === true
+                ? <Pill tone="mint" mono>Live</Pill>
+                : calendar.connected === false
+                ? <a href="/api/auth/google" style={{ fontSize: 11, color: 'var(--primary)', fontFamily: 'var(--font-mono)', textDecoration: 'none', letterSpacing: '0.08em' }}>Connect →</a>
+                : <Pill tone="lilac" mono>Loading…</Pill>
+            }
           />
-          {agenda.length === 0
-            ? <div className="empty">No events · Google Calendar sync coming soon</div>
-            : agenda.map(a => (
-              <div key={a.id} className="agenda-item">
-                <div className="agenda-time">{a.time}</div>
-                <div className="agenda-bar" style={{ background: a.color }}/>
-                <div>
-                  <div className="agenda-title">{a.title}</div>
-                  <div className="agenda-meta">{a.meta}</div>
-                </div>
+          {calendar.connected === false && (
+            <div className="empty" style={{ textAlign: 'center' }}>
+              <a href="/api/auth/google" style={{ color: 'var(--primary)' }}>Connect Google Calendar →</a>
+            </div>
+          )}
+          {calendar.connected === true && calendar.events.length === 0 && (
+            <div className="empty">No events today</div>
+          )}
+          {calendar.events.map(a => (
+            <div key={a.id} className="agenda-item">
+              <div className="agenda-time">{a.time}</div>
+              <div className="agenda-bar" style={{ background: a.color }}/>
+              <div>
+                <div className="agenda-title">{a.title}</div>
+                {a.meta && <div className="agenda-meta">{a.meta}</div>}
               </div>
-            ))
-          }
+            </div>
+          ))}
         </div>
 
         <div className="card col-5">

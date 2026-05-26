@@ -435,7 +435,6 @@ function EntryEditor({ habits, onSave, prefillPrompt, onClearPrompt }) {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showRandomizer, setShowRandomizer] = useState(false);
   const [showHabits, setShowHabits] = useState(false);
-  const [autotagging, setAutotagging] = useState(false);
   const [listening, setListening] = useState(false);
   const bodyRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -472,15 +471,24 @@ function EntryEditor({ habits, onSave, prefillPrompt, onClearPrompt }) {
     setField('tags', next);
   };
 
-  const autotag = async () => {
-    if (!draft.title && !draft.body) return;
-    setAutotagging(true);
-    try {
-      const res = await fetch('/api/journal/autotag', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: draft.title, body: draft.body }) });
-      const { tags } = await res.json();
-      if (tags?.length) setField('tags', [...new Set([...draft.tags, ...tags])]);
-    } catch {}
-    setAutotagging(false);
+  const autotag = () => {
+    const text = (draft.title + ' ' + draft.body).toLowerCase();
+    const keywords = {
+      work:      ['work', 'job', 'boss', 'office', 'career', 'meeting', 'coworker', 'client', 'salary', 'promotion', 'deadline', 'manager', 'corporate', 'interview'],
+      family:    ['family', 'mom', 'dad', 'sister', 'brother', 'parent', 'grandma', 'grandpa', 'aunt', 'uncle', 'cousin', 'childhood', 'home'],
+      friends:   ['friend', 'bestie', 'girls', 'squad', 'hangout', 'brunch', 'friendship', 'besties', 'homegirl', 'group chat'],
+      love:      ['date', 'dating', 'boyfriend', 'girlfriend', 'relationship', 'crush', 'romance', 'heartbreak', 'situationship', 'talking to', 'ex ', 'love interest', 'boo'],
+      selfcare:  ['skincare', 'nails', 'spa', 'bath', 'relax', 'self-care', 'self care', 'massage', 'routine', 'rest day', 'pampering'],
+      growth:    ['growth', 'therapy', 'improve', 'mindset', 'reflect', 'lesson', 'learning', 'better myself', 'habit', 'discipline', 'accountability'],
+      mental:    ['anxiety', 'stress', 'overwhelm', 'depression', 'mental health', 'sad', 'crying', 'struggle', 'breakdown', 'spiral', 'overthinking', 'exhausted'],
+      gratitude: ['grateful', 'thankful', 'blessed', 'appreciate', 'gratitude', 'thankful', 'abundance'],
+      goals:     ['goal', 'dream', 'vision', 'plan', 'future', 'ambition', 'aspire', 'manifest', 'intention'],
+      body:      ['gym', 'workout', 'fitness', 'exercise', 'running', 'walking', 'eating', 'body', 'weight', 'health', 'nutrition', 'hair', 'skin'],
+    };
+    const matched = Object.entries(keywords)
+      .filter(([, words]) => words.some(w => text.includes(w)))
+      .map(([tag]) => tag);
+    if (matched.length) setField('tags', [...new Set([...draft.tags, ...matched])]);
   };
 
   const toggleVoice = () => {
@@ -609,8 +617,8 @@ function EntryEditor({ habits, onSave, prefillPrompt, onClearPrompt }) {
                 background: draft.tags.includes(tag.id) ? tag.bg : 'transparent', color: draft.tags.includes(tag.id) ? tag.color : 'var(--muted)', fontFamily: 'inherit', transition: 'all 0.15s', fontWeight: draft.tags.includes(tag.id) ? 600 : 400,
               }}>{tag.label}</button>
             ))}
-            <button onClick={autotag} disabled={autotagging} style={{ padding: '3px 10px', borderRadius: 8, fontSize: 11, cursor: 'pointer', border: '1.5px dashed var(--primary)', background: 'transparent', color: 'var(--primary)', fontFamily: 'inherit' }}>
-              {autotagging ? '...' : '✦ Auto-tag'}
+            <button onClick={autotag} style={{ padding: '3px 10px', borderRadius: 8, fontSize: 11, cursor: 'pointer', border: '1.5px dashed var(--primary)', background: 'transparent', color: 'var(--primary)', fontFamily: 'inherit' }}>
+              ✦ Auto-tag
             </button>
           </div>
         </div>

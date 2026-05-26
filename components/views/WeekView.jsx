@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DAYS_OF_WEEK, cls } from '@/lib/helpers';
 import { CardHead, Pill, Editable, burstConfetti } from '@/components/ui/primitives';
 import Icon from '@/components/ui/Icon';
@@ -20,6 +20,7 @@ function getWeekRange(offsetWeeks = 0) {
 export default function WeekView({ state, setState }) {
   const { tasks, gymWeek } = state;
   const [weekOffset, setWeekOffset] = useState(0);
+  const [calEvents, setCalEvents] = useState({});
 
   const now = new Date();
   const TODAY_IDX = (now.getDay() + 6) % 7;
@@ -31,10 +32,27 @@ export default function WeekView({ state, setState }) {
     return DAYS_OF_WEEK.map((_, i) => {
       const d = new Date(now);
       d.setDate(now.getDate() + mondayOffset + i);
-      return d.getDate();
+      return d;
     });
   };
-  const weekDates = getWeekDates(weekOffset);
+  const weekDateObjs = getWeekDates(weekOffset);
+  const weekDates = weekDateObjs.map(d => d.getDate());
+
+  const toDateStr = (d) => {
+    const s = d.toLocaleDateString('en-US', {
+      timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+    });
+    const [mo, day, y] = s.split('/');
+    return `${y}-${mo}-${day}`;
+  };
+
+  useEffect(() => {
+    const dates = weekDateObjs.map(toDateStr).join(',');
+    fetch(`/api/calendar?dates=${dates}`)
+      .then(r => r.json())
+      .then(data => { if (data.connected) setCalEvents(data.eventsByDate || {}); })
+      .catch(() => {});
+  }, [weekOffset]);
 
   const toggleTask = (id, e) => {
     if (e && !tasks.find(t => t.id === id).done) {
@@ -135,6 +153,8 @@ export default function WeekView({ state, setState }) {
 
         {taskByDay.map((col, i) => {
           const isToday = weekOffset === 0 && col.day === todayShort;
+          const dayStr = toDateStr(weekDateObjs[i]);
+          const dayCalEvents = calEvents[dayStr] || [];
           return (
             <div key={col.day} className={cls('card', 'col-3', isToday && 'card--pink')} style={{ minHeight: 200 }}>
               <div className="row row--between" style={{ marginBottom: 10 }}>
@@ -144,7 +164,16 @@ export default function WeekView({ state, setState }) {
                 </div>
                 {isToday && <Pill tone="pink" mono>today</Pill>}
               </div>
-              {col.items.length === 0 && <div className="empty" style={{ padding: '12px 0' }}>nothing yet</div>}
+              {dayCalEvents.map(e => (
+                <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', borderBottom: '1px dashed var(--line)', marginBottom: 2 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--primary)', flexShrink: 0 }}/>
+                  <div style={{ flex: 1, overflow: 'hidden' }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.title}</div>
+                    <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>{e.time}</div>
+                  </div>
+                </div>
+              ))}
+              {col.items.length === 0 && dayCalEvents.length === 0 && <div className="empty" style={{ padding: '12px 0' }}>nothing yet</div>}
               {col.items.map(t => (
                 <div key={t.id} className={cls('task', t.done && 'task--done')} style={{ padding: '6px 0', borderBottom: '1px dashed var(--line)' }}>
                   <button

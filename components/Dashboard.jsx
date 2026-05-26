@@ -35,6 +35,8 @@ export default function Dashboard({ initialData }) {
   const [theme, setTheme] = useState('strawberry');
   const [tweakOpen, setTweakOpen] = useState(false);
   const [shortcut, setShortcut] = useState(null);
+  const [briefingSending, setBriefingSending] = useState(false);
+  const [briefingStatus, setBriefingStatus] = useState(null);
   const saveTimer = useRef(null);
 
   useEffect(() => {
@@ -124,6 +126,27 @@ export default function Dashboard({ initialData }) {
             ))}
           </div>
 
+          <div className="text-mono fs-xs text-muted" style={{ letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>Morning briefing</div>
+          <button
+            className="btn btn--pink"
+            style={{ width: '100%', marginBottom: 18, fontSize: 12, justifyContent: 'center' }}
+            disabled={briefingSending}
+            onClick={async () => {
+              setBriefingSending(true);
+              setBriefingStatus(null);
+              try {
+                const r = await fetch('/api/briefing/send', { method: 'POST' });
+                const j = await r.json();
+                setBriefingStatus(j.ok ? 'sent' : 'error');
+              } catch {
+                setBriefingStatus('error');
+              }
+              setBriefingSending(false);
+              setTimeout(() => setBriefingStatus(null), 4000);
+            }}
+          >
+            {briefingSending ? 'Sending…' : briefingStatus === 'sent' ? '✓ Sent to your phone!' : briefingStatus === 'error' ? '✗ Error — check Vercel logs' : '📱 Send test briefing now'}
+          </button>
           <div className="text-mono fs-xs text-muted" style={{ letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>Show views</div>
           <div className="col gap-sm">
             {NAV.map(n => (

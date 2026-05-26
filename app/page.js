@@ -1,29 +1,45 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { getDefaultState } from '@/lib/defaultData';
-import { getDb } from '@/lib/db';
 import PinGate from '@/components/PinGate';
 import Dashboard from '@/components/Dashboard';
 
-async function getData() {
-  try {
-    const sql = getDb();
-    await sql`
-      CREATE TABLE IF NOT EXISTS dashboard_data (
-        user_id TEXT PRIMARY KEY,
-        data JSONB NOT NULL,
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `;
-    const rows = await sql`SELECT data FROM dashboard_data WHERE user_id = 'dennika'`;
-    if (rows.length === 0) return getDefaultState();
-    return { ...getDefaultState(), ...rows[0].data };
-  } catch (err) {
-    console.error('getData error:', err);
-    return getDefaultState();
-  }
-}
+export default function Page() {
+  const [initialData, setInitialData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-export default async function Page() {
-  const initialData = await getData();
+  useEffect(() => {
+    fetch('/api/data')
+      .then(r => r.json())
+      .then(data => {
+        setInitialData({ ...getDefaultState(), ...data });
+        setLoading(false);
+      })
+      .catch(() => {
+        setInitialData(getDefaultState());
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'var(--bg)',
+        display: 'grid',
+        placeItems: 'center',
+        fontFamily: 'var(--font-mono)',
+        fontSize: 12,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        color: 'var(--muted)',
+      }}>
+        Loading…
+      </div>
+    );
+  }
+
   return (
     <PinGate>
       <Dashboard initialData={initialData} />

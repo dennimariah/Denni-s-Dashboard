@@ -1146,8 +1146,8 @@ function ContentTab({ state, setState }) {
   );
 }
 
-// ─── EDUCATION ────────────────────────────────────────────────────────────────
-function EducationTab({ state, setState }) {
+// ─── PRO DEV ──────────────────────────────────────────────────────────────────
+function ProDevTab({ state, setState }) {
   const edu = state.scEducation || {};
   const ceLog = edu.ceLog || [];
   const wishlist = edu.wishlist || [];
@@ -1398,9 +1398,407 @@ function OperationsModal({ state, setState, onClose }) {
   );
 }
 
+// ─── HAIR EDUCATION ───────────────────────────────────────────────────────────
+const HAIR_LEVEL_COLORS = { Beginner:'#5a8a6a', Intermediate:'#b8860b', Advanced:'#d68d84', Opinionated:'#2c2c2c' };
+
+const HAIR_SCRIPTS = [
+  {
+    id:'hs01', level:'Beginner',
+    title:'Porosity Is the Thing That Changes Everything',
+    hook:"Your curl pattern doesn't tell you what products to use. Your porosity does — and most people have no idea what theirs is.",
+    body:`Porosity is how well your hair absorbs and holds onto moisture. There are three levels. Low porosity means your cuticles lay flat and tightly closed — water beads up, products sit on top, and your hair takes forever to get fully wet. High porosity means your cuticles are raised or have gaps, so hair absorbs moisture quickly but loses it just as fast. Normal porosity is the middle ground.
+
+Here's a quick test. Take a clean strand of hair and drop it in a glass of water. If it sinks fast, your porosity is high. If it floats for a long time, it's low.
+
+Why does this matter? Low porosity hair needs lightweight products and heat to help products actually penetrate — heavy creams just sit on top. High porosity hair needs protein to fill those gaps and heavy sealants to lock moisture in before it evaporates.
+
+Most 4B and 4C hair is naturally high porosity. Heat damage and chemical processing make it more so. Once you know your porosity, product selection gets a lot less confusing.
+
+Today's Challenge for the comment section: Drop a water drop emoji if you're high porosity and a snowflake if you're low.`,
+  },
+  {
+    id:'hs02', level:'Beginner',
+    title:'Shedding vs. Breakage — These Are Not the Same Thing',
+    hook:"If you're losing hair and you don't know where it's coming from — you're going to treat the wrong problem.",
+    body:`There are two reasons hair leaves your head and they require completely different responses.
+
+Shedding is normal. Hair that has a small white bulb at the root has completed its growth cycle and released naturally. You shed between 50 and 100 strands a day — that's healthy. You cannot stop normal shedding with any product.
+
+Breakage has no bulb. It's a shorter piece, it can come from anywhere on the strand, and it means the hair broke — it did not shed. Breakage comes from dryness, excessive manipulation, heat damage, protein deficiency, or tension. This is what you can and should address.
+
+Here's why this matters: if you're seeing a lot of hair and you assume it's shedding, you might do nothing. If you assume it's all breakage, you might over-protein treat and make things worse. Look at the strand. White bulb — let it go. No bulb — that's something to investigate.
+
+Most women doing heavy protective styles think they're shedding when they take the style down. Some of it is shedding that accumulated. Some of it is breakage from the tension. Learning to tell the difference is how you start making real progress.`,
+  },
+  {
+    id:'hs03', level:'Beginner',
+    title:"Your Hair IS Growing. You're Breaking It Off.",
+    hook:"The reason most Black women feel like their hair won't grow has nothing to do with their hair not growing.",
+    body:`Hair grows on average half an inch per month regardless of your ethnicity or curl pattern. That's up to six inches a year. If your hair isn't getting longer, the issue is almost never that it stopped growing. The issue is that you're losing length as fast as — or faster than — it comes in.
+
+This is called length retention, and it's the real conversation.
+
+Common retention killers: dry ends that snap off, heat damage that weakens the shaft, detangling too aggressively when hair is dry, sleeping on cotton, tight styles that create tension at the hairline and nape, and skipping protective styles on vulnerable ends.
+
+If you want to retain length, moisturize and seal your ends consistently, protect your hair at night with satin or silk, minimize heat, and handle your hair gently especially when it's wet — that's when it's most vulnerable.
+
+The hair is growing. Focus on keeping what you have.`,
+  },
+  {
+    id:'hs04', level:'Beginner',
+    title:'What the LCO Method Is Actually Doing',
+    hook:"The order you layer your products matters more than which products you're using.",
+    body:`LCO stands for Liquid, Cream, Oil — and the order is not random.
+
+Step one is liquid. Water or a water-based leave-in is the only thing that actually hydrates the hair shaft. Water molecules are small enough to penetrate the cortex. Your hair needs this first.
+
+Step two is cream. A moisturizing cream helps lock that water in and for high porosity hair, it helps fill some of the gaps in the cuticle.
+
+Step three is oil. Oil molecules are too large to enter the hair shaft — they sit on top of the cuticle and seal everything underneath. This slows down moisture evaporation.
+
+If you put oil on first, you've sealed the cuticle before moisture had a chance to get in. If you skip cream and go straight to oil, you're sealing less effectively.
+
+For low porosity hair, LOC — Liquid, Oil, Cream — sometimes works better because the light oil helps product absorb rather than sitting on top.
+
+The method is simple but the science behind it is real. Try it consistently for four weeks and watch the difference.`,
+  },
+  {
+    id:'hs05', level:'Beginner',
+    title:'Your Clarifying Shampoo Is Not Optional',
+    hook:"If you haven't clarified your hair in over a month, your products are probably not working the way they should.",
+    body:`Clarifying removes what your regular shampoo cannot: silicone buildup, hard water mineral deposits, accumulated product residue, and excess sebum. Over time all of that coats the hair shaft and blocks moisture from getting in.
+
+Signs you're overdue for a clarify: your moisturizer stopped absorbing the way it used to, your hair feels coated or waxy even after washing, you're getting more tangles than usual, your scalp is itchy, or your products just feel like they stopped working.
+
+Clarify once a month at minimum. If you use a lot of heavy products, wash infrequently, or have hard water, you may need to do it every two to three weeks.
+
+One important thing: clarifying shampoo strips everything — buildup and moisture. Always follow with a deep conditioner. Do not skip this step.
+
+An apple cider vinegar rinse is also an option for a lighter reset — it lowers the pH of the hair, closes the cuticle, and removes some buildup without being as harsh as a full clarifying shampoo. A good add-on between clarifying sessions.`,
+  },
+  {
+    id:'hs06', level:'Intermediate',
+    title:'The Protein-Moisture Balance — What It Actually Means',
+    hook:"Hair that stretches and never snaps back needs protein. Hair that snaps immediately with no stretch needs moisture. Most people are treating the wrong one.",
+    body:`Hair is made of a protein called keratin. When that protein structure is compromised — from heat, chemicals, or mechanical damage — the hair loses its elasticity and integrity. Protein treatments temporarily fill gaps in the cuticle and restore some of that structure.
+
+But here's where people go wrong: too much protein makes hair rigid and brittle. It'll snap with the slightest tension. Too much moisture without enough protein creates what's called hygral fatigue — the hair absorbs water so easily it swells and contracts repeatedly, weakening the strand. That hair feels gummy and mushy when wet.
+
+The test is simple. Take a wet strand and gently stretch it. If it stretches excessively and stays stretched or feels gummy, add protein. If it snaps immediately with almost no stretch, add moisture. If it stretches about 30% and returns, your balance is good.
+
+High porosity hair typically needs more frequent protein because gaps in the cuticle mean it loses both moisture and structural integrity faster. Low porosity hair can reach protein overload more quickly because protein products don't absorb as easily and can build up.
+
+Always follow a protein treatment with a moisturizing deep conditioner. Protein without moisture after is how people end up with straw-like hair.`,
+  },
+  {
+    id:'hs07', level:'Intermediate',
+    title:'Why pH Matters in Your Routine',
+    hook:"The reason your hair feels rough after some washes and smooth after others isn't the product — it's the pH.",
+    body:`Your hair's natural pH is between 4.5 and 5.5 — slightly acidic. At that pH the cuticle lays flat. Flat cuticle means smoother hair, less tangles, better moisture retention, more shine.
+
+Alkaline products — anything above pH 7 — cause the cuticle to lift. Lifted cuticles feel rough, tangle more easily, and lose moisture faster. Many cleansers are slightly alkaline because it helps with lather, which is one reason hair can feel stripped after washing.
+
+Water is pH 7 — neutral. So even rinsing with tap water temporarily raises your hair's pH, which is why finishing a wash with an acidic rinse makes a real difference.
+
+What helps close the cuticle: apple cider vinegar diluted in water, aloe vera juice which has a pH around 4.5, and products formulated to be acidic. This is why products like Redken Acidic Bonding Concentrate are effective — they're intentionally formulated to restore the hair's pH after chemical or heat damage.
+
+If your hair feels rough and tangled right after washing, it's almost always a pH issue, not a moisture issue. An acidic final rinse takes 30 seconds and you'll feel the difference immediately.`,
+  },
+  {
+    id:'hs08', level:'Intermediate',
+    title:'The Strand Test — Do This Before Every New Treatment',
+    hook:"Before you put any new treatment on your entire head, take 30 seconds and do this first.",
+    body:`The strand test is how you figure out what your hair actually needs right now — not what a product label says, not what worked last month, but today.
+
+Take a clean, dry strand of hair. Hold each end and gently stretch it.
+
+If it snaps immediately with no stretch: your hair is brittle and dry. It needs moisture before anything else.
+
+If it stretches far and stays stretched without snapping back: your hair is over-moisturized and lacks protein. It needs a protein treatment.
+
+If it stretches slightly — around 30% — and returns to its original length: your balance is healthy. Maintain what you're doing.
+
+For a wet strand test: take a wet strand and stretch it. If it stretches excessively and feels gummy or almost mushy, this is hygral fatigue — too much moisture, protein needed. If it snaps while wet with very little stretch, your hair is extremely compromised and needs immediate protein and moisture restoration carefully.
+
+Do this test whenever you're about to introduce a new treatment, after a stressful period, after extended heat use, or any time your hair is behaving differently than normal. It takes less than a minute and removes all the guesswork.`,
+  },
+  {
+    id:'hs09', level:'Intermediate',
+    title:'Why You Keep Breaking at the Same Spot',
+    hook:"If your hair always breaks at the same place on the strand, that's not random. Your hair is telling you exactly what happened to it.",
+    body:`Mid-shaft breakage — hair that snaps somewhere in the middle of the strand rather than at the end — means there was a specific point of trauma on that hair.
+
+The most common causes: repeated heat at the same temperature, chemical processing where the new growth meets previously treated hair, elastic bands or accessories worn at the same point repeatedly, or anywhere the hair makes consistent contact with a rough surface — a coat collar, the back of a chair, a cotton pillowcase.
+
+This type of breakage is structural. The cortex at that point is compromised. Moisture alone won't fix it. You need protein to temporarily reinforce the cuticle at those points and you need to identify and eliminate whatever caused the damage in the first place.
+
+If it's heat, lower your temperature or reduce frequency. If it's an elastic band, switch to seamless bands and vary where you place them. If it's your pillowcase, switch to satin tonight.
+
+Mid-shaft splits won't seal back together — once a split starts it travels up the shaft. If you see them, trim them. Then address the source.`,
+  },
+  {
+    id:'hs10', level:'Intermediate',
+    title:'Your Scalp Is the Soil — Treat It Like It',
+    hook:"You can use the best products on the market. If your scalp is unhealthy, your hair will show it.",
+    body:`The scalp is where every strand of hair is born. A healthy scalp means clean follicles, balanced sebum production, and adequate blood circulation to the follicle. When any of those are off, the hair that grows reflects it.
+
+Product buildup, silicone residue, and dry scalp all block or inflame follicles. Chronic inflammation at the follicle is one of the primary precursors to hair thinning.
+
+Signs of an unhealthy scalp: persistent itching or flaking, tenderness when touching the scalp, slower growth than usual, thinning near the hairline or crown, or hair that seems weak from the root.
+
+What genuinely helps: regular cleansing — weekly to biweekly depending on your lifestyle — scalp massages which have research supporting increased hair thickness by stimulating blood flow to follicles, lightweight oils that penetrate rather than just coat, and rosemary oil specifically, which has been studied and shown results comparable to minoxidil for hair growth stimulation.
+
+What consistently hurts: leaving heavy product directly on the scalp for weeks, tight installs with no scalp access, and skipping clarifying which allows buildup to accumulate directly at the follicle opening.
+
+Treat your scalp like soil. What grows out of it depends entirely on what you put into it.`,
+  },
+  {
+    id:'hs11', level:'Advanced',
+    title:'Understanding Your Hair Growth Cycles',
+    hook:"Your hair is not always growing. There are phases — and knowing them explains almost everything people panic about.",
+    body:`Every strand of hair on your head is in one of three phases at any given time.
+
+Anagen is the active growth phase. This is when the follicle is producing new cells and the strand is actively lengthening. Anagen lasts two to seven years for scalp hair, and its duration is largely genetic — this is what determines your maximum possible hair length.
+
+Catagen is a brief transition phase lasting two to three weeks. The follicle shrinks and detaches from its blood supply. Growth stops.
+
+Telogen is the resting phase. The hair sits in the follicle for about three months before shedding naturally. This is normal shedding — the white bulb strand.
+
+At any point, roughly 85 to 90 percent of your scalp hair is in anagen. The remaining percentage is resting and preparing to shed.
+
+Why this matters: telogen effluvium is when a significant stressor — illness, surgery, extreme emotional stress, childbirth, crash dieting — pushes a large number of follicles out of anagen and into telogen simultaneously. Three months later, you see dramatic shedding. The timing gap is why people often don't connect the shedding to its actual cause.
+
+You can support healthy growth cycles with adequate protein, iron, zinc, vitamin D, and B vitamins. You cannot speed up anagen beyond your genetic ceiling. But you can absolutely disrupt it.`,
+  },
+  {
+    id:'hs12', level:'Advanced',
+    title:'Traction Alopecia — The Most Preventable Hair Loss in Black Women',
+    hook:"The most common form of hair loss in Black women is almost entirely preventable. And it's been normalized.",
+    body:`Traction alopecia is hair loss caused by repeated tension on the follicle. It's the most prevalent form of hair loss among Black women and it develops slowly enough that most people don't notice it until significant damage has already occurred.
+
+The most affected areas are the temples, the edges, and the nape — anywhere that consistently bears tension from braids, locs, weaves, wigs with tight bands, or high ponytails.
+
+Early signs: small bumps or folliculitis along the hairline, tenderness or pain when styling, sparse or short baby hairs in areas that were previously full.
+
+Here's the critical distinction: caught early, traction alopecia is reversible. The follicle is inflamed but not scarred. Release the tension, allow the area to rest, and follicles can recover. Left untreated, chronic tension causes follicular scarring — the follicle is permanently destroyed and the hair loss is irreversible.
+
+What actually helps in early stages: immediately stop or significantly reduce tension on affected areas, avoid tight styles for at minimum six months, use scalp oils with anti-inflammatory and circulation-stimulating properties — rosemary and jamaican black castor oil are well-supported options — and see a dermatologist if loss is progressing or if you suspect scarring.
+
+The styles themselves are not the problem. The tension is. Protective styles installed with care, proper take-down, and adequate rest periods between installs are not the same as chronic tight installs with no recovery time.`,
+  },
+  {
+    id:'hs13', level:'Opinionated',
+    title:'My Honest Ranking of Clarifying Shampoos',
+    hook:"Not all clarifying shampoos are doing the same job — and most people are using the wrong one for their buildup type.",
+    guidance:`Share your top picks and what you like about each — be specific about what you've personally used. Mention OUAI Detox. Talk about the difference between chelating shampoos (remove mineral deposits from hard water) vs regular clarifying (remove product buildup) — most people don't know chelating is a separate category. Give your personal ranking and be direct about which ones you'd skip.`,
+  },
+  {
+    id:'hs14', level:'Opinionated',
+    title:"Products I Would Never Put on a Client's Hair",
+    hook:"There are some things I won't touch — and if you knew what I know, you probably wouldn't either.",
+    guidance:`Name product types or specific red flags — not to bash brands unnecessarily but to educate. Examples: anything with high alcohol early in the ingredient list on a dry 4C client, very thick petroleum-based products on low porosity hair, products marketed for "growth" that are 90% carrier oil with trace actives. Talk from experience and from what you learned in school. Frame it as education, not drama.`,
+  },
+  {
+    id:'hs15', level:'Opinionated',
+    title:"Why Most 'Hair Growth' Products Are Marketing",
+    hook:"Hair growth comes from the follicle. A topical product cannot change your genetic growth rate. Let me explain what they can actually do.",
+    guidance:`Explain that hair growth comes from the follicle and topical products cannot change your genetic growth rate. What they can do: support scalp health, reduce inflammation, and minimize shedding — all of which contribute to retention. The honest nuance: some ingredients (rosemary, caffeine, saw palmetto) have legit research behind them, most do not. Tell people what to look for on the ingredient list vs what's a filler. Be opinionated but back it up.`,
+  },
+  {
+    id:'hs16', level:'Opinionated',
+    title:"The Truth About Protective Styles — They're Not Always Protecting Anything",
+    hook:"A protective style is only protective if it actually meets certain conditions. A lot of what we call protective is actively causing damage.",
+    guidance:`A protective style is only protective if it meets certain conditions: low manipulation, ends tucked away, not too tight, scalp is still being maintained, style is not left in too long. Walk through what makes a style actually protective vs what people call protective that is causing damage — overtightening, months without moisturizing, ignoring the scalp. Give your honest take. This is a high-engagement topic.`,
+  },
+  {
+    id:'hs17', level:'Opinionated',
+    title:"Why Your Silk Press Isn't Lasting",
+    hook:"If your silk press doesn't hold, it's almost never the iron. Here's what's actually happening.",
+    guidance:`Cover the real reasons a silk press doesn't hold: moisture in the hair that wasn't fully removed before pressing, wrong heat temperature for the hair's porosity and density, skipping heat protectant or using a water-based one that reintroduces moisture, humidity with no anti-humidity product, manipulation after pressing before the hair cools fully. Give the actual process tips that make it last. This is a perfect video for driving client bookings — position yourself as someone who knows how to do it right.`,
+  },
+  {
+    id:'hs18', level:'Opinionated',
+    title:'Ingredients I Always Look For in a Leave-In',
+    hook:"You can spend $40 on a leave-in or $8. Here's what actually makes the difference on the ingredient list.",
+    guidance:`Your personal must-haves. Candidates to discuss: water as the first ingredient, humectants (glycerin, aloe, hyaluronic acid), penetrating oils (coconut, avocado, olive — small molecule, can enter the shaft), amino acids or hydrolyzed protein for light strengthening, panthenol. Explain what each one does in one sentence. Keep it practical.`,
+  },
+  {
+    id:'hs19', level:'Opinionated',
+    title:'Ingredients I Always Avoid and Why',
+    hook:"There are certain things I look for on a label before I even open the bottle. Let me show you what to watch for.",
+    guidance:`Be specific and explain the why — not just a list. Candidates: sulfates (nuanced — some are fine for clarifying), high alcohols early in the ingredient list on dry hair, petrolatum and mineral oil on low porosity hair (seals without moisturizing), formaldehyde-releasing preservatives in keratin treatments, fragrance listed without specifics if client has a sensitive scalp. Acknowledge that context matters — this shows expertise.`,
+  },
+  {
+    id:'hs20', level:'Opinionated',
+    title:'Drugstore vs Salon Products — My Actual Opinion',
+    hook:"Some drugstore products are better than what's on the salon shelf. I'll tell you exactly when and why.",
+    guidance:`Be honest. Some drugstore products are formulated well. Some salon products are overpriced for the formulation. The real question is the ingredient list, not the price point. Share specific comparisons if you have them. Talk about what the price usually goes toward in professional lines — licensed distribution, education, consistency of formulation. Tell people when it's worth the splurge and when the drugstore version is genuinely comparable. This builds trust.`,
+  },
+  {
+    id:'hs21', level:'Opinionated',
+    title:'Why I Stopped Recommending [X Type of Product]',
+    hook:"I used to recommend this all the time. Here's what I learned that changed my mind.",
+    guidance:`Pick a product type or practice you've moved away from based on experience or education — could be a heavy grease, a specific technique, a product category. Explain what you learned and what you switched to. Frame it as growth and education, not a takedown. This humanizes you and shows that you evolve your practice.`,
+  },
+  {
+    id:'hs22', level:'Opinionated',
+    title:'My Honest Take on Hair Vitamins',
+    hook:"Most people taking hair vitamins are treating a deficiency they don't have and ignoring the one they do.",
+    guidance:`Most people are taking hair vitamins that don't address their actual deficiency. Biotin is the most popular and most oversold — if you're not deficient, more biotin does little. The nutrients that actually matter for hair: ferritin (stored iron — many women test non-anemic but are low ferritin), vitamin D, zinc, and getting enough dietary protein. Recommend getting bloodwork before buying a supplement stack. Opinionated but responsible.`,
+  },
+];
+
+function HairEducationTab({ state, setState }) {
+  const filmed = state.scHairEducation?.filmed || {};
+  const [filter, setFilter] = useState('All');
+  const [search, setSearch] = useState('');
+  const [modal, setModal] = useState(null);
+  const [calLinked, setCalLinked] = useState(false);
+
+  const filtered = HAIR_SCRIPTS.filter(s => {
+    if (filter !== 'All' && s.level !== filter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return s.title.toLowerCase().includes(q) || s.hook.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  const sorted = [...filtered].sort((a, b) => (filmed[a.id]?1:0) - (filmed[b.id]?1:0));
+  const totalFilmed = HAIR_SCRIPTS.filter(s => filmed[s.id]).length;
+
+  const toggleFilmed = (id) => setState(s => ({
+    ...s,
+    scHairEducation: { ...s.scHairEducation, filmed: { ...(s.scHairEducation?.filmed||{}), [id]: !(s.scHairEducation?.filmed||{})[id] } }
+  }));
+
+  const linkToCalendar = (script) => {
+    const monday = new Date();
+    monday.setDate(monday.getDate() - (monday.getDay()===0?6:monday.getDay()-1));
+    const week = monday.toISOString().slice(0,10);
+    setState(s => ({ ...s, scContentCalendar: [{ id:'cp'+Date.now(), day:'Mon', platform:'Both', type:'Educational', caption:script.title, posted:false, week }, ...(s.scContentCalendar||[])] }));
+    setCalLinked(true);
+    setTimeout(() => setCalLinked(false), 2000);
+  };
+
+  const LEVELS = ['All','Beginner','Intermediate','Advanced','Opinionated'];
+
+  return (
+    <div className="col gap-md">
+      <div style={{ position:'sticky', top:0, zIndex:10, background:'var(--bg)', paddingTop:4, paddingBottom:10 }}>
+        <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:10 }}>
+          {LEVELS.map(f => (
+            <button key={f} onClick={() => setFilter(f)} style={{
+              padding:'6px 14px', borderRadius:999, border:`1.5px solid ${filter===f?(HAIR_LEVEL_COLORS[f]||SC_GOLD):'var(--line)'}`,
+              background: filter===f?(HAIR_LEVEL_COLORS[f]||SC_GOLD):'transparent',
+              color: filter===f?'white':'var(--ink-soft)',
+              fontWeight:600, fontSize:12, cursor:'pointer', fontFamily:'inherit', transition:'all 0.15s',
+            }}>{f}</button>
+          ))}
+        </div>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search titles and hooks…"
+          style={{ ...INN, width:'100%' }}
+        />
+      </div>
+
+      <div style={{ display:'flex', gap:12, padding:'10px 16px', background:'var(--card-2)', borderRadius:12, fontSize:13, flexWrap:'wrap' }}>
+        <span><strong>{HAIR_SCRIPTS.length}</strong> scripts total</span>
+        <span style={{ color:'var(--muted)' }}>·</span>
+        <span style={{ color:SC_GOLD }}><strong>{totalFilmed}</strong> filmed</span>
+        <span style={{ color:'var(--muted)' }}>·</span>
+        <span><strong>{HAIR_SCRIPTS.length - totalFilmed}</strong> remaining</span>
+      </div>
+
+      {sorted.length === 0 && <div className="empty" style={{ padding:28 }}>No scripts match your search.</div>}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(300px, 1fr))', gap:16 }}>
+        {sorted.map(script => {
+          const isFilmed = !!filmed[script.id];
+          const badgeColor = HAIR_LEVEL_COLORS[script.level];
+          return (
+            <div key={script.id} style={{
+              background: isFilmed ? 'var(--card-2)' : 'var(--card)',
+              border: `1.5px solid ${isFilmed ? 'var(--line)' : badgeColor+'44'}`,
+              borderRadius:14, padding:18, opacity: isFilmed ? 0.7 : 1,
+              display:'flex', flexDirection:'column', gap:10,
+            }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+                <span style={{ fontSize:11, padding:'3px 10px', borderRadius:999, background:badgeColor+'22', color:badgeColor, fontWeight:700 }}>{script.level}</span>
+                {isFilmed && <span style={{ fontSize:11, color:SC_GOLD, fontWeight:700 }}>✓ Filmed</span>}
+              </div>
+              <div className="text-serif" style={{ fontSize:16, fontWeight:600, lineHeight:1.4 }}>{script.title}</div>
+              <div style={{ fontStyle:'italic', color:'var(--ink-soft)', fontSize:13, lineHeight:1.6, fontFamily:'var(--font-serif)' }}>{script.hook}</div>
+              <div style={{ display:'flex', gap:8, alignItems:'center', marginTop:'auto', flexWrap:'wrap' }}>
+                <span style={{ fontSize:11, padding:'2px 8px', borderRadius:999, background:'var(--card-2)', color:'var(--muted)', border:'1px solid var(--line)' }}>1–2 min</span>
+                <button onClick={() => toggleFilmed(script.id)} style={{
+                  fontSize:11, padding:'3px 10px', borderRadius:8,
+                  border:`1px solid ${isFilmed?SC_GOLD:'var(--line)'}`,
+                  background:isFilmed?SC_SOFT:'transparent',
+                  color:isFilmed?SC_GOLD:'var(--ink-soft)', cursor:'pointer', fontFamily:'inherit',
+                }}>{isFilmed ? '✓ Filmed' : 'Mark filmed'}</button>
+                <button onClick={() => setModal(script)} style={{
+                  marginLeft:'auto', fontSize:12, padding:'5px 12px', borderRadius:8, border:0,
+                  background:badgeColor, color:'white', fontWeight:600, cursor:'pointer', fontFamily:'inherit',
+                }}>View script →</button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {modal && (
+        <Modal onClose={() => { setModal(null); setCalLinked(false); }} maxWidth={680}>
+          <ModalHead title={modal.title} sub={modal.level.toLowerCase()} onClose={() => { setModal(null); setCalLinked(false); }}/>
+          <div style={{ padding:'0 22px 24px' }}>
+            <div style={{ display:'flex', gap:8, alignItems:'center', marginBottom:16, flexWrap:'wrap' }}>
+              <span style={{ fontSize:12, padding:'3px 10px', borderRadius:999, background:HAIR_LEVEL_COLORS[modal.level]+'22', color:HAIR_LEVEL_COLORS[modal.level], fontWeight:700 }}>{modal.level}</span>
+              <span style={{ fontSize:12, padding:'3px 10px', borderRadius:999, background:'var(--card-2)', color:'var(--muted)', border:'1px solid var(--line)' }}>1–2 min</span>
+              {filmed[modal.id] && <span style={{ fontSize:12, color:SC_GOLD, fontWeight:700 }}>✓ Filmed</span>}
+            </div>
+
+            <div style={{ background:SC_SOFT, border:`1.5px solid ${SC_BORDER}`, borderRadius:12, padding:'14px 18px', marginBottom:20 }}>
+              <div className="text-mono fs-xs text-muted" style={{ marginBottom:6, textTransform:'uppercase', letterSpacing:'0.08em' }}>Opening Hook</div>
+              <div style={{ fontSize:16, fontWeight:700, lineHeight:1.6, fontFamily:'var(--font-serif)', fontStyle:'italic' }}>"{modal.hook}"</div>
+            </div>
+
+            {modal.level === 'Opinionated' && (
+              <div style={{ background:'#fff8e6', border:'1px solid #f5d87a', borderRadius:10, padding:'10px 14px', marginBottom:16, fontSize:13, color:'#7a5c00' }}>
+                This is a guided topic — make it your own.
+              </div>
+            )}
+
+            {modal.level === 'Opinionated' ? (
+              <div>
+                <div className="text-mono fs-xs text-muted" style={{ marginBottom:10, textTransform:'uppercase', letterSpacing:'0.08em' }}>Talking Points</div>
+                <div style={{ fontSize:14, lineHeight:1.85, color:'var(--ink)', whiteSpace:'pre-wrap' }}>{modal.guidance}</div>
+              </div>
+            ) : (
+              <div style={{ fontSize:14, lineHeight:1.9, color:'var(--ink)', whiteSpace:'pre-wrap', fontFamily:'var(--font-serif)' }}>{modal.body}</div>
+            )}
+
+            <div style={{ display:'flex', gap:10, marginTop:22, flexWrap:'wrap', borderTop:'1px solid var(--line)', paddingTop:16 }}>
+              <button className="btn btn--ghost" onClick={() => navigator.clipboard?.writeText(modal.level === 'Opinionated' ? `${modal.title}\n\n${modal.hook}\n\n${modal.guidance}` : `${modal.title}\n\n${modal.hook}\n\n${modal.body}`)}>
+                📋 Copy script
+              </button>
+              <button className="btn btn--ghost" style={{ color:filmed[modal.id]?SC_GOLD:'var(--ink-soft)', borderColor:filmed[modal.id]?SC_GOLD:'var(--line)' }} onClick={() => toggleFilmed(modal.id)}>
+                {filmed[modal.id] ? '✓ Mark unfilmed' : 'Mark as filmed'}
+              </button>
+              <button className="btn btn--pink" style={{ marginLeft:'auto' }} onClick={() => linkToCalendar(modal)}>
+                {calLinked ? '✓ Added to calendar' : '📅 Add to content calendar'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
 // ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
-const SUB_TABS = ['overview','setup','finances','clients','marketing','content','education'];
-const SUB_LABELS = { overview:'Overview', setup:'Setup', finances:'Finances', clients:'Clients', marketing:'Marketing', content:'Content', education:'Education' };
+const SUB_TABS = ['overview','setup','finances','clients','marketing','content','hairEducation','prodev'];
+const SUB_LABELS = { overview:'Overview', setup:'Setup', finances:'Finances', clients:'Clients', marketing:'Marketing', content:'Content', hairEducation:'Hair Education', prodev:'Pro Dev' };
 
 export default function SilkCollectiveView({ state, setState }) {
   const [tab, setTab] = useState('overview');
@@ -1430,8 +1828,9 @@ export default function SilkCollectiveView({ state, setState }) {
       {tab === 'finances'   && <FinancesTab   state={state} setState={setState} />}
       {tab === 'clients'    && <ClientsTab    state={state} setState={setState} />}
       {tab === 'marketing'  && <MarketingTab  state={state} setState={setState} />}
-      {tab === 'content'    && <ContentTab    state={state} setState={setState} />}
-      {tab === 'education'  && <EducationTab  state={state} setState={setState} />}
+      {tab === 'content'       && <ContentTab        state={state} setState={setState} />}
+      {tab === 'hairEducation' && <HairEducationTab  state={state} setState={setState} />}
+      {tab === 'prodev'        && <ProDevTab         state={state} setState={setState} />}
 
       {opsOpen && <OperationsModal state={state} setState={setState} onClose={()=>setOpsOpen(false)} />}
     </>

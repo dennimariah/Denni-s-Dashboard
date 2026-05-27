@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Icon from '@/components/ui/Icon';
 import { DEVOTIONALS } from '@/lib/devotionals';
 import { getRegimenWeek } from '@/lib/hairRegimen';
+import { MOOD_OPTIONS } from '@/lib/helpers';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -12,7 +13,6 @@ const SOFT_BG = '#fdf6f4';
 const SAGE = '#5a8a6a';
 const GOLD = '#b8860b';
 
-const MOOD_LABELS  = { 1: '😔 heavy', 2: '😕 low', 3: '😐 even', 4: '🙂 bright', 5: '✨ soaring' };
 const ENERGY_LABELS = { 1: '💤 depleted', 2: '😴 tired', 3: '⚡ steady', 4: '🔥 lit', 5: '🚀 buzzing' };
 const CAT_COLORS   = { body: '#5b8df5', hair: '#6db88a', business: '#b8860b', mind: '#d68d84' };
 const CAT_LABELS   = { body: 'Body',   hair: 'Hair',  business: 'Business', mind: 'Mind & Recovery' };
@@ -181,22 +181,103 @@ function GreetingStats({ state }) {
   );
 }
 
-// ── ZONE 3: AFFIRMATION ───────────────────────────────────────────────────────
+// ── ZONE 3: QUICK TASKS ───────────────────────────────────────────────────────
 
-function AffirmationCard({ state }) {
-  const affirmations = state.devotionAffirmations || [];
-  const aff = affirmations.length ? affirmations[dayOfYear() % affirmations.length] : null;
+function QuickTasks({ state, setState }) {
+  const tasks = state.quickTasks || [];
+  const [text, setText] = useState('');
+
+  const add = () => {
+    if (!text.trim()) return;
+    setState(s => ({ ...s, quickTasks: [...(s.quickTasks || []), { id: uid(), text: text.trim(), done: false }] }));
+    setText('');
+  };
+  const toggle = (id) => setState(s => ({ ...s, quickTasks: (s.quickTasks || []).map(t => t.id === id ? { ...t, done: !t.done } : t) }));
+  const del = (id) => setState(s => ({ ...s, quickTasks: (s.quickTasks || []).filter(t => t.id !== id) }));
+
+  const active = tasks.filter(t => !t.done);
+  const done = tasks.filter(t => t.done);
+
   return (
-    <div style={{ background: SOFT_BG, borderRadius: 16, padding: '32px 28px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-      <div style={{ fontSize: 18, color: ACCENT }}>✦</div>
-      {aff
-        ? <div style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--ink)', lineHeight: 1.4, maxWidth: 600 }}>{aff.text}</div>
-        : <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontStyle: 'italic', color: 'var(--muted)' }}>Add affirmations in the Devotion tab.</div>}
+    <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 14, padding: '14px 16px' }}>
+      <SectionLabel>Quick Tasks</SectionLabel>
+      <div style={{ display: 'flex', gap: 8, marginBottom: active.length || done.length ? 8 : 0 }}>
+        <input
+          value={text}
+          onChange={e => setText(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && add()}
+          placeholder="Add a task and press Enter…"
+          style={{ flex: 1, fontSize: 13, padding: '7px 10px', border: '1px solid var(--line)', borderRadius: 9, background: 'var(--card-2)', outline: 'none', fontFamily: 'inherit' }}
+        />
+        <button onClick={add} style={{ background: ACCENT, border: 'none', borderRadius: 9, padding: '0 14px', color: '#fff', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', fontWeight: 600 }}>Add</button>
+      </div>
+      {tasks.length === 0 && <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>Nothing here yet. Add your quick tasks above.</div>}
+      {active.map(t => (
+        <div key={t.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '6px 0', borderTop: '1px solid var(--line)' }}>
+          <button onClick={() => toggle(t.id)} style={{ width: 18, height: 18, borderRadius: 4, border: `1.5px solid var(--line)`, background: 'transparent', cursor: 'pointer', flexShrink: 0, marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+          <span style={{ fontSize: 13, color: 'var(--ink)', flex: 1, lineHeight: 1.5 }}>{t.text}</span>
+          <button onClick={() => del(t.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 18, lineHeight: 1, padding: 0, flexShrink: 0 }}>×</button>
+        </div>
+      ))}
+      {done.map(t => (
+        <div key={t.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '6px 0', borderTop: '1px solid var(--line)', opacity: 0.5 }}>
+          <button onClick={() => toggle(t.id)} style={{ width: 18, height: 18, borderRadius: 4, border: `1.5px solid var(--muted)`, background: 'var(--muted)', cursor: 'pointer', flexShrink: 0, marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="check" size={11} stroke={2.2} />
+          </button>
+          <span style={{ fontSize: 13, color: 'var(--muted)', flex: 1, lineHeight: 1.5, textDecoration: 'line-through' }}>{t.text}</span>
+          <button onClick={() => del(t.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 18, lineHeight: 1, padding: 0, flexShrink: 0 }}>×</button>
+        </div>
+      ))}
     </div>
   );
 }
 
-// ── ZONE 4: SLEEP CHECK-IN ────────────────────────────────────────────────────
+// ── ZONE 4: UPCOMING GOALS STRIP ─────────────────────────────────────────────
+
+function UpcomingGoalsStrip({ state, onNavigate }) {
+  const today = new Date(todayStr() + 'T00:00:00');
+  const in14 = new Date(today); in14.setDate(today.getDate() + 14);
+  const CAT_COL = { health: '#6db88a', business: '#9b7cc8', personal: '#f4a261' };
+
+  const upcoming = (state.quarterGoals || [])
+    .filter(g => { if (!g.targetDate || g.status === 'complete') return false; const d = new Date(g.targetDate + 'T00:00:00'); return d >= today && d <= in14; })
+    .sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate))
+    .slice(0, 6);
+
+  if (upcoming.length === 0) return null;
+
+  return (
+    <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 14, padding: '14px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <SectionLabel>Goals Due in 14 Days</SectionLabel>
+        <LinkBtn onClick={() => onNavigate('quarter')}>See all →</LinkBtn>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {upcoming.map(g => {
+          const days = daysUntil(g.targetDate);
+          const urgent = days <= 7;
+          const c = CAT_COL[g.category] || '#888';
+          return (
+            <button key={g.id} onClick={() => onNavigate('quarter')} style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '7px 12px', borderRadius: 10,
+              background: urgent ? '#fff1f1' : 'var(--card-2)',
+              border: `1.5px solid ${urgent ? '#e07070' : c}`,
+              cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+            }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: urgent ? '#c0392b' : c, fontFamily: 'var(--font-mono)', minWidth: 28 }}>
+                {days === 0 ? 'Today' : `${days}d`}
+              </span>
+              <span style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.3 }}>{g.title}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── ZONE 5: SLEEP CHECK-IN ────────────────────────────────────────────────────
 
 function SleepCheckIn({ state, setState }) {
   const today = todayStr();
@@ -477,54 +558,65 @@ function UpcomingTrip({ state }) {
 
 function MoodEnergyCheckIn({ state, setState }) {
   const today = todayStr();
-  const moodLogEntry = (state.moodLog || {})[today];
-  const journalEntry = (state.journal || []).find(e => e.date === today);
-  const initMood = moodLogEntry?.level || journalEntry?.mood || 0;
-  const initEnergy = journalEntry?.energy || 0;
-  const [mood, setMood] = useState(initMood);
-  const [energy, setEnergy] = useState(initEnergy);
+  const existing = (state.todayMood || {})[today];
+  const [chosenMood, setChosenMood] = useState(existing?.mood || null);
+  const [energy, setEnergy] = useState(existing?.energy || 0);
 
   const persist = (newMood, newEnergy) => {
     setState(s => {
+      const todayMood = { ...(s.todayMood || {}), [today]: { mood: newMood, energy: newEnergy } };
       const list = s.journal || [];
       const i = list.findIndex(e => e.date === today);
       const journal = i >= 0
         ? list.map((e, idx) => idx === i ? { ...e, mood: newMood, energy: newEnergy } : e)
         : [{ id: uid(), date: today, title: '', body: '', mood: newMood, energy: newEnergy }, ...list];
-      const moodLog = { ...(s.moodLog || {}), [today]: { level: newMood, note: s.moodLog?.[today]?.note || '' } };
-      return { ...s, journal, moodLog };
+      const moodLog = { ...(s.moodLog || {}), [today]: { level: newEnergy, note: s.moodLog?.[today]?.note || '' } };
+      return { ...s, todayMood, journal, moodLog };
     });
   };
 
-  const pickMood = (n) => { setMood(n); persist(n, energy); };
-  const pickEnergy = (n) => { setEnergy(n); persist(mood, n); };
+  const pickMood = (id) => { setChosenMood(id); persist(id, energy); };
+  const pickEnergy = (n) => { setEnergy(n); persist(chosenMood, n); };
 
-  const TapRow = ({ val, onPick, labels }) => (
-    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-      {[1,2,3,4,5].map(n => (
-        <button key={n} onClick={() => onPick(n)} style={{
-          padding: '5px 10px', borderRadius: 8, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', transition: 'all .12s',
-          border: `1px solid ${val === n ? ACCENT : 'var(--line)'}`,
-          background: val === n ? ACCENT : 'var(--card)',
-          color: val === n ? '#fff' : 'var(--ink-soft)',
-        }}>{labels[n]}</button>
-      ))}
-    </div>
-  );
+  const selectedOpt = MOOD_OPTIONS.find(o => o.id === chosenMood);
 
   return (
     <div className="card" style={{ padding: '14px 16px', marginBottom: 10 }}>
       <SectionLabel>Mood & Energy</SectionLabel>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
-          <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 6 }}>Mood {mood > 0 && <span style={{ color: ACCENT, fontWeight: 600 }}>· {MOOD_LABELS[mood]}</span>}</div>
-          <TapRow val={mood} onPick={pickMood} labels={MOOD_LABELS} />
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>
+            How are you feeling? {selectedOpt && <span style={{ color: ACCENT, fontWeight: 600 }}>· {selectedOpt.emoji} {selectedOpt.label}</span>}
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {MOOD_OPTIONS.map(opt => (
+              <button key={opt.id} onClick={() => pickMood(opt.id)} style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                padding: '7px 10px', borderRadius: 10, fontSize: 11, fontFamily: 'inherit', cursor: 'pointer', transition: 'all .12s',
+                border: `1.5px solid ${chosenMood === opt.id ? ACCENT : 'var(--line)'}`,
+                background: chosenMood === opt.id ? ACCENT + '18' : 'var(--card-2)',
+                color: chosenMood === opt.id ? ACCENT : 'var(--ink-soft)',
+              }}>
+                <span style={{ fontSize: 20 }}>{opt.emoji}</span>
+                <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>{opt.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
         <div>
           <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 6 }}>Energy {energy > 0 && <span style={{ color: ACCENT, fontWeight: 600 }}>· {ENERGY_LABELS[energy]}</span>}</div>
-          <TapRow val={energy} onPick={pickEnergy} labels={ENERGY_LABELS} />
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+            {[1,2,3,4,5].map(n => (
+              <button key={n} onClick={() => pickEnergy(n)} style={{
+                padding: '5px 10px', borderRadius: 8, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', transition: 'all .12s',
+                border: `1px solid ${energy === n ? ACCENT : 'var(--line)'}`,
+                background: energy === n ? ACCENT : 'var(--card)',
+                color: energy === n ? '#fff' : 'var(--ink-soft)',
+              }}>{ENERGY_LABELS[n]}</button>
+            ))}
+          </div>
         </div>
-        {(mood > 0 || energy > 0) && (
+        {(chosenMood || energy > 0) && (
           <div style={{ fontSize: 11, color: SAGE }}>✓ Saved automatically</div>
         )}
       </div>
@@ -710,7 +802,7 @@ function JournalToday({ state, onNavigate }) {
         <div>
           <div style={{ fontSize: 13, color: SAGE, fontWeight: 600 }}>Entry written ✓</div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-            {wordCount} {wordCount === 1 ? 'word' : 'words'} · {MOOD_LABELS[entry.mood] || 'mood not set'}
+            {wordCount} {wordCount === 1 ? 'word' : 'words'} · {(MOOD_OPTIONS.find(o => o.id === entry.mood)?.label) || (entry.mood ? `${entry.mood}` : 'mood not set')}
           </div>
         </div>
       ) : (
@@ -874,9 +966,9 @@ export default function TodayView({ state, setState }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <GreetingStats state={state} />
 
-      <AffirmationCard state={state} />
+      <QuickTasks state={state} setState={setState} />
 
-      <SleepCheckIn state={state} setState={setState} />
+      <UpcomingGoalsStrip state={state} onNavigate={navigate} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, alignItems: 'start' }}>
         <div>
@@ -889,20 +981,22 @@ export default function TodayView({ state, setState }) {
           <GoalsDueThisWeek state={state} />
           <SilkWeeklyFocus state={state} setState={setState} />
           <UpcomingTrip state={state} />
+
+          <SleepCheckIn state={state} setState={setState} />
         </div>
 
         <div>
-          <GroupHeader label="Body & Wellness" />
-          <MoodEnergyCheckIn state={state} setState={setState} />
-          <FitnessThisWeek state={state} />
-          <HairRegimenStatus state={state} />
-          <KitchenCheckIn state={state} setState={setState} />
-
           <GroupHeader label="Daily Anchors" />
           <DevotionToday state={state} onNavigate={navigate} />
           <JournalToday state={state} onNavigate={navigate} />
           <QuickWinCapture state={state} setState={setState} />
           <MonthlyReviewPrompt state={state} onNavigate={navigate} />
+
+          <GroupHeader label="Body & Wellness" />
+          <MoodEnergyCheckIn state={state} setState={setState} />
+          <FitnessThisWeek state={state} />
+          <HairRegimenStatus state={state} />
+          <KitchenCheckIn state={state} setState={setState} />
         </div>
       </div>
 

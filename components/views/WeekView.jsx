@@ -165,6 +165,48 @@ export default function WeekView({ state, setState }) {
           </div>
         </div>
 
+        {(() => {
+          const weekStart = toDateStr(weekDateObjs[0]);
+          const weekEnd   = toDateStr(weekDateObjs[6]);
+          const goalsThisWeek = (state.quarterGoals || []).filter(g => g.targetDate && g.targetDate >= weekStart && g.targetDate <= weekEnd && g.status !== 'complete');
+          const STATUS_COLORS = { not_started:'#9b9b9b', in_progress:'#7aaee5', on_track:'#6db88a', at_risk:'#d4843a', complete:'#3d6b4f' };
+          const STATUS_LABELS = { not_started:'Not started', in_progress:'In progress', on_track:'On track', at_risk:'At risk', complete:'Complete' };
+          return (
+            <div className="card col-12" style={{ marginBottom: 0 }}>
+              <div style={{ marginBottom: 10 }}>
+                <div className="text-mono fs-xs text-muted" style={{ letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 2 }}>Goals Due This Week</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>{getWeekRange(weekOffset)}</div>
+              </div>
+              {goalsThisWeek.length === 0
+                ? <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', padding: '6px 0' }}>No goals due this week — you're clear.</div>
+                : <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {goalsThisWeek.map(g => {
+                      const daysLeft = Math.ceil((new Date(g.targetDate + 'T12:00:00') - new Date()) / 86400000);
+                      const col = STATUS_COLORS[g.status] || '#9b9b9b';
+                      return (
+                        <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--card-2)', borderRadius: 10, border: `1.5px solid ${col}`, minWidth: 220 }}>
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', lineHeight: 1.3 }}>{g.title}</div>
+                            <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--muted)', marginTop: 2 }}>
+                              <span style={{ color: col }}>{STATUS_LABELS[g.status]}</span>
+                              {' · '}
+                              {new Date(g.targetDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              {' · '}
+                              <span style={{ color: daysLeft <= 2 ? '#c0392b' : 'var(--muted)' }}>
+                                {daysLeft > 0 ? `${daysLeft}d left` : daysLeft === 0 ? 'due today' : 'overdue'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+              }
+            </div>
+          );
+        })()}
+
         {taskByDay.map((col, i) => {
           const isToday = weekOffset === 0 && col.day === todayShort;
           const dayStr = toDateStr(weekDateObjs[i]);

@@ -5,16 +5,28 @@ import { cls } from '@/lib/helpers';
 import { CardHead, Pill, Editable } from '@/components/ui/primitives';
 import Icon from '@/components/ui/Icon';
 
-const formats = ['Newsletter', 'TikTok', 'Instagram', 'Blog', 'Podcast', 'Video'];
+const CATEGORIES = [
+  'Personal Instagram',
+  'Personal TikTok',
+  'Silk Co. Instagram',
+  'Silk Co. TikTok',
+  'Newsletter',
+  'Blog',
+  'Podcast',
+  'Video',
+];
+
 const statuses = ['Idea', 'Drafting', 'Scheduled', 'Published'];
 
-const formatColor = {
-  Newsletter: { bg: 'var(--primary-soft)',  text: 'var(--primary-deep)', accent: 'var(--primary)'  },
-  TikTok:     { bg: 'var(--accent-3-soft)', text: '#5e4b85',             accent: 'var(--accent-3)' },
-  Instagram:  { bg: 'var(--accent-1-soft)', text: '#8b4f1c',             accent: 'var(--accent-1)' },
-  Blog:       { bg: 'var(--accent-2-soft)', text: '#3d6b4f',             accent: 'var(--accent-2)' },
-  Podcast:    { bg: 'var(--accent-4-soft)', text: '#8a6a16',             accent: 'var(--accent-4)' },
-  Video:      { bg: 'var(--primary-soft)',  text: 'var(--primary-deep)', accent: 'var(--primary)'  },
+const categoryColor = {
+  'Personal Instagram':  { bg: 'var(--accent-1-soft)', text: '#8b4f1c', accent: 'var(--accent-1)' },
+  'Personal TikTok':     { bg: 'var(--accent-3-soft)', text: '#5e4b85', accent: 'var(--accent-3)' },
+  'Silk Co. Instagram':  { bg: 'var(--primary-soft)',  text: 'var(--primary-deep)', accent: 'var(--primary)' },
+  'Silk Co. TikTok':     { bg: '#f0eef7',              text: '#4a3070', accent: '#7c5cbf' },
+  'Newsletter':          { bg: 'var(--accent-2-soft)', text: '#3d6b4f', accent: 'var(--accent-2)' },
+  'Blog':                { bg: '#fff5e6',              text: '#7c4a00', accent: '#d4843a' },
+  'Podcast':             { bg: 'var(--accent-4-soft)', text: '#8a6a16', accent: 'var(--accent-4)' },
+  'Video':               { bg: '#fce8f0',              text: '#8b2252', accent: '#c0396e' },
 };
 
 const statusColor = {
@@ -27,9 +39,9 @@ const statusColor = {
 export default function ContentView({ state, setState }) {
   const { content } = state;
   const [filterStatus, setFilterStatus] = useState('all');
-  const [filterFormat, setFilterFormat] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
   const [draftOpen, setDraftOpen] = useState(false);
-  const [draft, setDraft] = useState({ title: '', format: 'Newsletter', status: 'Idea', notes: '' });
+  const [draft, setDraft] = useState({ title: '', category: 'Personal Instagram', status: 'Idea', notes: '' });
 
   const counts = {
     Idea:      content.filter((c) => c.status === 'Idea').length,
@@ -58,9 +70,9 @@ export default function ContentView({ state, setState }) {
     if (!draft.title.trim()) return;
     setState((s) => ({
       ...s,
-      content: [{ id: 'c' + Date.now(), starred: false, tags: [], ...draft }, ...s.content],
+      content: [{ id: 'c' + Date.now(), starred: false, tags: [], pinned: false, ...draft }, ...s.content],
     }));
-    setDraft({ title: '', format: 'Newsletter', status: 'Idea', notes: '' });
+    setDraft({ title: '', category: 'Personal Instagram', status: 'Idea', notes: '' });
     setDraftOpen(false);
   };
 
@@ -71,6 +83,14 @@ export default function ContentView({ state, setState }) {
 
   const now = new Date();
   const qNum = Math.floor(now.getMonth() / 3) + 1;
+
+  // Support both legacy `format` field and new `category` field
+  const getCategory = (c) => c.category || c.format || 'Newsletter';
+
+  const filtered = content.filter((c) =>
+    (filterStatus === 'all' || c.status === filterStatus) &&
+    (filterCategory === 'all' || getCategory(c) === filterCategory)
+  );
 
   return (
     <>
@@ -116,30 +136,29 @@ export default function ContentView({ state, setState }) {
         ))}
       </div>
 
-      {/* Format filters */}
+      {/* Category filters */}
       <div className="row gap-sm" style={{ flexWrap: 'wrap', margin: '16px 0' }}>
-        {['all', ...formats].map((f) => (
-          <button
-            key={f}
-            className="pill pill--mono"
-            style={{
-              cursor: 'pointer',
-              background: filterFormat === f ? 'var(--primary)' : 'var(--card)',
-              color: filterFormat === f ? 'white' : 'var(--ink-soft)',
-              border: filterFormat === f ? '1px solid var(--primary)' : '1px solid var(--line)',
-            }}
-            onClick={() => setFilterFormat(f)}
-          >
-            {f}
-          </button>
-        ))}
+        {['all', ...CATEGORIES].map((f) => {
+          const cc = f !== 'all' ? categoryColor[f] : null;
+          const active = filterCategory === f;
+          return (
+            <button
+              key={f}
+              className="pill pill--mono"
+              style={{
+                cursor: 'pointer',
+                background: active ? (cc?.accent || 'var(--primary)') : 'var(--card)',
+                color: active ? 'white' : 'var(--ink-soft)',
+                border: '1px solid ' + (active ? (cc?.accent || 'var(--primary)') : 'var(--line)'),
+              }}
+              onClick={() => setFilterCategory(f)}
+            >
+              {f === 'all' ? 'All' : f}
+            </button>
+          );
+        })}
         <span style={{ flex: 1 }} />
-        <Pill tone="lilac" mono>
-          {content.filter((c) =>
-            (filterStatus === 'all' || c.status === filterStatus) &&
-            (filterFormat === 'all' || c.format === filterFormat)
-          ).length} showing
-        </Pill>
+        <Pill tone="lilac" mono>{filtered.length} showing</Pill>
       </div>
 
       {/* Kanban board */}
@@ -148,7 +167,7 @@ export default function ContentView({ state, setState }) {
           const items = content
             .filter((c) => c.status === st)
             .filter((c) => filterStatus === 'all' || c.status === filterStatus)
-            .filter((c) => filterFormat === 'all' || c.format === filterFormat);
+            .filter((c) => filterCategory === 'all' || getCategory(c) === filterCategory);
           return (
             <div key={st} className="card col-3" style={{ minHeight: 360, background: 'var(--card-2)', padding: 16 }}>
               <div className="row row--between" style={{ marginBottom: 14 }}>
@@ -166,21 +185,22 @@ export default function ContentView({ state, setState }) {
                   </div>
                 )}
                 {items.map((c) => {
-                  const fc = formatColor[c.format] || formatColor.Newsletter;
+                  const cat = getCategory(c);
+                  const cc = categoryColor[cat] || categoryColor['Newsletter'];
                   return (
                     <div
                       key={c.id}
                       style={{
                         background: 'var(--card)',
                         border: '1px solid var(--line)',
-                        borderLeft: `3px solid ${fc.accent}`,
+                        borderLeft: `3px solid ${cc.accent}`,
                         borderRadius: 12,
                         padding: 12,
                       }}
                     >
                       <div className="row row--between" style={{ marginBottom: 6, alignItems: 'flex-start' }}>
-                        <span className="pill pill--mono" style={{ background: fc.bg, color: fc.text, border: 'none', fontSize: 9 }}>
-                          {c.format}
+                        <span className="pill pill--mono" style={{ background: cc.bg, color: cc.text, border: 'none', fontSize: 9 }}>
+                          {cat}
                         </span>
                         <button
                           className="btn btn--ghost"
@@ -267,6 +287,7 @@ export default function ContentView({ state, setState }) {
                 onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
                 style={{ width: '100%', border: 0, background: 'var(--card-2)', borderRadius: 12, padding: '12px 14px', fontSize: 16, outline: 'none', marginBottom: 12 }}
                 autoFocus
+                onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) saveDraft(); }}
               />
 
               <textarea
@@ -276,24 +297,14 @@ export default function ContentView({ state, setState }) {
                 style={{ width: '100%', border: 0, background: 'var(--card-2)', borderRadius: 12, padding: '12px 14px', fontSize: 13.5, lineHeight: 1.55, outline: 'none', minHeight: 80, resize: 'vertical', marginBottom: 16 }}
               />
 
-              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>Format</div>
-              <div className="row gap-sm" style={{ flexWrap: 'wrap', marginBottom: 14 }}>
-                {formats.map((f) => (
-                  <button
-                    key={f}
-                    className="pill pill--mono"
-                    style={{
-                      cursor: 'pointer',
-                      background: draft.format === f ? formatColor[f].accent : 'var(--card-2)',
-                      color: draft.format === f ? 'white' : 'var(--ink-soft)',
-                      border: '1px solid ' + (draft.format === f ? formatColor[f].accent : 'var(--line)'),
-                    }}
-                    onClick={() => setDraft((d) => ({ ...d, format: f }))}
-                  >
-                    {f}
-                  </button>
-                ))}
-              </div>
+              <div className="text-mono fs-xs text-muted" style={{ letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>Category</div>
+              <select
+                value={draft.category}
+                onChange={(e) => setDraft((d) => ({ ...d, category: e.target.value }))}
+                style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--card-2)', borderRadius: 10, padding: '9px 12px', fontSize: 13.5, outline: 'none', marginBottom: 14, fontFamily: 'inherit', color: 'var(--ink)', cursor: 'pointer' }}
+              >
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
 
               <div className="text-mono fs-xs text-muted" style={{ letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>Status</div>
               <div className="row gap-sm" style={{ flexWrap: 'wrap', marginBottom: 18 }}>

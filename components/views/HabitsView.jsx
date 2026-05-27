@@ -55,12 +55,23 @@ function getWeekKey() {
 function DailyRow({ habit, log, todayIdx, onToggle }) {
   const count = log.filter(Boolean).length;
   const hit = count >= habit.goal;
+  const streak = (() => {
+    let s = 0;
+    for (let i = todayIdx; i >= 0; i--) {
+      if (log[i]) s++;
+      else break;
+    }
+    return s;
+  })();
   return (
     <div className="habit-row">
       <div className="habit-row__head">
         <span className="habit-row__icon" style={{ background: habit.color + '22' }}>{habit.icon}</span>
         <div style={{ minWidth: 0 }}>
-          <div title={habit.label} style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{habit.label}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div title={habit.label} style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{habit.label}</div>
+            {streak > 0 && <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#d4843a', flexShrink: 0 }}>🔥 {streak}</span>}
+          </div>
           <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>{habit.goal}/wk</div>
         </div>
       </div>

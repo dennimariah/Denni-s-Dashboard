@@ -628,7 +628,92 @@ function NutritionTab({ fitness, setState }) {
 
 // ── Tab: Overview ─────────────────────────────────────────────────────────────
 
-function OverviewTab({ fitness, setState }) {
+// ── Log Workout Modal ─────────────────────────────────────────────────────────
+
+function LogWorkoutModal({ onSave, onClose, initial }) {
+  const [form, setForm] = useState(initial || {
+    date: todayKey(), day: 2, title: 'Back + Biceps + Abs', duration: 50, notes: '',
+  });
+  const [isCustom, setIsCustom] = useState(initial?.day === 0);
+
+  const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const selectDay = (d) => {
+    if (d === 0) { setIsCustom(true); setF('day', 0); setF('title', ''); }
+    else { setIsCustom(false); setF('day', d); setF('title', WORKOUTS[d]?.title || ''); }
+  };
+
+  const save = () => {
+    if (!form.title.trim()) return;
+    onSave({ id: form.id || 'wl-' + Date.now(), ...form, day: +form.day, duration: +form.duration });
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(58,29,40,0.42)', zIndex: 60, display: 'grid', placeItems: 'center', padding: 24, backdropFilter: 'blur(4px)' }} onClick={onClose}>
+      <div className="card" style={{ maxWidth: 460, width: '100%', padding: 0, overflow: 'hidden', boxShadow: 'var(--shadow-lg)' }} onClick={e => e.stopPropagation()}>
+        <div style={{ height: 6, background: 'var(--primary)' }} />
+        <div style={{ padding: 22 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
+            <div>
+              <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)' }}>Log a workout</div>
+              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 26, margin: '4px 0 0', lineHeight: 1.1 }}>{initial?.id ? 'Edit entry' : 'New entry'}</h3>
+            </div>
+            <button className="btn btn--icon" onClick={onClose}><Icon name="x" size={14}/></button>
+          </div>
+
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Date</div>
+            <input type="date" value={form.date} onChange={e => setF('date', e.target.value)}
+              style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card-2)', fontSize: 13.5, fontFamily: 'inherit', color: 'var(--ink)', outline: 'none' }} />
+          </div>
+
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Workout</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+              {[1,2,3,4,5].map(d => (
+                <button key={d} onClick={() => selectDay(d)} style={{
+                  padding: '5px 10px', borderRadius: 8, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', border: `1px solid ${form.day === d && !isCustom ? 'var(--primary)' : 'var(--line)'}`,
+                  background: form.day === d && !isCustom ? 'var(--primary)' : 'var(--card-2)',
+                  color: form.day === d && !isCustom ? '#fff' : 'var(--ink-soft)',
+                }}>Day {d}</button>
+              ))}
+              <button onClick={() => selectDay(0)} style={{
+                padding: '5px 10px', borderRadius: 8, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', border: `1px solid ${isCustom ? 'var(--primary)' : 'var(--line)'}`,
+                background: isCustom ? 'var(--primary)' : 'var(--card-2)', color: isCustom ? '#fff' : 'var(--ink-soft)',
+              }}>Custom</button>
+            </div>
+            <input value={form.title} onChange={e => setF('title', e.target.value)}
+              placeholder="Workout name"
+              style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card-2)', fontSize: 13.5, fontFamily: 'inherit', color: 'var(--ink)', outline: 'none' }} />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10, marginBottom: 12 }}>
+            <div>
+              <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Duration (min)</div>
+              <input type="number" min={1} max={300} value={form.duration} onChange={e => setF('duration', e.target.value)}
+                style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card-2)', fontSize: 13.5, fontFamily: 'var(--font-serif)', color: 'var(--ink)', outline: 'none' }} />
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Notes</div>
+              <input value={form.notes} onChange={e => setF('notes', e.target.value)}
+                placeholder="Optional"
+                style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card-2)', fontSize: 13.5, fontFamily: 'inherit', color: 'var(--ink)', outline: 'none' }} />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <button className="btn btn--ghost" onClick={onClose}>Cancel</button>
+            <button className="btn btn--pink" onClick={save}><Icon name="check" size={14}/> Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Overview Tab ──────────────────────────────────────────────────────────────
+
+function OverviewTab({ fitness, setState, onSwitchTab }) {
   const GOAL_ZONES = [
     { key: 'glutes', label: 'Glutes', emoji: '🍑', color: 'var(--primary)' },
     { key: 'arms', label: 'Arms', emoji: '💪', color: 'var(--accent-1)' },
@@ -640,15 +725,19 @@ function OverviewTab({ fitness, setState }) {
   const latestWeight = fitness.weightLog?.slice(-1)[0]?.weight || 160;
   const [newWeight, setNewWeight] = useState('');
   const [photoView, setPhotoView] = useState(null);
+  const [logModal, setLogModal] = useState(null);
+  const [tipsOpen, setTipsOpen] = useState(false);
+  const [editingLog, setEditingLog] = useState(null);
+
+  // Which workout day is today?
+  const dayOfWeekIdx = (new Date().getDay() + 6) % 7; // 0=Mon
+  const workoutDayMap = [1, 2, null, 3, 4, 5, null];
+  const todayWorkoutDay = workoutDayMap[dayOfWeekIdx];
+  const todayWorkout = todayWorkoutDay ? WORKOUTS[todayWorkoutDay] : null;
 
   const logWeight = () => {
     if (!newWeight) return;
-    setState(s => ({
-      ...s, fitness: {
-        ...s.fitness,
-        weightLog: [...(s.fitness.weightLog || []), { date: today, weight: +newWeight }],
-      },
-    }));
+    setState(s => ({ ...s, fitness: { ...s.fitness, weightLog: [...(s.fitness.weightLog || []), { date: today, weight: +newWeight }] } }));
     setNewWeight('');
   };
 
@@ -656,8 +745,7 @@ function OverviewTab({ fitness, setState }) {
     const file = e.target.files[0];
     if (!file) return;
     const dataUrl = await compressImage(file);
-    const photo = { id: `ph-${Date.now()}`, date: today, dataUrl, note: '' };
-    setState(s => ({ ...s, fitness: { ...s.fitness, progressPhotos: [...(s.fitness.progressPhotos || []), photo] } }));
+    setState(s => ({ ...s, fitness: { ...s.fitness, progressPhotos: [...(s.fitness.progressPhotos || []), { id: `ph-${Date.now()}`, date: today, dataUrl, note: '' }] } }));
     e.target.value = '';
   };
 
@@ -666,95 +754,215 @@ function OverviewTab({ fitness, setState }) {
     setPhotoView(null);
   };
 
+  const saveWorkoutLog = (entry) => {
+    setState(s => {
+      const log = s.fitness.workoutLog || [];
+      const exists = log.findIndex(e => e.id === entry.id);
+      const next = exists >= 0 ? log.map(e => e.id === entry.id ? entry : e) : [...log, entry];
+      return { ...s, fitness: { ...s.fitness, workoutLog: next } };
+    });
+    setLogModal(null);
+    setEditingLog(null);
+  };
+
+  const deleteWorkoutLog = (id) => {
+    setState(s => ({ ...s, fitness: { ...s.fitness, workoutLog: (s.fitness.workoutLog || []).filter(e => e.id !== id) } }));
+  };
+
+  const workoutLog = [...(fitness.workoutLog || [])].sort((a, b) => b.date.localeCompare(a.date));
   const watchWorkouts = (fitness.watchWorkouts || []).slice(-5).reverse();
   const photos = [...(fitness.progressPhotos || [])].sort((a, b) => b.date.localeCompare(a.date));
 
+  // Build week strip Mon-Sun
+  const weekDays = (() => {
+    const d = new Date();
+    const mondayOff = (d.getDay() + 6) % 7;
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(d);
+      day.setDate(d.getDate() - mondayOff + i);
+      return day.toISOString().slice(0, 10);
+    });
+  })();
+  const loggedDates = new Set(workoutLog.map(e => e.date));
+  const watchDates = new Set((fitness.watchWorkouts || []).map(w => w.date));
+  const WEEK_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const isRestDay = [false, false, true, false, false, false, true];
+
   return (
     <div className="bento">
-      {/* Body stats */}
-      <div className="card col-6" style={{ padding: 20 }}>
-        <CardHead title="Body stats" sub="Track your progress" />
-        <div style={{ marginBottom: 16 }}>
-          <WeightSparkline log={fitness.weightLog || []} />
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 8 }}>
-            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 32, fontWeight: 500 }}>{latestWeight}</span>
-            <span style={{ fontSize: 12, color: 'var(--muted)' }}>lb</span>
+
+      {/* TODAY'S WORKOUT — full width */}
+      <div className="card col-12" style={{ padding: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 6 }}>Today's Workout</div>
+            {todayWorkout ? (
+              <>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, margin: '0 0 4px', color: 'var(--ink)' }}>
+                  Day {todayWorkoutDay} — {todayWorkout.title}
+                </h3>
+                <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginBottom: 4 }}>{todayWorkout.subtitle}</div>
+                <div style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>{todayWorkout.duration} · {todayWorkout.exercises.length} exercises</div>
+              </>
+            ) : (
+              <>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, margin: '0 0 4px', color: 'var(--ink)' }}>Rest Day</h3>
+                <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>No lifting today. Focus on recovery, stretch, and hydration.</div>
+              </>
+            )}
           </div>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input type="number" placeholder="Log weight" value={newWeight} onChange={e => setNewWeight(e.target.value)}
-            style={{ flex: 1, padding: '7px 10px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'inherit', fontSize: 13 }} />
-          <button onClick={logWeight} className="btn btn--pink" style={{ padding: '7px 14px' }}>Log</button>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 16 }}>
-          {[
-            { key: 'waist', label: 'Waist', unit: '"' },
-            { key: 'arms', label: 'Arms', unit: '"' },
-            { key: 'glutes', label: 'Glutes', unit: '"' },
-            { key: 'hips', label: 'Hips', unit: '"' },
-          ].map(m => (
-            <div key={m.key}>
-              <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>{m.label}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <input type="number" value={fitness.measurements?.[m.key] || ''} placeholder="0"
-                  onChange={e => setState(s => ({ ...s, fitness: { ...s.fitness, measurements: { ...(s.fitness.measurements || {}), [m.key]: +e.target.value, date: today } } }))}
-                  style={{ width: 60, padding: '5px 8px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--font-serif)', fontSize: 16 }} />
-                <span style={{ fontSize: 11, color: 'var(--muted)' }}>{m.unit}</span>
-              </div>
-            </div>
-          ))}
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexDirection: 'column', alignItems: 'flex-end' }}>
+            {todayWorkout && (
+              <button className="btn btn--pink" onClick={() => onSwitchTab('train')} style={{ whiteSpace: 'nowrap' }}>
+                Start Workout →
+              </button>
+            )}
+            <button className="btn btn--ghost" onClick={() => setLogModal({ date: today, day: todayWorkoutDay || 0, title: todayWorkout?.title || '', duration: 50, notes: '' })} style={{ fontSize: 12 }}>
+              {todayWorkout ? 'Already done — Log it' : '+ Log a workout'}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Body Goals */}
-      <div className="card col-6" style={{ padding: 20 }}>
-        <CardHead title="Body Goals" sub="TARGET MEASUREMENTS & FOCUS AREAS" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* MIDDLE LEFT — week strip + history */}
+      <div className="card col-7" style={{ padding: 20 }}>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 10 }}>This Week</div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {weekDays.map((dateStr, i) => {
+              const logged = loggedDates.has(dateStr) || watchDates.has(dateStr);
+              const isToday = dateStr === today;
+              const entry = workoutLog.find(e => e.date === dateStr);
+              return (
+                <div key={i} title={entry ? entry.title : isRestDay[i] ? 'Rest' : ''} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                  <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: isToday ? 'var(--primary)' : 'var(--muted)', fontWeight: isToday ? 700 : 400 }}>{WEEK_LABELS[i]}</div>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 10, fontWeight: 700,
+                    background: logged ? 'var(--primary)' : isRestDay[i] ? 'var(--card-2)' : 'transparent',
+                    border: `1.5px solid ${isToday ? 'var(--primary)' : logged ? 'var(--primary)' : 'var(--line)'}`,
+                    color: logged ? '#fff' : isToday ? 'var(--primary)' : 'var(--muted)',
+                  }}>
+                    {logged ? '✓' : isRestDay[i] ? '–' : ''}
+                  </div>
+                  {entry && <div style={{ fontSize: 8, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textAlign: 'center', maxWidth: 32, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.title.split(' ')[0]}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)' }}>Recent History</div>
+            <button className="btn btn--ghost" style={{ fontSize: 11, padding: '4px 10px' }} onClick={() => setLogModal({ date: today, day: todayWorkoutDay || 0, title: todayWorkout?.title || '', duration: 50, notes: '' })}>
+              + Log a workout
+            </button>
+          </div>
+          {workoutLog.length === 0 ? (
+            <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>No workouts logged yet. Hit "Log a workout" to get started.</div>
+          ) : (
+            workoutLog.slice(0, 5).map(entry => (
+              <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid var(--line)' }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{entry.title}</div>
+                  <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+                    {entry.date} · {entry.duration}min{entry.day ? ` · Day ${entry.day}` : ''}
+                  </div>
+                  {entry.notes && <div style={{ fontSize: 11, color: 'var(--ink-soft)', marginTop: 2 }}>{entry.notes}</div>}
+                </div>
+                <button onClick={() => { setEditingLog(entry); setLogModal(entry); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 4, fontSize: 12 }}>✏</button>
+                <button onClick={() => deleteWorkoutLog(entry.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 4, fontSize: 16, lineHeight: 1 }}>×</button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* MIDDLE RIGHT — compact body stats + goals */}
+      <div className="card col-5" style={{ padding: 20 }}>
+        <div style={{ marginBottom: 16 }}>
+          <CardHead title="Body stats" sub="Track your progress" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+            <div>
+              <span style={{ fontFamily: 'var(--font-serif)', fontSize: 32, fontWeight: 500 }}>{latestWeight}</span>
+              <span style={{ fontSize: 12, color: 'var(--muted)', marginLeft: 4 }}>lb</span>
+            </div>
+            <div style={{ flex: 1 }}>
+              <WeightSparkline log={fitness.weightLog || []} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input type="number" placeholder="Log weight" value={newWeight} onChange={e => setNewWeight(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && logWeight()}
+              style={{ flex: 1, padding: '6px 10px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'inherit', fontSize: 13 }} />
+            <button onClick={logWeight} className="btn btn--pink" style={{ padding: '6px 12px' }}>Log</button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginTop: 12 }}>
+            {[{key:'waist',label:'Waist'},{key:'arms',label:'Arms'},{key:'glutes',label:'Glutes'},{key:'hips',label:'Hips'}].map(m => (
+              <div key={m.key} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>{m.label}</div>
+                <input type="number" value={fitness.measurements?.[m.key] || ''} placeholder="—"
+                  onChange={e => setState(s => ({ ...s, fitness: { ...s.fitness, measurements: { ...(s.fitness.measurements || {}), [m.key]: +e.target.value, date: today } } }))}
+                  style={{ width: '100%', padding: '4px 6px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--font-serif)', fontSize: 15, textAlign: 'center' }} />
+                <div style={{ fontSize: 9, color: 'var(--muted)', marginTop: 2 }}>in</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 10 }}>Body Goals</div>
           {GOAL_ZONES.map(g => {
-            const current = fitness.measurements?.[g.key] || '';
-            const target = fitness.goals?.[g.key] || '';
-            const focus = fitness.goalNotes?.[g.key] || 'Medium';
-            const pctDone = (current && target && +target > 0) ? Math.min(100, Math.round((+current / +target) * 100)) : 0;
+            const current = +(fitness.measurements?.[g.key] || 0);
+            const target = +(fitness.goals?.[g.key] || 0);
+            const pct = (current && target) ? Math.min(100, Math.round((current / target) * 100)) : 0;
             return (
-              <div key={g.key}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                  <span style={{ fontSize: 14 }}>{g.emoji}</span>
-                  <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', fontWeight: 700, color: g.color, textTransform: 'uppercase', letterSpacing: '0.12em' }}>{g.label}</span>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
-                  <div>
-                    <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Current (in)</div>
-                    <input type="number" value={current} placeholder="0"
-                      onChange={e => setState(s => ({ ...s, fitness: { ...s.fitness, measurements: { ...(s.fitness.measurements || {}), [g.key]: +e.target.value, date: todayKey() } } }))}
-                      style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--font-serif)', fontSize: 16, boxSizing: 'border-box' }} />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Goal (in)</div>
-                    <input type="number" value={target} placeholder="0"
+              <div key={g.key} style={{ marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <span style={{ fontSize: 11, color: g.color, fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{g.emoji} {g.label}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input type="number" value={target || ''} placeholder="target"
                       onChange={e => setState(s => ({ ...s, fitness: { ...s.fitness, goals: { ...(s.fitness.goals || {}), [g.key]: +e.target.value } } }))}
-                      style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--font-serif)', fontSize: 16, boxSizing: 'border-box' }} />
+                      style={{ width: 52, padding: '3px 6px', border: '1px solid var(--line)', borderRadius: 7, background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--font-mono)', fontSize: 12, textAlign: 'center' }} />
+                    <span style={{ fontSize: 10, color: 'var(--muted)' }}>in</span>
                   </div>
                 </div>
-                {(current || target) ? (
-                  <div style={{ marginBottom: 8 }}>
-                    <div style={{ height: 4, background: 'var(--line)', borderRadius: 2, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: pctDone + '%', background: g.color, borderRadius: 2, transition: 'width 0.3s' }} />
-                    </div>
-                    <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', marginTop: 3 }}>{pctDone}% of goal</div>
-                  </div>
-                ) : null}
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {['High', 'Medium', 'Low'].map(level => (
-                    <button key={level} onClick={() => setState(s => ({ ...s, fitness: { ...s.fitness, goalNotes: { ...(s.fitness.goalNotes || {}), [g.key]: level } } }))}
-                      style={{ flex: 1, padding: '4px 0', borderRadius: 6, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', border: `1px solid ${focus === level ? g.color : 'var(--line)'}`, background: focus === level ? g.color + '22' : 'transparent', color: focus === level ? g.color : 'var(--muted)', fontWeight: focus === level ? 700 : 400 }}>
-                      {level}
-                    </button>
-                  ))}
+                <div style={{ height: 4, background: 'var(--line)', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: pct + '%', background: g.color, borderRadius: 2, transition: 'width 0.3s' }} />
                 </div>
+                {pct > 0 && <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--muted)', marginTop: 2 }}>{pct}% of goal</div>}
               </div>
             );
           })}
         </div>
+      </div>
+
+      {/* SLEEP & RECOVERY TIPS — collapsible */}
+      <div className="card col-12" style={{ padding: 20 }}>
+        <button onClick={() => setTipsOpen(o => !o)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
+          <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 600 }}>Sleep & Recovery Tips</div>
+          <span style={{ fontSize: 12, color: 'var(--muted)' }}>{tipsOpen ? '▲' : '▼'}</span>
+        </button>
+        {tipsOpen && (
+          <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
+            {[
+              { icon: '🌙', title: 'Aim for 7–9 hours', body: 'Sleep is when muscle repair happens. Less than 6 hours = elevated cortisol and reduced fat loss.' },
+              { icon: '📵', title: 'Screen-free wind down', body: 'Put your phone down 30 min before bed. Blue light suppresses melatonin production.' },
+              { icon: '🌡️', title: 'Cool room = better sleep', body: 'Keep your room around 65–68°F. Body temperature drops as you fall asleep.' },
+              { icon: '🧘', title: 'Stretch on rest days', body: 'Light hip flexor and hamstring work on rest days keeps you mobile and reduces soreness.' },
+              { icon: '💧', title: 'Hydrate before bed', body: '16 oz of water before sleeping helps with overnight recovery and morning energy.' },
+              { icon: '☕', title: 'Cut caffeine by 2pm', body: 'Caffeine has a 5-hour half-life. An afternoon coffee can still disrupt sleep quality at 10pm.' },
+            ].map((tip, i) => (
+              <div key={i} style={{ padding: '12px 14px', background: 'var(--card-2)', borderRadius: 12, border: '1px solid var(--line)' }}>
+                <div style={{ fontSize: 18, marginBottom: 6 }}>{tip.icon}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink)', marginBottom: 4 }}>{tip.title}</div>
+                <div style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.5 }}>{tip.body}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Progress Photos */}
@@ -814,6 +1022,15 @@ function OverviewTab({ fitness, setState }) {
             <button onClick={() => setPhotoView(null)} style={{ position: 'absolute', top: -14, right: -14, width: 30, height: 30, borderRadius: '50%', background: 'white', border: 'none', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>×</button>
           </div>
         </div>
+      )}
+
+      {/* Log workout modal */}
+      {logModal !== null && (
+        <LogWorkoutModal
+          initial={logModal}
+          onSave={saveWorkoutLog}
+          onClose={() => { setLogModal(null); setEditingLog(null); }}
+        />
       )}
     </div>
   );
@@ -884,7 +1101,8 @@ export default function FitnessView({ state, setState }) {
   const today = todayKey();
   const log = fitness.nutritionByDate?.[today] || [];
   const totals = log.reduce((a, m) => ({ cal: a.cal + m.cal, p: a.p + m.p }), { cal: 0, p: 0 });
-  const weekWorkouts = Object.values(fitness.workoutByDate || {}).filter(w => w.session).length;
+  const weekStart = (() => { const d = new Date(); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.toISOString().slice(0, 10); })();
+  const weekWorkouts = (fitness.workoutLog || []).filter(w => w.date >= weekStart).length;
 
   const sleepLog = fitness.sleepLog || [];
   const lastSleep = sleepLog.length > 0 ? [...sleepLog].sort((a, b) => b.date.localeCompare(a.date))[0] : null;
@@ -927,7 +1145,7 @@ export default function FitnessView({ state, setState }) {
         ))}
       </div>
 
-      {tab === 'overview' && <OverviewTab fitness={fitness} setState={setState} />}
+      {tab === 'overview' && <OverviewTab fitness={fitness} setState={setState} onSwitchTab={setTab} />}
       {tab === 'sleep' && <div className="bento"><div className="card col-8" style={{ padding: 20 }}><SleepTab fitness={fitness} setState={setState} /></div><div className="card col-4" style={{ padding: 20 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 12 }}>Sleep tips</div><div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>{['Aim for 7.5–9h per night','Consistent wake time matters more than bedtime','Avoid screens 30 min before bed','Cool room = deeper sleep (65–68°F)','Magnesium glycinate before bed can help'].map((tip, i) => (<div key={i} style={{ padding: '10px 12px', background: 'var(--bg)', borderRadius: 10, fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.5, borderLeft: '3px solid var(--primary)' }}>{tip}</div>))}</div><div style={{ marginTop: 20, padding: 14, background: 'var(--bg)', borderRadius: 12, fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.7, fontStyle: 'italic' }}>Sleep is when your muscles actually grow. Non-negotiable for the glute goals.</div></div></div>}
       {tab === 'train' && <div className="bento"><div className="card col-8" style={{ padding: 20 }}><TrainTab fitness={fitness} setState={setState} /></div><div className="card col-4" style={{ padding: 20 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 12 }}>Your Program</div>{[1, 2, 3, 4, 5].map(n => (<div key={n} style={{ padding: '10px 0', borderBottom: '1px dashed var(--line)', fontSize: 13 }}><span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', marginRight: 8 }}>Day {n}</span><span style={{ color: 'var(--ink)', fontWeight: 500 }}>{WORKOUTS[n].title}</span></div>))}<div style={{ marginTop: 16, padding: 14, background: 'var(--bg)', borderRadius: 12, fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.7, fontStyle: 'italic' }}>Consistency over intensity. Always.</div></div></div>}
       {tab === 'nutrition' && <div className="bento"><div className="card col-8" style={{ padding: 20 }}><NutritionTab fitness={fitness} setState={setState} /></div><div className="card col-4" style={{ padding: 20 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--primary)', fontWeight: 700, marginBottom: 12 }}>Daily Targets</div>{[{ label: 'Calories', value: TARGETS.cal, unit: 'kcal', color: 'var(--accent-1)' }, { label: 'Protein', value: TARGETS.p, unit: 'g', color: 'var(--primary)' }, { label: 'Carbs', value: TARGETS.c, unit: 'g', color: 'var(--accent-2)' }, { label: 'Fat', value: TARGETS.f, unit: 'g', color: 'var(--accent-3)' }].map(t => (<MacroBar key={t.label} label={t.label} value={totals[t.label.toLowerCase().slice(0, 1)] || 0} target={t.value} unit={t.unit} color={t.color} />))}<div style={{ marginTop: 20, padding: 14, background: 'var(--bg)', borderRadius: 12 }}><div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Goal</div><div style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.7 }}>Recomp — build muscle, lose fat simultaneously. High protein keeps you full and preserves muscle in a slight deficit.</div></div></div></div>}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { pct, cls } from '@/lib/helpers';
 import { Pill, burstConfetti } from '@/components/ui/primitives';
 import Icon from '@/components/ui/Icon';
@@ -203,6 +203,13 @@ function GoalCard({ goal, onUpdate, onDelete, readOnly }) {
   const [editing, setEditing] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Auto-correct: if progress > 0 but status is still not_started, bump to in_progress
+  useEffect(() => {
+    if (!readOnly && goal.status === 'not_started' && goal.progress > 0) {
+      onUpdate({ ...goal, status: 'in_progress' });
+    }
+  }, [goal.id, goal.progress, goal.status]);
+
   const daysLeft = getDaysRemaining(goal.targetDate);
   const status = STATUS[goal.status] || STATUS.not_started;
   const cat = CAT_MAP[goal.category];
@@ -223,8 +230,15 @@ function GoalCard({ goal, onUpdate, onDelete, readOnly }) {
     if (s === 'complete' && goal.status !== 'complete') {
       const r = e?.currentTarget?.getBoundingClientRect();
       if (r) burstConfetti(r.left + r.width / 2, r.top + r.height / 2);
+      onUpdate({ ...goal, status: s, progress: 100 });
+      return;
     }
-    onUpdate({ ...goal, status: s, progress: s === 'complete' ? 100 : goal.progress });
+    if (s === 'not_started' && goal.progress > 0) {
+      if (!window.confirm('Reset progress to 0% and mark as not started?')) return;
+      onUpdate({ ...goal, status: 'not_started', progress: 0 });
+      return;
+    }
+    onUpdate({ ...goal, status: s, progress: goal.progress });
   };
 
   return (

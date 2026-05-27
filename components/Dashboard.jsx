@@ -346,16 +346,20 @@ export default function Dashboard({ initialData }) {
 }
 
 function MoodModal({ state, setState, onClose }) {
-  const [chosen, setChosen] = useState(null);
+  const today = new Date().toISOString().slice(0, 10);
+  const existing = (state.todayMood || {})[today];
+  const [chosen, setChosen] = useState(existing?.mood || null);
 
   const now = new Date();
   const TODAY_IDX = (now.getDay() + 6) % 7;
 
   const save = () => {
     if (!chosen) return;
+    const opt = MOOD_OPTIONS.find(o => o.id === chosen);
     setState(s => ({
       ...s,
-      moodWeek: s.moodWeek.map((m, i) => i === TODAY_IDX ? { ...m, emoji: chosen, mood: 4 } : m),
+      todayMood: { ...(s.todayMood || {}), [today]: { mood: chosen, energy: s.todayMood?.[today]?.energy || 3 } },
+      moodWeek: s.moodWeek.map((m, i) => i === TODAY_IDX ? { ...m, emoji: opt?.emoji || chosen, mood: 4 } : m),
     }));
     onClose();
   };
@@ -374,8 +378,8 @@ function MoodModal({ state, setState, onClose }) {
           </div>
           <div className="mood-grid" style={{ gap: 10 }}>
             {MOOD_OPTIONS.map(opt => (
-              <button key={opt.id} className="mood-pick" onClick={() => setChosen(opt.emoji)}>
-                <span className={cls('mood-emoji', chosen === opt.emoji && 'mood-emoji--active')} style={{ width: 48, height: 48, fontSize: 24 }}>{opt.emoji}</span>
+              <button key={opt.id} className="mood-pick" onClick={() => setChosen(opt.id)}>
+                <span className={cls('mood-emoji', chosen === opt.id && 'mood-emoji--active')} style={{ width: 48, height: 48, fontSize: 24 }}>{opt.emoji}</span>
                 <span className="mood-label">{opt.label}</span>
               </button>
             ))}

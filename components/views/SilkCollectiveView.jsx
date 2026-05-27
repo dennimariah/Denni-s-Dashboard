@@ -114,7 +114,7 @@ function OverviewTab({ state, setState, onOpsOpen }) {
   const goal = scFinances?.revenueGoal || 3000;
   const goalPct = Math.min(100, Math.round(monthRev / goal * 100));
   const activeClients = scClients.filter(c => c.lastVisit && (Date.now() - new Date(c.lastVisit)) / 86400000 <= 60).length;
-  const linkedGoals = quarterGoals.filter(g => g.category === 'business' || (g.title || '').toLowerCase().includes('silk'));
+  const linkedGoals = quarterGoals.filter(g => g.silkCollective === true);
   const mondayKey = getMondayKey();
   const weekTodos = (state.scWeeklyTodos || {})[mondayKey] || [];
   const [newTodo, setNewTodo] = useState('');

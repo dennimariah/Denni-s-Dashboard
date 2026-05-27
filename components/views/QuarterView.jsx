@@ -17,7 +17,6 @@ const STATUS = {
 
 const CATEGORIES = [
   { id: 'health',   label: 'Health',   icon: '🌿', color: '#e8527a', bg: '#fbd7e1' },
-  { id: 'finance',  label: 'Finance',  icon: '💰', color: '#6db88a', bg: '#c8e8d4' },
   { id: 'business', label: 'Business', icon: '👑', color: '#9b7cc8', bg: '#e0d4f5' },
   { id: 'personal', label: 'Personal', icon: '🌸', color: '#f4a261', bg: '#fde3cf' },
 ];
@@ -69,19 +68,13 @@ function isCurrentOrPast(q) {
   return year < cy || (year === cy && qNum <= cq);
 }
 
-// ── Donut ring ────────────────────────────────────────────────────────────────
+// ── Mini progress bar ─────────────────────────────────────────────────────────
 
-function DonutRing({ value, color, size = 52 }) {
-  const r = (size - 10) / 2;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (Math.min(value, 100) / 100) * circ;
+function MiniBar({ value, color, width = 80 }) {
   return (
-    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--line)" strokeWidth={5} />
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={5}
-        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
-        style={{ transition: 'stroke-dashoffset 0.4s ease' }} />
-    </svg>
+    <div style={{ width, height: 6, background: 'var(--line)', borderRadius: 3, overflow: 'hidden', flexShrink: 0 }}>
+      <div style={{ height: '100%', width: Math.min(value, 100) + '%', background: color, borderRadius: 3, transition: 'width 0.4s' }} />
+    </div>
   );
 }
 
@@ -203,12 +196,12 @@ function GoalModal({ goal, categoryId, quarter, onSave, onClose }) {
   );
 }
 
-// ── Goal card ─────────────────────────────────────────────────────────────────
+// ── Goal card (vertical list item) ───────────────────────────────────────────
 
 function GoalCard({ goal, onUpdate, onDelete, readOnly }) {
-  const [showNotes, setShowNotes] = useState(false);
   const [showSubtasks, setShowSubtasks] = useState(false);
-  const [editing, setEditing] = useState(null); // null | goal object for modal
+  const [editing, setEditing] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const daysLeft = getDaysRemaining(goal.targetDate);
   const status = STATUS[goal.status] || STATUS.not_started;
@@ -234,24 +227,43 @@ function GoalCard({ goal, onUpdate, onDelete, readOnly }) {
     onUpdate({ ...goal, status: s, progress: s === 'complete' ? 100 : goal.progress });
   };
 
-  const setProgress = (v) => onUpdate({ ...goal, progress: v });
-
   return (
     <>
-      <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 14, padding: '16px 18px', borderLeft: `3px solid ${status.color}` }}>
-        {/* Carried over badge */}
-        {goal.carriedOver && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 6, background: '#fef3cd', color: '#8b6914', fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 600, letterSpacing: '0.08em', marginBottom: 8 }}>
-            ↩ CARRIED OVER
+      <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 14, padding: '14px 16px', borderLeft: `3px solid ${status.color}`, position: 'relative' }}>
+        {/* Top row: title + overflow menu */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
+          <div style={{ flex: 1 }}>
+            {goal.carriedOver && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '1px 7px', borderRadius: 5, background: '#fef3cd', color: '#8b6914', fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 600, letterSpacing: '0.08em', marginBottom: 6 }}>
+                ↩ CARRIED OVER
+              </div>
+            )}
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 500, color: 'var(--ink)', lineHeight: 1.4 }}>{goal.title}</div>
           </div>
-        )}
+          {!readOnly && (
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <button onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 18, lineHeight: 1, padding: '0 4px', fontWeight: 700 }}>⋯</button>
+              {menuOpen && (
+                <div style={{ position: 'absolute', right: 0, top: '100%', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.10)', zIndex: 20, minWidth: 120, overflow: 'hidden' }}
+                  onBlur={() => setMenuOpen(false)}>
+                  <button onClick={() => { setEditing(goal); setMenuOpen(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '9px 14px', fontSize: 13, color: 'var(--ink)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Edit goal</button>
+                  <button onClick={() => { onDelete(goal.id); setMenuOpen(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '9px 14px', fontSize: 13, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
-        {/* Title */}
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 500, color: 'var(--ink)', lineHeight: 1.4, marginBottom: 10 }}>{goal.title}</div>
-
-        {/* Status + date row */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ padding: '3px 10px', borderRadius: 8, background: status.bg, color: status.color, fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{status.label}</span>
+        {/* Status select + date */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+          {readOnly ? (
+            <span style={{ padding: '3px 10px', borderRadius: 8, background: status.bg, color: status.color, fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{status.label}</span>
+          ) : (
+            <select value={goal.status} onChange={e => setStatus(e.target.value, null)}
+              style={{ padding: '4px 8px', borderRadius: 8, border: `1.5px solid ${status.color}`, background: status.bg, color: status.color, fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-mono)', cursor: 'pointer', outline: 'none' }}>
+              {Object.entries(STATUS).map(([key, s]) => <option key={key} value={key}>{s.label}</option>)}
+            </select>
+          )}
           {goal.targetDate && (
             <span style={{ fontSize: 11, color: dateColor, fontFamily: 'var(--font-mono)' }}>
               {new Date(goal.targetDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -260,43 +272,48 @@ function GoalCard({ goal, onUpdate, onDelete, readOnly }) {
           )}
         </div>
 
-        {/* Progress */}
-        <div style={{ marginBottom: 12 }}>
+        {/* Progress bar (visual only — edit via modal) */}
+        <div style={{ marginBottom: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
             <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Progress</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: cat?.color || 'var(--primary)' }}>{goal.progress}%</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: cat?.color || 'var(--primary)' }}>{goal.progress}%</span>
+              {!readOnly && (
+                <button onClick={() => setEditing(goal)} title="Edit progress" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 2, lineHeight: 1, fontSize: 11 }}>✏</button>
+              )}
+            </div>
           </div>
-          <div style={{ height: 6, background: 'var(--line)', borderRadius: 3, overflow: 'hidden', marginBottom: 6 }}>
+          <div style={{ height: 6, background: 'var(--line)', borderRadius: 3, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: goal.progress + '%', background: cat?.color || 'var(--primary)', borderRadius: 3, transition: 'width 0.3s' }} />
           </div>
-          {!readOnly && (
-            <input type="range" min={0} max={100} step={5} value={goal.progress} onChange={e => setProgress(+e.target.value)}
-              style={{ width: '100%', accentColor: cat?.color || 'var(--primary)', height: 3 }} />
-          )}
         </div>
 
-        {/* Expandable notes */}
-        {(goal.notes || !readOnly) && (
-          <button onClick={() => setShowNotes(!showNotes)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 12, fontFamily: 'inherit', padding: '2px 0', marginBottom: 4, width: '100%', textAlign: 'left' }}>
-            <span style={{ fontSize: 10 }}>{showNotes ? '▾' : '▸'}</span>
-            <span>Notes {goal.notes ? '·' + goal.notes.slice(0, 30) + (goal.notes.length > 30 ? '...' : '') : '(empty)'}</span>
-          </button>
-        )}
-        {showNotes && (
-          <div style={{ padding: '10px 12px', background: 'var(--bg)', borderRadius: 10, fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.6, marginBottom: 8, whiteSpace: 'pre-wrap' }}>
-            {goal.notes || <span style={{ fontStyle: 'italic', color: 'var(--muted)' }}>No notes yet. Edit to add.</span>}
+        {/* "What does 100% mean?" */}
+        {(goal.successCriteria || !readOnly) && (
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>What does 100% mean?</div>
+            {readOnly ? (
+              <div style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.4 }}>{goal.successCriteria || <span style={{ fontStyle: 'italic' }}>—</span>}</div>
+            ) : (
+              <input
+                value={goal.successCriteria || ''}
+                onChange={e => onUpdate({ ...goal, successCriteria: e.target.value })}
+                placeholder="Define what completion looks like…"
+                style={{ width: '100%', border: 'none', borderBottom: '1px solid var(--line)', background: 'transparent', fontSize: 12, color: 'var(--ink-soft)', fontFamily: 'inherit', outline: 'none', padding: '3px 0', boxSizing: 'border-box' }}
+              />
+            )}
           </div>
         )}
 
-        {/* Expandable subtasks */}
+        {/* Subtasks */}
         {(goal.subtasks?.length > 0) && (
           <>
-            <button onClick={() => setShowSubtasks(!showSubtasks)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 12, fontFamily: 'inherit', padding: '2px 0', marginBottom: 4, width: '100%', textAlign: 'left' }}>
+            <button onClick={() => setShowSubtasks(!showSubtasks)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 12, fontFamily: 'inherit', padding: '2px 0', width: '100%', textAlign: 'left' }}>
               <span style={{ fontSize: 10 }}>{showSubtasks ? '▾' : '▸'}</span>
-              <span>Subtasks · {doneSubtasks}/{goal.subtasks.length} complete</span>
+              <span>Subtasks · {doneSubtasks}/{goal.subtasks.length} done</span>
             </button>
             {showSubtasks && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8, paddingLeft: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6, paddingLeft: 12 }}>
                 {goal.subtasks.map(s => (
                   <label key={s.id} style={{ display: 'flex', gap: 8, alignItems: 'center', cursor: readOnly ? 'default' : 'pointer' }}>
                     <input type="checkbox" checked={s.done} onChange={() => !readOnly && toggleSubtask(s.id)} style={{ accentColor: cat?.color || 'var(--primary)' }} />
@@ -306,23 +323,6 @@ function GoalCard({ goal, onUpdate, onDelete, readOnly }) {
               </div>
             )}
           </>
-        )}
-
-        {/* Actions */}
-        {!readOnly && (
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 10, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
-            {Object.entries(STATUS).map(([key, s]) => (
-              <button key={key} onClick={(e) => setStatus(key, e)} style={{
-                padding: '3px 8px', borderRadius: 6, fontSize: 10, cursor: 'pointer', fontFamily: 'inherit',
-                border: `1px solid ${goal.status === key ? s.color : 'var(--line)'}`,
-                background: goal.status === key ? s.bg : 'transparent',
-                color: goal.status === key ? s.color : 'var(--muted)', fontWeight: goal.status === key ? 700 : 400,
-              }}>{s.label}</button>
-            ))}
-            <div style={{ flex: 1 }} />
-            <button onClick={() => setEditing(goal)} style={{ fontSize: 11, color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Edit</button>
-            <button onClick={() => onDelete(goal.id)} style={{ fontSize: 11, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>
-          </div>
         )}
       </div>
 
@@ -343,15 +343,13 @@ function CategorySection({ category, goals, quarter, onAdd, onUpdate, onDelete, 
   return (
     <div style={{ marginBottom: 28 }}>
       {/* Section header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <DonutRing value={catPct} color={category.color} size={48} />
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 18 }}>{category.icon}</span>
-              <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 700, color: category.color }}>{category.label}</span>
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{completed}/{total} complete · {catPct}%</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+        <span style={{ fontSize: 20 }}>{category.icon}</span>
+        <div>
+          <div style={{ fontSize: 14, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 800, color: category.color }}>{category.label}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+            <MiniBar value={catPct} color={category.color} width={72} />
+            <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>{completed}/{total} complete · {catPct}%</span>
           </div>
         </div>
         <div style={{ flex: 1, height: 1, background: category.color + '25' }} />
@@ -363,11 +361,11 @@ function CategorySection({ category, goals, quarter, onAdd, onUpdate, onDelete, 
       </div>
 
       {goals.length === 0 ? (
-        <div style={{ padding: '20px 0', textAlign: 'center', fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>
+        <div style={{ padding: '16px 0', fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>
           {readOnly ? 'No goals this quarter' : 'No goals yet — add one above'}
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {goals.map(g => (
             <GoalCard key={g.id} goal={g} onUpdate={onUpdate} onDelete={onDelete} readOnly={readOnly} />
           ))}
@@ -478,7 +476,7 @@ export default function QuarterView({ state, setState }) {
       )}
 
       {/* Quarter health summary */}
-      <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 16, padding: 20, marginBottom: 24 }}>
+      <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 16, padding: 20, marginBottom: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 16, marginBottom: 16 }}>
           {[
             { label: 'Goals complete',  val: `${completeGoals} of ${totalGoals}`, color: '#6db88a' },
@@ -499,6 +497,92 @@ export default function QuarterView({ state, setState }) {
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)', fontFamily: 'var(--font-mono)', minWidth: 40 }}>{overallPct}%</span>
         </div>
       </div>
+
+      {/* Progress at a glance + Timeline (only for active quarter) */}
+      {!showArchive && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 }}>
+          {/* 2b: Progress by category */}
+          <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 14, padding: 16 }}>
+            <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 700, marginBottom: 14 }}>Progress at a glance</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {CATEGORIES.map(cat => {
+                const catGoals = qGoals.filter(g => g.category === cat.id);
+                if (catGoals.length === 0) return null;
+                const avgPct = Math.round(catGoals.reduce((sum, g) => sum + (g.progress || 0), 0) / catGoals.length);
+                return (
+                  <div key={cat.id}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', fontWeight: 700, color: cat.color }}>{cat.icon} {cat.label}</span>
+                      <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>{avgPct}%</span>
+                    </div>
+                    <div style={{ height: 8, background: 'var(--line)', borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: avgPct + '%', background: cat.color, borderRadius: 4, transition: 'width 0.4s' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 2c: Timeline strip */}
+          {(() => {
+            const { start, end } = getQuarterDates(activeQ);
+            const now = new Date();
+            const totalDays = (end - start) / 86400000;
+            const elapsed = Math.max(0, Math.min(totalDays, (now - start) / 86400000));
+            const todayPct = (elapsed / totalDays) * 100;
+
+            const goalDots = qGoals
+              .filter(g => g.targetDate)
+              .map(g => {
+                const d = new Date(g.targetDate + 'T12:00:00');
+                const posPct = Math.max(0, Math.min(100, ((d - start) / (end - start)) * 100));
+                const cat = CAT_MAP[g.category];
+                return { ...g, posPct, color: cat?.color || 'var(--primary)' };
+              });
+
+            const fmtDate = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            return (
+              <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 14, padding: 16 }}>
+                <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 700, marginBottom: 14 }}>Quarter timeline</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>{fmtDate(start)}</span>
+                  <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>{fmtDate(end)}</span>
+                </div>
+                <div style={{ position: 'relative', height: 32, marginBottom: 16 }}>
+                  {/* Track */}
+                  <div style={{ position: 'absolute', top: 14, left: 0, right: 0, height: 4, background: 'var(--line)', borderRadius: 2 }} />
+                  {/* Elapsed */}
+                  <div style={{ position: 'absolute', top: 14, left: 0, width: todayPct + '%', height: 4, background: 'var(--primary)', borderRadius: 2, transition: 'width 0.4s' }} />
+                  {/* Today marker */}
+                  {isCurrentQuarter && (
+                    <div style={{ position: 'absolute', top: 8, left: todayPct + '%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <div style={{ width: 2, height: 16, background: 'var(--primary)', borderRadius: 1 }} />
+                    </div>
+                  )}
+                  {/* Goal dots */}
+                  {goalDots.map(g => (
+                    <div key={g.id} title={g.title} style={{ position: 'absolute', top: 8, left: g.posPct + '%', transform: 'translateX(-50%)' }}>
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: g.color, border: '2px solid var(--card)', cursor: 'help' }} />
+                    </div>
+                  ))}
+                </div>
+                {/* Goal dot legend */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 5, maxHeight: 120, overflowY: 'auto' }}>
+                  {goalDots.sort((a, b) => a.posPct - b.posPct).map(g => (
+                    <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <div style={{ width: 7, height: 7, borderRadius: '50%', background: g.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, color: 'var(--ink-soft)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.title}</span>
+                      <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--muted)', flexShrink: 0 }}>{new Date(g.targetDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
 
       {/* Archive view */}
       {showArchive ? (
@@ -549,22 +633,32 @@ export default function QuarterView({ state, setState }) {
           <div style={{ marginTop: 8, padding: 20, background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 500, color: 'var(--ink)' }}>Parking lot</div>
-                <div style={{ fontSize: 12, color: 'var(--muted)' }}>Ideas to revisit next quarter</div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 500, color: 'var(--ink)' }}>Parking lot</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>Ideas that aren't ready for a goal yet — capture them here</div>
               </div>
-              <button onClick={() => setState(s => ({ ...s, parking: ['', ...(s.parking || [])] }))} style={{ padding: '5px 12px', borderRadius: 10, border: '1px solid var(--line)', background: 'var(--bg)', color: 'var(--muted)', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>+ Idea</button>
+              <button onClick={() => setState(s => ({ ...s, parking: ['', ...(s.parking || [])] }))}
+                style={{ padding: '7px 16px', borderRadius: 10, border: 'none', background: 'var(--primary)', color: 'white', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
+                + Idea
+              </button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
-              {(state.parking || []).map((p, i) => (
-                <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '10px 12px', background: 'var(--bg)', borderRadius: 10, border: '1px solid var(--line)' }}>
-                  <span style={{ color: 'var(--accent-3)', fontSize: 12, marginTop: 2, flexShrink: 0 }}>◆</span>
-                  <input value={p} onChange={e => setState(s => ({ ...s, parking: s.parking.map((x, j) => j === i ? e.target.value : x) }))}
-                    style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, background: 'transparent', color: 'var(--ink)', fontFamily: 'inherit' }} />
-                  <button onClick={() => setState(s => ({ ...s, parking: s.parking.filter((_, j) => j !== i) }))} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, flexShrink: 0 }}>×</button>
-                </div>
-              ))}
-              {(state.parking || []).length === 0 && <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', gridColumn: 'span 3' }}>Nothing parked yet</div>}
-            </div>
+            {(state.parking || []).length === 0 ? (
+              <div style={{ padding: '24px 0', textAlign: 'center' }}>
+                <div style={{ fontSize: 22, marginBottom: 8 }}>💡</div>
+                <div style={{ fontSize: 14, fontFamily: 'var(--font-serif)', color: 'var(--ink-soft)', marginBottom: 4 }}>Nothing parked yet</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>Got a goal idea that isn't ready to commit to? Park it here and revisit next quarter.</div>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
+                {(state.parking || []).map((p, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '10px 12px', background: 'var(--bg)', borderRadius: 10, border: '1px solid var(--line)' }}>
+                    <span style={{ color: 'var(--accent-3)', fontSize: 12, marginTop: 2, flexShrink: 0 }}>◆</span>
+                    <input value={p} onChange={e => setState(s => ({ ...s, parking: s.parking.map((x, j) => j === i ? e.target.value : x) }))}
+                      style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, background: 'transparent', color: 'var(--ink)', fontFamily: 'inherit' }} />
+                    <button onClick={() => setState(s => ({ ...s, parking: s.parking.filter((_, j) => j !== i) }))} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, flexShrink: 0 }}>×</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

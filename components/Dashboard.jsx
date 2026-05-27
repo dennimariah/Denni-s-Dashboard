@@ -24,7 +24,6 @@ import TodayView from '@/components/views/TodayView';
 import WeekView from '@/components/views/WeekView';
 import HabitsView from '@/components/views/HabitsView';
 import QuarterView from '@/components/views/QuarterView';
-import FinanceView from '@/components/views/FinanceView';
 import JournalView from '@/components/views/JournalView';
 import RecipesView from '@/components/views/RecipesView';
 import ContentView from '@/components/views/ContentView';
@@ -35,14 +34,13 @@ import TravelView from '@/components/views/TravelView';
 import MonthlyReviewView from '@/components/views/MonthlyReviewView';
 import DevotionView from '@/components/views/DevotionView';
 
-const VIEWS = { today: TodayView, week: WeekView, habits: HabitsView, quarter: QuarterView, finance: FinanceView, journal: JournalView, recipes: RecipesView, content: ContentView, hair: HairView, fitness: FitnessView, silk: SilkCollectiveView, travel: TravelView, review: MonthlyReviewView, devotion: DevotionView };
+const VIEWS = { today: TodayView, week: WeekView, habits: HabitsView, quarter: QuarterView, journal: JournalView, recipes: RecipesView, content: ContentView, hair: HairView, fitness: FitnessView, silk: SilkCollectiveView, travel: TravelView, review: MonthlyReviewView, devotion: DevotionView };
 
 const NAV = [
   { id: 'today', label: 'Today', icon: 'spark' },
   { id: 'week', label: 'This week', icon: 'week' },
   { id: 'habits', label: 'Habits', icon: 'habit' },
   { id: 'quarter', label: 'Quarterly Goals', icon: 'quarter' },
-  { id: 'finance', label: 'Finance', icon: 'money' },
   { id: 'journal', label: 'Journal', icon: 'book' },
   { id: 'recipes', label: 'Kitchen', icon: 'chef' },
   { id: 'content', label: 'Content', icon: 'sparkle' },

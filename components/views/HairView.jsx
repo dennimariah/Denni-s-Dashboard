@@ -697,7 +697,7 @@ function ProgressTab({ hair, setState }) {
       {/* Progress photos with comments */}
       <div className="card col-12" style={{ padding: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-          <CardHead title="Progress photos" sub={`${photos.length} photos · tap to view full size`} />
+          <CardHead title="Progress photos" sub={`${photos.length} photos · click to view full size`} />
           <label style={{ cursor: 'pointer' }}>
             <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
             <span className="btn btn--ghost" style={{ fontSize: 12 }}>+ Add photo</span>
@@ -784,7 +784,7 @@ function ProductsTab() {
   return (
     <div>
       <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginBottom: 20, lineHeight: 1.6 }}>
-        Reference guide for every product in your regimen. Tap a product to see full how-to and notes. More products can be added as your stash grows.
+        Reference guide for every product in your regimen. Click a product to see full how-to and notes. More products can be added as your stash grows.
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {PRODUCT_CATALOG.map(category => (

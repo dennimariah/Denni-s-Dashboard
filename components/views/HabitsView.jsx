@@ -183,11 +183,11 @@ function CategorySection({ category, habitLogs, weeklyHabitLogs, churchLog, toda
         <span style={{ fontSize: 14 }}>{category.icon}</span>
         <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, color: category.color }}>{category.label}</span>
         <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />
-        <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--muted)' }}>{done}/{total}</span>
+        <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--muted)' }} title="check-ins completed this week vs. total possible">{done}/{total} this week</span>
         <div style={{ width: 48, height: 3, background: 'var(--line)', borderRadius: 2, overflow: 'hidden' }}>
           <div style={{ height: '100%', width: score + '%', background: category.color, borderRadius: 2, transition: 'width 0.3s' }} />
         </div>
-        <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: category.color, fontWeight: 600, minWidth: 28, textAlign: 'right' }}>{score}%</span>
+        <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: category.color, fontWeight: 600, minWidth: 28, textAlign: 'right' }} title="completion rate this week">{score}%</span>
       </div>
 
       {/* Column headers — only render once above habits */}

@@ -308,13 +308,37 @@ function HabitsToday({ state, setState }) {
   );
 }
 
-function TodaysAgenda({ calendar }) {
+function TodaysAgenda({ calendar, upcomingEvents }) {
+  const nextEvent = useMemo(() => {
+    if (!upcomingEvents) return null;
+    const sorted = Object.entries(upcomingEvents)
+      .sort(([a], [b]) => a.localeCompare(b));
+    for (const [dateStr, events] of sorted) {
+      if (events.length > 0) {
+        const d = new Date(dateStr + 'T12:00:00');
+        const label = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        return { title: events[0].title, label };
+      }
+    }
+    return null;
+  }, [upcomingEvents]);
+
   return (
     <div className="card" style={{ padding: '14px 16px', marginBottom: 10 }}>
       <SectionLabel>Today's Agenda</SectionLabel>
       {calendar.connected === null && <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>Loading…</div>}
       {calendar.connected === false && <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>Add a calendar in Themes &amp; settings →</div>}
-      {calendar.connected === true && calendar.events.length === 0 && <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>Your schedule is clear today.</div>}
+      {calendar.connected === true && calendar.events.length === 0 && (
+        <div>
+          <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>Your schedule is clear today.</div>
+          {nextEvent && (
+            <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 10 }}>→</span>
+              <span>Next up: <strong>{nextEvent.title}</strong> on {nextEvent.label}</span>
+            </div>
+          )}
+        </div>
+      )}
       {(calendar.events || []).map(ev => (
         <div key={ev.id} style={{ display: 'flex', gap: 10, padding: '6px 0', borderTop: '1px solid var(--line)', alignItems: 'flex-start' }}>
           <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--muted)', minWidth: 46, paddingTop: 2 }}>{ev.time}</div>
@@ -825,11 +849,22 @@ function BrainDump({ state, setState }) {
 
 export default function TodayView({ state, setState }) {
   const [calendar, setCalendar] = useState({ connected: null, events: [] });
+  const [upcomingEvents, setUpcomingEvents] = useState({});
 
   useEffect(() => {
     fetch('/api/calendar')
       .then(r => r.json())
-      .then(setCalendar)
+      .then(data => {
+        setCalendar(data);
+        if (data.connected) {
+          const toStr = (d) => { const s = d.toLocaleDateString('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }); const [m, dy, y] = s.split('/'); return `${y}-${m}-${dy}`; };
+          const dates = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() + i + 1); return toStr(d); }).join(',');
+          fetch(`/api/calendar?dates=${dates}`)
+            .then(r => r.json())
+            .then(d => { if (d.connected) setUpcomingEvents(d.eventsByDate || {}); })
+            .catch(() => {});
+        }
+      })
       .catch(() => setCalendar({ connected: false, events: [] }));
   }, []);
 
@@ -847,7 +882,7 @@ export default function TodayView({ state, setState }) {
         <div>
           <GroupHeader label="Today's Focus" />
           <HabitsToday state={state} setState={setState} />
-          <TodaysAgenda calendar={calendar} />
+          <TodaysAgenda calendar={calendar} upcomingEvents={upcomingEvents} />
           <ContentDueToday state={state} onNavigate={navigate} />
 
           <GroupHeader label="On Your Radar" />

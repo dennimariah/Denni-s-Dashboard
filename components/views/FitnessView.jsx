@@ -749,16 +749,14 @@ function OverviewTab({ fitness, setState }) {
           <div className="empty">Workouts will appear here after Health Auto Export syncs</div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }}>
-            {watchWorkouts.map((w, i) => (
-              <div key={i} style={{ padding: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 12 }}>
-                <div style={{ fontSize: 20, marginBottom: 4 }}>{w.type?.includes('Strength') || w.type?.includes('Weight') ? '🏋️' : w.type?.includes('Run') ? '🏃' : '⚡'}</div>
-                <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ink)', marginBottom: 2 }}>{w.type}</div>
-                <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
-                  {w.duration}min · {w.calories} kcal{w.heartRate ? ` · ${w.heartRate} bpm` : ''}
-                </div>
-                <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>{w.date}</div>
-              </div>
-            ))}
+            {watchWorkouts.map((w, i) => {
+              const realIdx = (fitness.watchWorkouts || []).length - 1 - i;
+              return <WatchWorkoutCard key={i} w={w} onSave={patch => setState(s => {
+                const arr = [...(s.fitness.watchWorkouts || [])];
+                arr[realIdx] = { ...arr[realIdx], ...patch };
+                return { ...s, fitness: { ...s.fitness, watchWorkouts: arr } };
+              })} />;
+            })}
           </div>
         )}
       </div>
@@ -779,6 +777,58 @@ function OverviewTab({ fitness, setState }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Watch Workout Card (with inline edit for correcting bad Apple Watch data) ──
+
+function WatchWorkoutCard({ w, onSave }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ duration: w.duration, calories: w.calories });
+  const emoji = w.type?.includes('Strength') || w.type?.includes('Weight') ? '🏋️' : w.type?.includes('Run') ? '🏃' : '⚡';
+
+  const save = () => {
+    onSave({ duration: Number(draft.duration) || 0, calories: Number(draft.calories) || 0 });
+    setEditing(false);
+  };
+
+  if (editing) return (
+    <div style={{ padding: 14, background: 'var(--bg)', border: '1.5px solid var(--primary)', borderRadius: 12 }}>
+      <div style={{ fontSize: 20, marginBottom: 6 }}>{emoji}</div>
+      <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--ink)', marginBottom: 8 }}>{w.type}</div>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>min</div>
+          <input type="number" value={draft.duration} onChange={e => setDraft(d => ({ ...d, duration: e.target.value }))}
+            style={{ width: '100%', padding: '5px 7px', border: '1px solid var(--line)', borderRadius: 7, background: 'var(--card)', fontFamily: 'var(--font-serif)', fontSize: 15, color: 'var(--ink)' }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>kcal</div>
+          <input type="number" value={draft.calories} onChange={e => setDraft(d => ({ ...d, calories: e.target.value }))}
+            style={{ width: '100%', padding: '5px 7px', border: '1px solid var(--line)', borderRadius: 7, background: 'var(--card)', fontFamily: 'var(--font-serif)', fontSize: 15, color: 'var(--ink)' }} />
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <button onClick={save} style={{ flex: 1, padding: '5px 0', borderRadius: 7, border: 0, background: 'var(--primary)', color: 'white', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Save</button>
+        <button onClick={() => setEditing(false)} style={{ padding: '5px 10px', borderRadius: 7, border: '1px solid var(--line)', background: 'transparent', color: 'var(--muted)', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>✕</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ padding: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 12, position: 'relative' }}>
+      <button onClick={() => { setDraft({ duration: w.duration, calories: w.calories }); setEditing(true); }}
+        title="Correct this entry"
+        style={{ position: 'absolute', top: 10, right: 10, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 2, lineHeight: 1 }}>
+        <Icon name="edit" size={12} />
+      </button>
+      <div style={{ fontSize: 20, marginBottom: 4 }}>{emoji}</div>
+      <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ink)', marginBottom: 2 }}>{w.type}</div>
+      <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+        {w.duration}min · {w.calories} kcal{w.heartRate ? ` · ${w.heartRate} bpm` : ''}
+      </div>
+      <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>{w.date}</div>
     </div>
   );
 }

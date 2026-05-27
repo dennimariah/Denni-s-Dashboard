@@ -12,8 +12,8 @@ const SOFT_BG = '#fdf6f4';
 const SAGE = '#5a8a6a';
 const GOLD = '#b8860b';
 
-const MOOD_LABELS  = { 1: 'heavy',    2: 'low',     3: 'even',   4: 'bright',  5: 'soaring'  };
-const ENERGY_LABELS = { 1: 'depleted', 2: 'tired',   3: 'steady', 4: 'lit',     5: 'buzzing'  };
+const MOOD_LABELS  = { 1: '😔 heavy', 2: '😕 low', 3: '😐 even', 4: '🙂 bright', 5: '✨ soaring' };
+const ENERGY_LABELS = { 1: '💤 depleted', 2: '😴 tired', 3: '⚡ steady', 4: '🔥 lit', 5: '🚀 buzzing' };
 const CAT_COLORS   = { body: '#5b8df5', hair: '#6db88a', business: '#b8860b', mind: '#d68d84' };
 const CAT_LABELS   = { body: 'Body',   hair: 'Hair',  business: 'Business', mind: 'Mind & Recovery' };
 
@@ -453,32 +453,36 @@ function UpcomingTrip({ state }) {
 
 function MoodEnergyCheckIn({ state, setState }) {
   const today = todayStr();
-  const entry = (state.journal || []).find(e => e.date === today);
-  const [mood, setMood] = useState(entry?.mood || 0);
-  const [energy, setEnergy] = useState(entry?.energy || 0);
-  const [saved, setSaved] = useState(!!(entry?.mood));
-  const [editing, setEditing] = useState(false);
+  const moodLogEntry = (state.moodLog || {})[today];
+  const journalEntry = (state.journal || []).find(e => e.date === today);
+  const initMood = moodLogEntry?.level || journalEntry?.mood || 0;
+  const initEnergy = journalEntry?.energy || 0;
+  const [mood, setMood] = useState(initMood);
+  const [energy, setEnergy] = useState(initEnergy);
 
-  const save = () => {
+  const persist = (newMood, newEnergy) => {
     setState(s => {
       const list = s.journal || [];
       const i = list.findIndex(e => e.date === today);
-      const updated = i >= 0
-        ? list.map((e, idx) => idx === i ? { ...e, mood, energy } : e)
-        : [{ id: uid(), date: today, title: '', body: '', mood, energy }, ...list];
-      return { ...s, journal: updated };
+      const journal = i >= 0
+        ? list.map((e, idx) => idx === i ? { ...e, mood: newMood, energy: newEnergy } : e)
+        : [{ id: uid(), date: today, title: '', body: '', mood: newMood, energy: newEnergy }, ...list];
+      const moodLog = { ...(s.moodLog || {}), [today]: { level: newMood, note: s.moodLog?.[today]?.note || '' } };
+      return { ...s, journal, moodLog };
     });
-    setSaved(true); setEditing(false);
   };
 
-  const TapRow = ({ val, onChange, labels }) => (
+  const pickMood = (n) => { setMood(n); persist(n, energy); };
+  const pickEnergy = (n) => { setEnergy(n); persist(mood, n); };
+
+  const TapRow = ({ val, onPick, labels }) => (
     <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
       {[1,2,3,4,5].map(n => (
-        <button key={n} onClick={() => onChange(n)} style={{
-          padding: '4px 9px', borderRadius: 8, fontSize: 11, fontFamily: 'inherit', cursor: 'pointer', transition: 'all .12s',
+        <button key={n} onClick={() => onPick(n)} style={{
+          padding: '5px 10px', borderRadius: 8, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', transition: 'all .12s',
           border: `1px solid ${val === n ? ACCENT : 'var(--line)'}`,
           background: val === n ? ACCENT : 'var(--card)',
-          color: val === n ? '#fff' : 'var(--muted)',
+          color: val === n ? '#fff' : 'var(--ink-soft)',
         }}>{labels[n]}</button>
       ))}
     </div>
@@ -487,31 +491,19 @@ function MoodEnergyCheckIn({ state, setState }) {
   return (
     <div className="card" style={{ padding: '14px 16px', marginBottom: 10 }}>
       <SectionLabel>Mood & Energy</SectionLabel>
-      {saved && !editing ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span style={{ fontSize: 13, color: 'var(--ink)' }}>
-            Mood: <strong>{MOOD_LABELS[mood]}</strong> · Energy: <strong>{ENERGY_LABELS[energy]}</strong>
-          </span>
-          <LinkBtn onClick={() => setEditing(true)}>Edit</LinkBtn>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 6 }}>Mood {mood > 0 && <span style={{ color: ACCENT, fontWeight: 600 }}>· {MOOD_LABELS[mood]}</span>}</div>
+          <TapRow val={mood} onPick={pickMood} labels={MOOD_LABELS} />
         </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 5 }}>Mood</div>
-            <TapRow val={mood} onChange={setMood} labels={MOOD_LABELS} />
-          </div>
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 5 }}>Energy</div>
-            <TapRow val={energy} onChange={setEnergy} labels={ENERGY_LABELS} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={save} style={{ background: ACCENT, border: 'none', borderRadius: 9, padding: '7px 14px', color: '#fff', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Icon name="check" size={13} /> Save
-            </button>
-            <span style={{ fontSize: 11, color: 'var(--muted)' }}>Saved to your journal.</span>
-          </div>
+        <div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 6 }}>Energy {energy > 0 && <span style={{ color: ACCENT, fontWeight: 600 }}>· {ENERGY_LABELS[energy]}</span>}</div>
+          <TapRow val={energy} onPick={pickEnergy} labels={ENERGY_LABELS} />
         </div>
-      )}
+        {(mood > 0 || energy > 0) && (
+          <div style={{ fontSize: 11, color: SAGE }}>✓ Saved automatically</div>
+        )}
+      </div>
     </div>
   );
 }
@@ -523,28 +515,46 @@ function FitnessThisWeek({ state }) {
   const workoutH = habits.find(h => h.id === 'hb2' || h.label?.toLowerCase().includes('workout'));
   const proteinH  = habits.find(h => h.id === 'hb1' || h.label?.toLowerCase().includes('protein'));
   const wLog = workoutH ? (logs[workoutH.id] || Array(7).fill(false)) : Array(7).fill(false);
-  const workoutsThisWeek = wLog.filter(Boolean).length;
   const proteinToday = !!(proteinH && logs[proteinH.id]?.[idx]);
   const DAYS = ['M','T','W','T','F','S','S'];
+
+  // Also pull Apple Watch workouts logged this week
+  const weekStart = (() => {
+    const d = new Date(todayStr() + 'T00:00:00');
+    d.setDate(d.getDate() - idx); // Monday
+    return d.toISOString().slice(0, 10);
+  })();
+  const watchWorkouts = (state.fitness?.watchWorkouts || []).filter(w => w.date >= weekStart);
+  // Build a set of weekday indices (0=Mon) that have watch workouts
+  const watchDays = new Set(watchWorkouts.map(w => {
+    const d = new Date(w.date + 'T12:00:00');
+    return (d.getDay() + 6) % 7;
+  }));
+
+  const totalWorkouts = new Set([...wLog.map((done, i) => done ? i : -1).filter(i => i >= 0), ...watchDays]).size;
 
   return (
     <div className="card" style={{ padding: '14px 16px', marginBottom: 10 }}>
       <SectionLabel>Fitness This Week</SectionLabel>
       <div style={{ fontSize: 13, color: 'var(--ink)', marginBottom: 10 }}>
-        <strong>{workoutsThisWeek}</strong> workouts this week <span style={{ color: 'var(--muted)' }}>· goal 3–4</span>
+        <strong>{totalWorkouts}</strong> workouts this week <span style={{ color: 'var(--muted)' }}>· goal 3–4</span>
+        {watchWorkouts.length > 0 && <span style={{ fontSize: 11, color: 'var(--muted)', marginLeft: 8 }}>({watchWorkouts.length} from Apple Watch)</span>}
       </div>
       <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
         {DAYS.map((d, i) => {
-          const done = wLog[i]; const isToday = i === idx;
+          const habitDone = wLog[i];
+          const watchDone = watchDays.has(i);
+          const done = habitDone || watchDone;
+          const isToday = i === idx;
           return (
-            <div key={i} style={{
+            <div key={i} title={watchDone ? 'Apple Watch' : undefined} style={{
               width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 10, fontWeight: 700,
               background: done ? '#5b8df5' : 'transparent',
               border: `1.5px solid ${isToday ? '#5b8df5' : done ? '#5b8df5' : 'var(--line)'}`,
               color: done ? '#fff' : isToday ? '#5b8df5' : 'var(--muted)',
               boxShadow: isToday ? '0 0 0 2px rgba(91,141,245,0.2)' : 'none',
-            }}>{d}</div>
+            }}>{watchDone && !habitDone ? '⌚' : d}</div>
           );
         })}
       </div>
@@ -556,7 +566,7 @@ function FitnessThisWeek({ state }) {
 }
 
 function HairRegimenStatus({ state }) {
-  const weekNum = getRegimenWeek();
+  const weekNum = state.hair?.activeWeek || getRegimenWeek();
   const now = new Date(todayStr() + 'T00:00:00');
   const nextTrim = new Date('2026-07-23T00:00:00');
   const daysToTrim = Math.max(0, Math.ceil((nextTrim - now) / 86400000));
@@ -586,48 +596,44 @@ function HairRegimenStatus({ state }) {
 function KitchenCheckIn({ state, setState }) {
   const today = todayStr();
   const saved = (state.todayKitchenCheck || {})[today];
-  const [meals, setMeals] = useState(saved?.mealsPlanned || false);
-  const [prep, setPrep] = useState(saved?.prepDone || false);
-  const [editing, setEditing] = useState(!saved);
+  const [meals, setMeals] = useState(saved?.mealsPlanned ?? null);
+  const [prep, setPrep] = useState(saved?.prepDone ?? null);
 
-  const save = () => {
-    setState(s => ({ ...s, todayKitchenCheck: { ...(s.todayKitchenCheck || {}), [today]: { date: today, mealsPlanned: meals, prepDone: prep } } }));
-    setEditing(false);
+  const pick = (field, val) => {
+    const newMeals = field === 'meals' ? val : meals;
+    const newPrep  = field === 'prep'  ? val : prep;
+    if (field === 'meals') setMeals(val);
+    if (field === 'prep')  setPrep(val);
+    setState(s => ({ ...s, todayKitchenCheck: { ...(s.todayKitchenCheck || {}), [today]: { date: today, mealsPlanned: newMeals, prepDone: newPrep } } }));
   };
 
-  const Toggle = ({ label, val, onChange }) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 0' }}>
+  const YesNo = ({ label, val, field }) => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderTop: '1px solid var(--line)' }}>
       <span style={{ fontSize: 13, color: 'var(--ink)' }}>{label}</span>
-      <button onClick={() => onChange(!val)} style={{
-        padding: '4px 12px', borderRadius: 14, fontSize: 12, fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer', transition: 'all .15s',
-        border: `1px solid ${val ? '#6db88a' : 'var(--line)'}`,
-        background: val ? '#6db88a' : 'var(--card)',
-        color: val ? '#fff' : 'var(--muted)',
-      }}>{val ? 'Yes ✓' : 'No'}</button>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <button onClick={() => pick(field, true)} style={{
+          padding: '4px 14px', borderRadius: 14, fontSize: 12, fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer', transition: 'all .15s',
+          border: `1px solid ${val === true ? SAGE : 'var(--line)'}`,
+          background: val === true ? SAGE : 'transparent',
+          color: val === true ? '#fff' : 'var(--muted)',
+        }}>Yes</button>
+        <button onClick={() => pick(field, false)} style={{
+          padding: '4px 14px', borderRadius: 14, fontSize: 12, fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer', transition: 'all .15s',
+          border: `1px solid ${val === false ? 'var(--primary)' : 'var(--line)'}`,
+          background: val === false ? '#fbd7e122' : 'transparent',
+          color: val === false ? 'var(--primary)' : 'var(--muted)',
+        }}>No</button>
+      </div>
     </div>
   );
 
   return (
     <div className="card" style={{ padding: '14px 16px', marginBottom: 10 }}>
       <SectionLabel>Kitchen Check-in</SectionLabel>
-      {!editing && saved ? (
-        <div>
-          <div style={{ fontSize: 13, color: 'var(--ink)', marginBottom: 4 }}>
-            Meals planned: <strong>{saved.mealsPlanned ? 'Yes' : 'No'}</strong> · Prep done: <strong>{saved.prepDone ? 'Yes' : 'No'}</strong>
-          </div>
-          {saved.mealsPlanned && saved.prepDone && <div style={{ fontSize: 13, color: SAGE, marginBottom: 4 }}>You're set. ✦</div>}
-          <LinkBtn onClick={() => setEditing(true)}>Edit</LinkBtn>
-        </div>
-      ) : (
-        <div>
-          <Toggle label="Meals planned for today?" val={meals} onChange={setMeals} />
-          <Toggle label="Meal prep done this week?" val={prep} onChange={setPrep} />
-          <div style={{ fontSize: 12, color: 'var(--muted)', margin: '6px 0 10px' }}>Protein goal is 130g daily.</div>
-          <button onClick={save} style={{ background: 'none', border: '1px solid var(--line)', borderRadius: 9, padding: '6px 14px', fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: 5 }}>
-            <Icon name="check" size={13} /> Save
-          </button>
-        </div>
-      )}
+      <YesNo label="Meals planned for today?" val={meals} field="meals" />
+      <YesNo label="Meal prep done this week?" val={prep} field="prep" />
+      {meals === true && prep === true && <div style={{ fontSize: 13, color: SAGE, marginTop: 8 }}>You're set. ✦</div>}
+      <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>Protein goal is 130g daily. Saves automatically.</div>
     </div>
   );
 }
@@ -831,8 +837,6 @@ export default function TodayView({ state, setState }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <ScriptureBanner onNavigate={navigate} />
-
       <GreetingStats state={state} />
 
       <AffirmationCard state={state} />

@@ -133,6 +133,19 @@ export default function WeekView({ state, setState }) {
         </div>
 
         <div className="card col-5">
+          {(() => {
+            const weekStart = toDateStr(weekDateObjs[0]);
+            const weekEnd   = toDateStr(weekDateObjs[6]);
+            const watchThisWeek = (state.fitness?.watchWorkouts || []).filter(w => w.date >= weekStart && w.date <= weekEnd);
+            return watchThisWeek.length > 0 ? (
+              <div style={{ marginBottom: 10, padding: '8px 12px', background: 'var(--card-2)', borderRadius: 10, fontSize: 12, color: 'var(--ink-soft)' }}>
+                ⌚ <strong>{watchThisWeek.length}</strong> Apple Watch workout{watchThisWeek.length !== 1 ? 's' : ''} this week
+                {watchThisWeek.map((w, i) => (
+                  <span key={i} style={{ marginLeft: 6, color: 'var(--muted)' }}>· {w.type} {w.duration}min {w.calories}kcal</span>
+                ))}
+              </div>
+            ) : null;
+          })()}
           <CardHead
             title="Gym sessions"
             sub={`${gymWeek.filter(g => g.done).length}/5 weekly goal`}

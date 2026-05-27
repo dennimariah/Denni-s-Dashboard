@@ -43,11 +43,14 @@ export default function ContentView({ state, setState }) {
   const [draftOpen, setDraftOpen] = useState(false);
   const [draft, setDraft] = useState({ title: '', category: 'Personal Instagram', status: 'Idea', notes: '' });
 
+  // Support legacy `stage` field alongside current `status` field
+  const getStatus = (c) => c.status || c.stage || 'Idea';
+
   const counts = {
-    Idea:      content.filter((c) => c.status === 'Idea').length,
-    Drafting:  content.filter((c) => c.status === 'Drafting').length,
-    Scheduled: content.filter((c) => c.status === 'Scheduled').length,
-    Published: content.filter((c) => c.status === 'Published').length,
+    Idea:      content.filter((c) => getStatus(c) === 'Idea').length,
+    Drafting:  content.filter((c) => getStatus(c) === 'Drafting').length,
+    Scheduled: content.filter((c) => getStatus(c) === 'Scheduled').length,
+    Published: content.filter((c) => getStatus(c) === 'Published').length,
   };
 
   const updateItem = (id, patch) => {
@@ -60,7 +63,7 @@ export default function ContentView({ state, setState }) {
 
   const cycleStatus = (id) => {
     const item = content.find((c) => c.id === id);
-    const idx = statuses.indexOf(item.status);
+    const idx = statuses.indexOf(getStatus(item));
     const next = statuses[(idx + 1) % statuses.length];
     const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     updateItem(id, { status: next, ...(next === 'Published' ? { publishedAt: today } : {}) });
@@ -88,7 +91,7 @@ export default function ContentView({ state, setState }) {
   const getCategory = (c) => c.category || c.format || 'Newsletter';
 
   const filtered = content.filter((c) =>
-    (filterStatus === 'all' || c.status === filterStatus) &&
+    (filterStatus === 'all' || getStatus(c) === filterStatus) &&
     (filterCategory === 'all' || getCategory(c) === filterCategory)
   );
 
@@ -165,8 +168,8 @@ export default function ContentView({ state, setState }) {
       <div className="bento">
         {statuses.map((st) => {
           const items = content
-            .filter((c) => c.status === st)
-            .filter((c) => filterStatus === 'all' || c.status === filterStatus)
+            .filter((c) => getStatus(c) === st)
+            .filter((c) => filterStatus === 'all' || getStatus(c) === filterStatus)
             .filter((c) => filterCategory === 'all' || getCategory(c) === filterCategory);
           return (
             <div key={st} className="card col-3" style={{ minHeight: 360, background: 'var(--card-2)', padding: 16 }}>

@@ -26,6 +26,20 @@ export async function GET() {
     if (!saved.travelTrips?.length) merged.travelTrips = defaults.travelTrips;
     if (!saved.travelPackingTemplates?.length) merged.travelPackingTemplates = defaults.travelPackingTemplates;
     if ((saved.devotionAffirmations?.length || 0) < 25) merged.devotionAffirmations = defaults.devotionAffirmations;
+    // Seed content if empty
+    if (!saved.content?.length) merged.content = defaults.content;
+    // Forward new goal fields (silkCollective, successCriteria) onto existing saved goals
+    if (saved.quarterGoals?.length) {
+      const defaultGoalMap = Object.fromEntries(defaults.quarterGoals.map(g => [g.id, g]));
+      merged.quarterGoals = saved.quarterGoals.map(g => ({
+        silkCollective: defaultGoalMap[g.id]?.silkCollective || false,
+        successCriteria: defaultGoalMap[g.id]?.successCriteria || '',
+        ...g,
+      }));
+    }
+    // Ensure new top-level keys exist
+    if (!saved.todayMood) merged.todayMood = {};
+    if (!saved.quickTasks) merged.quickTasks = [];
     return Response.json(merged);
   } catch (err) {
     console.error('GET /api/data error:', err);
